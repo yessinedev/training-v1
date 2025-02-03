@@ -13,7 +13,11 @@ const roleSchema = z.object({
 // GET handler to fetch all roles
 export async function GET() {
   try {
-    const roles = await prisma.role.findMany();
+    const roles = await prisma.role.findMany({
+      include: {
+        users: true,
+      }
+    });
     return NextResponse.json(roles, { status: 200 });
   } catch (error) {
     console.error("Failed to fetch roles:", error);

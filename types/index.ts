@@ -1,6 +1,7 @@
 export type Role = {
     role_id: number;
     role_name: string;
+    users: User[];
 }
 
 export type User = {

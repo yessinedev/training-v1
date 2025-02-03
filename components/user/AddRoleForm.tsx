@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -21,12 +22,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 
-// Define the form validation schema
 const formSchema = z.object({
   role_name: z
     .string()
@@ -37,65 +36,83 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const AddRoleForm = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+type RoleFormProps = {
+  role?: {
+    role_id: number;
+    role_name: string;
+  };
+  isOpen: boolean;
+  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
+};
 
-  // Initialize the form
+const RoleForm = ({ role, isOpen, onClose, onOpenChange }: RoleFormProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const isEditing = !!role;
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      role_name: "",
+      role_name: role?.role_name || "",
     },
   });
 
-  // Initialize the query client
+  useEffect(() => {
+    if (role) {
+      form.reset({ role_name: role.role_name });
+    }else{
+      form.reset({ role_name: "" });
+    }
+  }, [role, form]);
+
   const queryClient = useQueryClient();
 
-  // Define the mutation
-  const addRoleMutation = useMutation({
+  const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const response = await axiosInstance.post("/roles", data);
-      if (response.status !== 200 && response.status !== 201) {
-        throw new Error(response.data.message || "Failed to add role");
+      if (isEditing && role) {
+        const response = await axiosInstance.put(`/roles`, {
+          role_id: role.role_id,
+          ...data,
+        });
+        return response.data;
       }
+      const response = await axiosInstance.post("/roles", data);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
-      toast.success("Role added successfully");
+      toast.success(`Role ${isEditing ? "updated" : "created"} successfully`);
       form.reset();
-      setIsOpen(false);
+      onClose();
     },
     onError: (error: Error) => {
-      toast.error(error.message);
-      console.error("Error adding role:", error);
+      const message = error.message || "Failed to save role";
+      toast.error(message);
+      console.error("Error saving role:", error);
     },
   });
 
-  // Handle form submission
   const onSubmit = async (data: FormValues) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
     try {
-      await addRoleMutation.mutateAsync(data);
+      setIsLoading(true);
+      await mutation.mutateAsync(data);
+    } catch (error) {
+      console.error("Form submission error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Role
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Role</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Role" : "Add New Role"}</DialogTitle>
+          <DialogDescription>
+          {isEditing
+            ? "Update the role name and click the update button"
+            : "Enter the role name and click the save button"}
+        </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -112,20 +129,19 @@ const AddRoleForm = () => {
                 </FormItem>
               )}
             />
-
             <div className="flex justify-end gap-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => {
                   form.reset();
-                  setIsOpen(false);
+                  onClose();
                 }}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save"}
+                {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
               </Button>
             </div>
           </form>
@@ -135,4 +151,4 @@ const AddRoleForm = () => {
   );
 };
 
-export default AddRoleForm;
+export default RoleForm;
