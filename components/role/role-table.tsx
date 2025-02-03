@@ -18,7 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Role, User } from "@/types";
 import axiosInstance from "@/lib/axios";
 import RoleForm from "../user/AddRoleForm";
@@ -26,6 +26,8 @@ import RoleForm from "../user/AddRoleForm";
 const RolesTable = () => {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const queryClient = useQueryClient()
 
   const handleOpenDialog = (role?: Role) => {
     console.log("selectedRole")
@@ -49,6 +51,21 @@ const RolesTable = () => {
       return response.data;
     },
   });
+
+  const deleteRoleMutation = useMutation({
+    mutationFn: async (roleId: number) => {
+      await axiosInstance.delete(`/roles?id=${roleId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
+    },
+  });
+
+  const handleDeleteRole = (roleId: number) => {
+    if (window.confirm("Are you sure you want to delete this role?")) {
+      deleteRoleMutation.mutate(roleId);
+    }
+  };
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching roles</p>;
@@ -113,6 +130,7 @@ const RolesTable = () => {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive"
+                            onClick={() => handleDeleteRole(role.role_id)}
                           >
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">Delete role</span>
