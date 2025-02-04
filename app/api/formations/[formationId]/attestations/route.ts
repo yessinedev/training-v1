@@ -4,21 +4,21 @@ import { NextResponse } from "next/server";
 // POST handler to generate attestations for participants
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ formationId: string }> }
 ) {
   try {
-    const formationId = parseInt(params.id);
+    const {formationId} = await params
 
     // Get all confirmed participants without attestations
     const participants = await prisma.actionFormationParticipant.findMany({
       where: {
-        action_id: formationId,
+        action_id: parseInt(formationId),
         statut: "Confirmé",
         NOT: {
           participant: {
             attestations: {
               some: {
-                action_id: formationId
+                action_id: parseInt(formationId)
               }
             }
           }
@@ -37,7 +37,7 @@ export async function POST(
         return prisma.attestation.create({
           data: {
             participant_id: participant.participant_id,
-            action_id: formationId,
+            action_id: parseInt(formationId),
             date_emission: new Date(),
             qr_code_ref: qrCodeRef,
           },

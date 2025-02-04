@@ -1,14 +1,9 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { GraduationCap, UserPlus, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import AddParticipantDialog from "../participants/add-participant-dialog";
@@ -19,10 +14,13 @@ type FormationActionsProps = {
   formationId: number;
 };
 
-export default function FormationActions({ formationId }: FormationActionsProps) {
+export default function FormationActions({
+  formationId,
+}: FormationActionsProps) {
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
   const [isAddTrainerOpen, setIsAddTrainerOpen] = useState(false);
-  const [isGenerateAttestationOpen, setIsGenerateAttestationOpen] = useState(false);
+  const [isGenerateAttestationOpen, setIsGenerateAttestationOpen] =
+    useState(false);
 
   const { data: formation } = useQuery({
     queryKey: ["formation1", formationId],
@@ -39,11 +37,18 @@ export default function FormationActions({ formationId }: FormationActionsProps)
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <Button className="w-full" onClick={() => setIsAddParticipantOpen(true)}>
+          <Button
+            className="w-full"
+            onClick={() => setIsAddParticipantOpen(true)}
+          >
             <UserPlus className="mr-2 h-4 w-4" />
             Add Participant
           </Button>
-          <Button className="w-full" variant="outline" onClick={() => setIsAddTrainerOpen(true)}>
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={() => setIsAddTrainerOpen(true)}
+          >
             <GraduationCap className="mr-2 h-4 w-4" />
             Assign Trainer
           </Button>
@@ -57,20 +62,23 @@ export default function FormationActions({ formationId }: FormationActionsProps)
           </Button>
         </CardContent>
       </Card>
+      {isAddParticipantOpen && (
+        <AddParticipantDialog
+          formationId={formationId}
+          isOpen={isAddParticipantOpen}
+          onOpenChange={setIsAddParticipantOpen}
+        />
+      )}
 
-      <AddParticipantDialog
-        formationId={formationId}
-        isOpen={isAddParticipantOpen}
-        onOpenChange={setIsAddParticipantOpen}
-      />
+      {isAddTrainerOpen && (
+        <AssignTrainerDialog
+          formationId={formationId}
+          isOpen={isAddTrainerOpen}
+          onOpenChange={setIsAddTrainerOpen}
+        />
+      )}
 
-      <AssignTrainerDialog
-        formationId={formationId}
-        isOpen={isAddTrainerOpen}
-        onOpenChange={setIsAddTrainerOpen}
-      />
-
-      {formation && (
+      {isGenerateAttestationOpen && formation && (
         <GenerateAttestationsDialog
           formationId={formationId}
           isOpen={isGenerateAttestationOpen}

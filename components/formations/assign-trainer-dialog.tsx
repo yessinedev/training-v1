@@ -68,6 +68,7 @@ export default function AssignTrainerDialog({
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
+      console.log(data)
       const response = await axiosInstance.post(`/formations/${formationId}/formateurs`, {
         formateur_id: parseInt(data.formateur_id),
       });

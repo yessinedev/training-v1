@@ -33,6 +33,7 @@ export async function GET() {
             },
           },
         },
+        
       },
     });
     return NextResponse.json(formations, { status: 200 });

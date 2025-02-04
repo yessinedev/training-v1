@@ -10,14 +10,14 @@ const participantSchema = z.object({
 // GET handler to fetch participants for a formation
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ formationId: string }> }
 ) {
   try {
-    const formationId = parseInt(params.id);
+    const {formationId} = await params;
 
     // First get the participants
     const participants = await prisma.actionFormationParticipant.findMany({
-      where: { action_id: formationId },
+      where: { action_id: parseInt(formationId) },
       include: {
         participant: true,
       },
@@ -26,7 +26,7 @@ export async function GET(
     // Then get the attestations separately
     const attestations = await prisma.attestation.findMany({
       where: {
-        action_id: formationId,
+        action_id: parseInt(formationId),
         participant_id: {
           in: participants.map(p => p.participant_id),
         },
@@ -43,7 +43,9 @@ export async function GET(
 
     return NextResponse.json(participantsWithAttestations, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch participants:", error);
+    if (error instanceof Error){
+      console.log("Error: ", error.stack)
+  }
     return NextResponse.json(
       { error: "Failed to fetch participants" },
       { status: 500 }
@@ -54,10 +56,10 @@ export async function GET(
 // POST handler to add a participant to a formation
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ formationId: number }> }
 ) {
   try {
-    const formationId = parseInt(params.id);
+    const {formationId} = await params;
     const body = await request.json();
     const validatedData = participantSchema.parse(body);
 
@@ -75,7 +77,9 @@ export async function POST(
 
     return NextResponse.json(participant, { status: 201 });
   } catch (error) {
-    console.error("Failed to add participant:", error);
+    if (error instanceof Error){
+      console.log("Error: ", error.stack)
+  }
     return NextResponse.json(
       { error: "Failed to add participant" },
       { status: 500 }
@@ -86,10 +90,10 @@ export async function POST(
 // DELETE handler to remove a participant from a formation
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ formationId: number }> }
 ) {
   try {
-    const formationId = parseInt(params.id);
+    const {formationId} = await params;
     const { searchParams } = new URL(request.url);
     const participantId = parseInt(searchParams.get("participantId") || "");
 
@@ -114,7 +118,9 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.error("Failed to remove participant:", error);
+    if (error instanceof Error){
+      console.log("Error: ", error.stack)
+  }
     return NextResponse.json(
       { error: "Failed to remove participant" },
       { status: 500 }
