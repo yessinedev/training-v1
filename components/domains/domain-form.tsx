@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,70 +24,64 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
+import { Domain } from "@/types";
 
 const formSchema = z.object({
-  role_name: z
-    .string()
-    .min(1, "Role name is required")
-    .max(50, "Role name must be less than 50 characters")
-    .regex(/^[a-zA-Z\s]+$/, "Role name can only contain letters and spaces"),
+  libelle_domaine: z.string()
+    .min(1, "Domain name is required")
+    .max(100, "Domain name must be less than 100 characters"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-type RoleFormProps = {
-  role?: {
-    role_id: number;
-    role_name: string;
-  };
+type DomainFormProps = {
+  domain?: Domain;
   isOpen: boolean;
   onClose: () => void;
   onOpenChange: (open: boolean) => void;
 };
 
-const RoleForm = ({ role, isOpen, onClose, onOpenChange }: RoleFormProps) => {
+const DomainForm = ({ domain, isOpen, onClose, onOpenChange }: DomainFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const isEditing = !!role;
+  const isEditing = !!domain;
+  const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      role_name: role?.role_name || "",
+      libelle_domaine: "",
     },
   });
 
   useEffect(() => {
-    if (role) {
-      form.reset({ role_name: role.role_name });
-    }else{
-      form.reset({ role_name: "" });
+    if (isOpen && domain) {
+      form.reset({
+        libelle_domaine: domain.libelle_domaine,
+      });
     }
-  }, [role, form]);
-
-  const queryClient = useQueryClient();
+  }, [domain, isOpen, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      if (isEditing && role) {
-        const response = await axiosInstance.put(`/roles`, {
-          role_id: role.role_id,
+      if (isEditing && domain) {
+        const response = await axiosInstance.put(`/domaines`, {
+          domaine_id: domain.domaine_id,
           ...data,
         });
         return response.data;
+      } else {
+        const response = await axiosInstance.post("/domaines", data);
+        return response.data;
       }
-      const response = await axiosInstance.post("/roles", data);
-      return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["roles"] });
-      toast.success(`Role ${isEditing ? "updated" : "created"} successfully`);
-      form.reset();
+      queryClient.invalidateQueries({ queryKey: ["domaines"] });
+      toast.success(`Domain ${isEditing ? "updated" : "created"} successfully`);
       onClose();
     },
     onError: (error: Error) => {
-      const message = error.message || "Failed to save role";
-      toast.error(message);
-      console.error("Error saving role:", error);
+      toast.error(`Failed to ${isEditing ? "update" : "create"} domain: ${error.message}`);
+      console.error(`Error ${isEditing ? "updating" : "creating"} domain:`, error);
     },
   });
 
@@ -106,40 +100,41 @@ const RoleForm = ({ role, isOpen, onClose, onOpenChange }: RoleFormProps) => {
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Role" : "Add New Role"}</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Domain" : "Add New Domain"}</DialogTitle>
           <DialogDescription>
-          {isEditing
-            ? "Update the role name and click the update button"
-            : "Enter the role name and click the save button"}
-        </DialogDescription>
+            {isEditing
+              ? "Update the domain information and click the update button"
+              : "Enter the domain information and click the save button"}
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="role_name"
+              name="libelle_domaine"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role Name</FormLabel>
+                  <FormLabel>Domain Name</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Enter role name" />
+                    <Input placeholder="Enter domain name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <div className="flex justify-end gap-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  form.reset();
-                  onClose();
-                }}
+                onClick={onClose}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button 
+                type="submit"
+                disabled={isLoading}
+              >
                 {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
               </Button>
             </div>
@@ -150,4 +145,4 @@ const RoleForm = ({ role, isOpen, onClose, onOpenChange }: RoleFormProps) => {
   );
 };
 
-export default RoleForm;
+export default DomainForm;

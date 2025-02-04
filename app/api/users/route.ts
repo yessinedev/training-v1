@@ -9,7 +9,7 @@ const createUserSchema = z.object({
   nom: z.string().min(1).max(100),
   prenom: z.string().min(1).max(100),
   telephone: z.string().min(1),
-  role_id: z.string().min(1),
+  role_id: z.number().min(1),
 });
 
 // Validation schema for updating a user
@@ -51,7 +51,6 @@ export async function POST(request: Request) {
     const validatedData = createUserSchema.parse(body);
 
     // Convert role_id to number since it comes as string from the form
-    const roleId = parseInt(validatedData.role_id);
 
     const user = await prisma.user.create({
       data: {
@@ -60,7 +59,7 @@ export async function POST(request: Request) {
         nom: validatedData.nom,
         prenom: validatedData.prenom,
         telephone: validatedData.telephone,
-        role_id: roleId,
+        role_id: validatedData.role_id,
       },
       include: {
         role: true, // Include role information in the response
@@ -98,9 +97,8 @@ export async function PUT(request: Request) {
       );
     }
     // Convert role_id to number
-    const roleId = parseInt(updateData.role_id)
     // Validate update data
-    const validatedData = updateUserSchema.parse({...updateData, role_id: roleId, user_id: user_id});
+    const validatedData = updateUserSchema.parse({...updateData, user_id: user_id});
 
 
     // Prepare update data

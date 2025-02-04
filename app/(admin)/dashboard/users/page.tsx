@@ -1,5 +1,4 @@
 
-import AddUserForm from "@/components/user/AddUserForm";
 import UsersTable from "@/components/user/users-table";
 
 export default function UsersPage() {
