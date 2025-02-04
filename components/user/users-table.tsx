@@ -1,6 +1,7 @@
-"use client";
-import React from "react";
-import { Pencil, Trash2 } from "lucide-react";
+'use client';
+
+import React, { useState } from "react";
+import { Pencil, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -10,18 +11,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { User } from "@/types";
+import { toast } from "sonner";
+import UserForm from "./AddUserForm";
 
 const UsersTable = () => {
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const handleOpenDialog = (user?: User) => {
+    setSelectedUser(user ?? null);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedUser(null);
+    setIsDialogOpen(false);
+  };
+
   const {
     data: users,
     isLoading,
@@ -34,68 +51,115 @@ const UsersTable = () => {
     },
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      await axiosInstance.delete(`/users?id=${userId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("User deleted successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete user: ${error.message}`);
+      console.error("Error deleting user:", error);
+    },
+  });
+
+  const handleDeleteUser = async (userId: number) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await deleteUserMutation.mutateAsync(userId);
+      } catch (error) {
+        // Error is handled by mutation's onError
+        console.error("Delete submission error:", error);
+      }
+    }
+  };
+
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching users</p>;
+
   return (
-    <div className="rounded-lg border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>ID</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Nom</TableHead>
-            <TableHead>Prénom</TableHead>
-            <TableHead>Téléphone</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user: User) => (
-            <TableRow key={user.user_id}>
-              <TableCell>{user.user_id}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.nom}</TableCell>
-              <TableCell>{user.prenom}</TableCell>
-              <TableCell>{user.telephone}</TableCell>
-              <TableCell>{user.role.role_name}</TableCell>
-              <TableCell className="text-right">
-                <TooltipProvider>
-                  <div className="flex items-center justify-end gap-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit user</span>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Edit user</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete user</span>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Delete user</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                </TooltipProvider>
-              </TableCell>
+    <>
+      <Button onClick={() => handleOpenDialog()}>
+        <Plus className="mr-2 h-4 w-4" />
+        Add User
+      </Button>
+
+      <UserForm
+        user={selectedUser || undefined}
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
+        onOpenChange={setIsDialogOpen}
+      />
+
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Nom</TableHead>
+              <TableHead>Prénom</TableHead>
+              <TableHead>Téléphone</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {users?.map((user: User) => (
+              <TableRow key={user.user_id}>
+                <TableCell>{user.user_id}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.nom}</TableCell>
+                <TableCell>{user.prenom}</TableCell>
+                <TableCell>{user.telephone}</TableCell>
+                <TableCell>{user.role.role_name}</TableCell>
+                <TableCell className="text-right">
+                  <TooltipProvider>
+                    <div className="flex items-center justify-end gap-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleOpenDialog(user)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Edit user</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit user</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive"
+                            onClick={() => handleDeleteUser(user.user_id)}
+                            disabled={deleteUserMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete user</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete user</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </TooltipProvider>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </>
   );
 };
 

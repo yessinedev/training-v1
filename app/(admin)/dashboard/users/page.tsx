@@ -7,7 +7,6 @@ export default function UsersPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Users</h2>
-        <AddUserForm />
       </div>
       <UsersTable />
     </div>

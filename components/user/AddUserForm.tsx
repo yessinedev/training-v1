@@ -1,14 +1,15 @@
-"use client";
-import React, { useState } from "react";
+'use client';
+
+import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -27,13 +28,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
-import { Role } from "@/types";
+import { Role, User } from "@/types";
 
-// Define the form validation schema
 const formSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -51,10 +50,18 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const AddUserForm = () => {
-  const [isOpen, setIsOpen] = useState(false);
+type UserFormProps = {
+  user?: User;
+  isOpen: boolean;
+  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
+};
 
-  // Initialize the form
+const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const isEditing = !!user;
+  const queryClient = useQueryClient();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,53 +74,97 @@ const AddUserForm = () => {
     },
   });
 
-  const { data: roles, isLoading, isError } = useQuery({
+  // Reset form when user changes or dialog opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      const values = user ? {
+        email: user.email,
+        password: user.password,
+        nom: user.nom,
+        prenom: user.prenom,
+        telephone: user.telephone,
+        role_id: user.role_id.toString(),
+      } : {
+        email: "",
+        password: "",
+        nom: "",
+        prenom: "",
+        telephone: "",
+        role_id: "",
+      };
+      console.log("Resetting form with values:", values);
+      form.reset(values);
+    }
+  }, [user, isOpen, form]);
+
+  const { data: roles, isLoading: rolesLoading } = useQuery({
     queryKey: ["roles"],
     queryFn: async () => {
       const response = await axiosInstance.get("/roles");
       return response.data;
     },
-})
+  });
 
-  // Handle form submission
+  const mutation = useMutation({
+    mutationFn: async (data: FormValues) => {
+      const payload = {
+        ...data,
+        role_id: parseInt(data.role_id),
+      };
+
+      if (isEditing && user) {
+        console.log(user)
+        const response = await axiosInstance.put(`/users`, {
+          user_id: user.user_id,
+          ...payload,
+        });
+        return response.data;
+      } else {
+        const response = await axiosInstance.post("/users", payload);
+        return response.data;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success(`User ${isEditing ? "updated" : "created"} successfully`);
+      onClose();
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to ${isEditing ? "update" : "create"} user: ${error.message}`);
+      console.error(`Error ${isEditing ? "updating" : "creating"} user:`, error);
+    },
+  });
+
   const onSubmit = async (data: FormValues) => {
     try {
-      const response = await fetch("/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to add user");
-      }
-
-      const result = await response.json();
-      toast.success("User added successfully");
-      form.reset();
-      setIsOpen(false);
+      setIsLoading(true);
+      console.log("Submitting form data:", data);
+      await mutation.mutateAsync(data);
     } catch (error) {
-      toast.error("Failed to add user");
-      console.error("Error adding user:", error);
+      console.error("Form submission error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  if (rolesLoading) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add User
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New User</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit User" : "Add New User"}</DialogTitle>
+          <DialogDescription>
+            {isEditing
+              ? "Update the user information and click the update button"
+              : "Enter the user information and click the save button"}
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form 
+            onSubmit={form.handleSubmit(onSubmit)} 
+            className="space-y-4"
+          >
             <FormField
               control={form.control}
               name="email"
@@ -121,7 +172,33 @@ const AddUserForm = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} />
+                    <Input placeholder="Email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            <FormField
+              control={form.control}
+              name="nom"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Last Name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,79 +206,47 @@ const AddUserForm = () => {
             />
             <FormField
               control={form.control}
-              name="password"
+              name="prenom"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mot de passe</FormLabel>
+                  <FormLabel>First Name</FormLabel>
                   <FormControl>
-                    <Input type="text" {...field} />
+                    <Input placeholder="First Name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="nom"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="prenom"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prénom</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             <FormField
               control={form.control}
               name="telephone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Téléphone</FormLabel>
+                  <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input type="tel" {...field} />
+                    <Input placeholder="Phone Number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="role_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                  <Select 
+                    onValueChange={field.onChange} 
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select role" />
+                        <SelectValue placeholder="Select a role" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {roles.map((role: Role) => (
+                      {roles?.map((role: Role) => (
                         <SelectItem
                           key={role.role_id}
                           value={role.role_id.toString()}
@@ -215,19 +260,20 @@ const AddUserForm = () => {
                 </FormItem>
               )}
             />
-
             <div className="flex justify-end gap-4 pt-4">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  form.reset();
-                  setIsOpen(false);
-                }}
+                onClick={onClose}
               >
                 Cancel
               </Button>
-              <Button type="submit">Save</Button>
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+              >
+                {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
+              </Button>
             </div>
           </form>
         </Form>
@@ -236,4 +282,4 @@ const AddUserForm = () => {
   );
 };
 
-export default AddUserForm;
+export default UserForm;

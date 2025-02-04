@@ -71,6 +71,17 @@ export const roles = [
     },
     {
       action_id: 2,
+      type_action: 'Formation',
+      date_debut: new Date('2024-05-01'),
+      date_fin: new Date('2024-05-05'),
+      duree_jours: 5,
+      duree_heures: 45,
+      lieu: 'Paris',
+      nb_participants_prevu: 20,
+      theme_id: 1,
+    },
+    {
+      action_id: 3,
       type_action: 'Workshop',
       date_debut: new Date('2024-04-15'),
       date_fin: new Date('2024-04-16'),
