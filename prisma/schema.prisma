@@ -90,7 +90,6 @@ model Participant {
   telephone      String?  @db.VarChar(50)
   entreprise     String?  @db.VarChar(100)
   poste          String?  @db.VarChar(100)
-
   actions        ActionFormationParticipant[]
   attestations   Attestation[]
 }

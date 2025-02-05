@@ -70,6 +70,7 @@ export type ActionFormationParticipant = {
   participant_id: number;
   date_inscription?: Date;
   statut?: string;
+  action: Formation;
   participant: Participant;
   attestation?: Attestation;
 };
