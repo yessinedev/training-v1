@@ -70,7 +70,7 @@ export default function AddParticipantDialog({
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const response = await axiosInstance.post(`/formations/${formationId}/participants`, {
+      const response = await axiosInstance.put(`/formations/${formationId}/participants`, {
         participant_id: parseInt(data.participant_id),
         statut: data.statut,
       });

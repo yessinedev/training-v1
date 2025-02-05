@@ -13,41 +13,55 @@ export async function GET(
   { params }: { params: Promise<{ formationId: string }> }
 ) {
   try {
-    const {formationId} = await params;
+    const { formationId } = await params;
 
-    // First get the participants
     const participants = await prisma.actionFormationParticipant.findMany({
       where: { action_id: parseInt(formationId) },
       include: {
         participant: true,
+        action: true,
       },
     });
 
-    // Then get the attestations separately
-    const attestations = await prisma.attestation.findMany({
-      where: {
-        action_id: parseInt(formationId),
-        participant_id: {
-          in: participants.map(p => p.participant_id),
-        },
-      },
-    });
-
-    // Combine the data
-    const participantsWithAttestations = participants.map(participant => ({
-      ...participant,
-      attestation: attestations.find(
-        att => att.participant_id === participant.participant_id
-      ),
-    }));
-
-    return NextResponse.json(participantsWithAttestations, { status: 200 });
+    return NextResponse.json(participants, { status: 200 });
   } catch (error) {
-    if (error instanceof Error){
-      console.log("Error: ", error.stack)
-  }
     return NextResponse.json(
       { error: "Failed to fetch participants" },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT handler to update participant status
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ formationId: string }> }
+) {
+  try {
+    const { formationId } = await params;
+    const body = await request.json();
+    const validatedData = participantSchema.parse(body);
+    console.log(validatedData)
+    const updatedParticipant = await prisma.actionFormationParticipant.update({
+      where: {
+        action_id_participant_id: {
+          action_id: parseInt(formationId),
+          participant_id: validatedData.participant_id,
+        },
+      },
+      data: {
+        statut: validatedData.statut,
+      },
+      include: {
+        participant: true,
+        action: true,
+      },
+    });
+
+    return NextResponse.json(updatedParticipant, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to update participant status" },
       { status: 500 }
     );
   }
@@ -56,30 +70,53 @@ export async function GET(
 // POST handler to add a participant to a formation
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ formationId: number }> }
+  { params }: { params: { formationId: string } }
 ) {
   try {
-    const {formationId} = await params;
+    const { formationId } = await params;
     const body = await request.json();
     const validatedData = participantSchema.parse(body);
 
+    // Check if participant is already assigned to this formation
+    const existingAssignment =
+      await prisma.actionFormationParticipant.findUnique({
+        where: {
+          action_id_participant_id: {
+            action_id: parseInt(formationId),
+            participant_id: validatedData.participant_id,
+          },
+        },
+      });
+
+    if (existingAssignment) {
+      return NextResponse.json(
+        { error: "Participant is already assigned to this formation" },
+        { status: 400 }
+      );
+    }
+
     const participant = await prisma.actionFormationParticipant.create({
       data: {
-        action_id: formationId,
+        action_id: parseInt(formationId),
         participant_id: validatedData.participant_id,
         date_inscription: new Date(),
         statut: validatedData.statut,
       },
       include: {
         participant: true,
+        action: true,
       },
     });
 
     return NextResponse.json(participant, { status: 201 });
   } catch (error) {
-    if (error instanceof Error){
-      console.log("Error: ", error.stack)
-  }
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: error.errors },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to add participant" },
       { status: 500 }
@@ -90,10 +127,10 @@ export async function POST(
 // DELETE handler to remove a participant from a formation
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ formationId: number }> }
+  { params }: { params: Promise<{ formationId: string }> }
 ) {
   try {
-    const {formationId} = await params;
+    const { formationId } = await params;
     const { searchParams } = new URL(request.url);
     const participantId = parseInt(searchParams.get("participantId") || "");
 
@@ -107,7 +144,7 @@ export async function DELETE(
     await prisma.actionFormationParticipant.delete({
       where: {
         action_id_participant_id: {
-          action_id: formationId,
+          action_id: parseInt(formationId),
           participant_id: participantId,
         },
       },
@@ -118,9 +155,7 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    if (error instanceof Error){
-      console.log("Error: ", error.stack)
-  }
+    console.error("Failed to remove participant:", error);
     return NextResponse.json(
       { error: "Failed to remove participant" },
       { status: 500 }
