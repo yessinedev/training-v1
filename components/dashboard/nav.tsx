@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, UserCog, GraduationCap, UserPlus, BookOpen } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Users, UserCog, GraduationCap, UserPlus, BookOpen, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
+  {
+    title: "Home",
+    href: "/dashboard",
+    icon: Home,
+  },
   {
     title: "Users",
     href: "/dashboard/users",
