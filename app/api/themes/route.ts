@@ -21,7 +21,6 @@ export async function GET() {
     });
     return NextResponse.json(themes, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch themes:", error);
     return NextResponse.json(
       { error: "Failed to fetch themes" },
       { status: 500 }
@@ -47,7 +46,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(theme, { status: 201 });
   } catch (error) {
-    console.error("Failed to create theme:", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -91,8 +89,6 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedTheme, { status: 200 });
   } catch (error) {
-    console.error("Failed to update theme:", error);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid request data", details: error.errors },
@@ -129,7 +125,6 @@ export async function DELETE(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Failed to delete theme:", error);
     return NextResponse.json(
       { error: "Failed to delete theme" },
       { status: 500 }

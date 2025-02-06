@@ -51,7 +51,6 @@ export async function POST(
 
     return NextResponse.json(attestations, { status: 201 });
   } catch (error) {
-    console.error("Failed to generate attestations:", error);
     return NextResponse.json(
       { error: "Failed to generate attestations" },
       { status: 500 }

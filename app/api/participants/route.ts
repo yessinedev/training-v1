@@ -26,7 +26,6 @@ export async function GET() {
     });
     return NextResponse.json(participants, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch participants:", error);
     return NextResponse.json(
       { error: "Failed to fetch participants" },
       { status: 500 }
@@ -54,8 +53,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(participant, { status: 201 });
   } catch (error) {
-    console.error("Failed to create participant:", error);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid request data", details: error.errors },
@@ -100,8 +97,6 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedParticipant, { status: 200 });
   } catch (error) {
-    console.error("Failed to update participant:", error);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid request data", details: error.errors },
@@ -138,7 +133,6 @@ export async function DELETE(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Failed to delete participant:", error);
     return NextResponse.json(
       { error: "Failed to delete participant" },
       { status: 500 }

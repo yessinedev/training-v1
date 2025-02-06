@@ -88,7 +88,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(formation, { status: 201 });
   } catch (error) {
-    console.error("Failed to create formation:", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -163,8 +162,6 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedFormation, { status: 200 });
   } catch (error) {
-    console.error("Failed to update formation:", error);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid request data", details: error.errors },
@@ -201,7 +198,6 @@ export async function DELETE(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Failed to delete formation:", error);
     return NextResponse.json(
       { error: "Failed to delete formation" },
       { status: 500 }

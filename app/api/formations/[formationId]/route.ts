@@ -49,7 +49,6 @@ export async function GET(
 
     return NextResponse.json(formation, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch formation:", error);
     return NextResponse.json(
       { error: "Failed to fetch formation" },
       { status: 500 }

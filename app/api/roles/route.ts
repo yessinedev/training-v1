@@ -20,7 +20,6 @@ export async function GET() {
     });
     return NextResponse.json(roles, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch roles:", error);
     return NextResponse.json(
       { error: "Failed to fetch roles" },
       { status: 500 }
@@ -45,7 +44,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newRole, { status: 201 });
   } catch (error) {
-    console.error("Failed to create role:", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -87,7 +85,6 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedRole, { status: 200 });
   } catch (error) {
-    console.error("Failed to update role:", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -126,7 +123,6 @@ export async function DELETE(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Failed to delete role:", error);
     return NextResponse.json(
       { error: "Failed to delete role" },
       { status: 500 }

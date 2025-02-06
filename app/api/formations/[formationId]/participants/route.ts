@@ -155,7 +155,6 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.error("Failed to remove participant:", error);
     return NextResponse.json(
       { error: "Failed to remove participant" },
       { status: 500 }

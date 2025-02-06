@@ -29,7 +29,6 @@ export async function GET() {
     });
     return NextResponse.json(formateurs, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch formateurs:", error);
     return NextResponse.json(
       { error: "Failed to fetch formateurs" },
       { status: 500 }
@@ -85,7 +84,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(formateur, { status: 201 });
   } catch (error) {
-    console.error("Failed to create formateur:", error);
     return NextResponse.json(
       { error: "Failed to create formateur" },
       { status: 500 }
@@ -152,7 +150,6 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedFormateur, { status: 200 });
   } catch (error) {
-    console.error("Failed to update formateur:", error);
     return NextResponse.json(
       { error: "Failed to update formateur" },
       { status: 500 }
@@ -197,7 +194,6 @@ export async function DELETE(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Failed to delete formateur:", error);
     return NextResponse.json(
       { error: "Failed to delete formateur" },
       { status: 500 }

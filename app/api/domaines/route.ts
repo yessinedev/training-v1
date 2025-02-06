@@ -18,7 +18,6 @@ export async function GET() {
     });
     return NextResponse.json(domaines, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch domains:", error);
     return NextResponse.json(
       { error: "Failed to fetch domains" },
       { status: 500 }
@@ -43,8 +42,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(domaine, { status: 201 });
   } catch (error) {
-    console.error("Failed to create domain:", error);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid request data", details: error.errors },
@@ -86,8 +83,6 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedDomaine, { status: 200 });
   } catch (error) {
-    console.error("Failed to update domain:", error);
-
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid request data", details: error.errors },
@@ -124,7 +119,6 @@ export async function DELETE(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Failed to delete domain:", error);
     return NextResponse.json(
       { error: "Failed to delete domain" },
       { status: 500 }
