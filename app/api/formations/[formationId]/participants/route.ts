@@ -70,7 +70,7 @@ export async function PUT(
 // POST handler to add a participant to a formation
 export async function POST(
   request: Request,
-  { params }: { params: { formationId: string } }
+  { params }: { params: Promise<{ formationId: string }> }
 ) {
   try {
     const { formationId } = await params;
