@@ -4,12 +4,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, Upload } from "lucide-react";
+import { FileSpreadsheet} from "lucide-react";
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import { CreateParticipant, ExcelParticipant, Participant } from "@/types";
 import * as XLSX from "xlsx";
@@ -114,7 +113,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
         onOpenChange(false);
       }
     },
-    [uploadMutation, participateMutation]
+    [uploadMutation, participateMutation, onOpenChange]
   );
 
   return (
