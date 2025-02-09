@@ -1,6 +1,40 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ formationId: string }> }
+) {
+  try {
+    const {formationId} = await params;
+
+    const attestations = await prisma.attestation.findMany({
+      where: {
+        action_id: parseInt(formationId),
+      },
+      include: {
+        participant: true,
+        action: {
+          include: {
+            theme: true,
+          },
+        },
+      },
+      orderBy: {
+        date_emission: 'desc',
+      },
+    });
+
+    return NextResponse.json(attestations, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to fetch attestations" },
+      { status: 500 }
+    );
+  }
+}
+
+
 // POST handler to generate attestations for participants
 export async function POST(
   request: Request,

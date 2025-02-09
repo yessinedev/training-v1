@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
-import AddParticipantDialog from "../participants/add-participant-dialog";
 import AssignTrainerDialog from "./assign-trainer-dialog";
 import GenerateAttestationsDialog from "./generate-attestation-dialog";
+import ParticipantForm from "../participants/participant-form";
 
 type FormationActionsProps = {
   formationId: number;
@@ -29,6 +29,7 @@ export default function FormationActions({
       return response.data;
     },
   });
+
 
   return (
     <>
@@ -63,11 +64,12 @@ export default function FormationActions({
         </CardContent>
       </Card>
       {isAddParticipantOpen && (
-        <AddParticipantDialog
-          formationId={formationId}
-          isOpen={isAddParticipantOpen}
-          onOpenChange={setIsAddParticipantOpen}
-        />
+        
+        <ParticipantForm
+        formationId={formationId}
+        isOpen={isAddParticipantOpen}
+        onOpenChange={setIsAddParticipantOpen}
+      />
       )}
 
       {isAddTrainerOpen && (
