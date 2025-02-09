@@ -1,16 +1,8 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { format } from "date-fns";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Upload,
-  Download,
-  FileSpreadsheet,
-  Award,
-} from "lucide-react";
+import { Trash2, Upload, FileSpreadsheet, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -39,24 +31,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { Participant } from "@/types";
 import { toast } from "sonner";
-import ParticipantForm from "@/components/participants/participant-form";
 
 export default function ParticipantsPage() {
-  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
 
   const queryClient = useQueryClient();
-
-  const handleOpenDialog = (participant?: Participant) => {
-    setSelectedParticipant(participant ?? null);
-    setIsOpen(true);
-  };
-
-  const handleCloseDialog = () => {
-    setSelectedParticipant(null);
-    setIsOpen(false);
-  };
 
   const {
     data: participants,
@@ -123,7 +102,8 @@ export default function ParticipantsPage() {
                     className="cursor-pointer"
                   />
                   <p className="text-sm text-muted-foreground">
-                    Upload an Excel or CSV file containing participant information
+                    Upload an Excel or CSV file containing participant
+                    information
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -136,26 +116,18 @@ export default function ParticipantsPage() {
                 </div>
               </div>
               <div className="flex justify-end gap-4">
-                <Button variant="outline" onClick={() => setIsImportOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsImportOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button>Import</Button>
               </div>
             </DialogContent>
           </Dialog>
-          <Button onClick={() => handleOpenDialog()}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Participant
-          </Button>
         </div>
       </div>
-
-      <ParticipantForm
-        participant={selectedParticipant || undefined}
-        isOpen={isOpen}
-        onClose={handleCloseDialog}
-        onOpenChange={setIsOpen}
-      />
 
       <div className="rounded-lg border">
         <Table>
@@ -181,7 +153,9 @@ export default function ParticipantsPage() {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {participant.actions?.map((pa) => (
-                      <TooltipProvider key={`${pa.action_id}-${pa.participant_id}`}>
+                      <TooltipProvider
+                        key={`${pa.action_id}-${pa.participant_id}`}
+                      >
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex items-center gap-1">
@@ -190,16 +164,17 @@ export default function ParticipantsPage() {
                               </span>
                               {participant.attestations?.some(
                                 (att) => att.action_id === pa.action_id
-                              ) && (
-                                <Award className="h-4 w-4 text-green-500" />
-                              )}
+                              ) && <Award className="h-4 w-4 text-green-500" />}
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>
                               {pa.action.type_action} - {pa.action.lieu}
                               <br />
-                              {format(new Date(pa.action.date_debut), 'dd/MM/yyyy')}
+                              {format(
+                                new Date(pa.action.date_debut),
+                                "dd/MM/yyyy"
+                              )}
                               <br />
                               Status: {pa.statut}
                             </p>
@@ -212,13 +187,13 @@ export default function ParticipantsPage() {
                 <TableCell className="text-right">
                   <TooltipProvider>
                     <div className="flex items-center justify-end gap-2">
-                      <Tooltip>
+                      {/* <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => handleOpenDialog(participant)}
+                            // onClick={() => handleOpenDialog(participant)}
                           >
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Edit participant</span>
@@ -227,14 +202,18 @@ export default function ParticipantsPage() {
                         <TooltipContent>
                           <p>Edit participant</p>
                         </TooltipContent>
-                      </Tooltip>
+                      </Tooltip> */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive"
-                            onClick={() => handleDeleteParticipant(participant.participant_id)}
+                            onClick={() =>
+                              handleDeleteParticipant(
+                                participant.participant_id
+                              )
+                            }
                             disabled={deleteParticipantMutation.isPending}
                           >
                             <Trash2 className="h-4 w-4" />
