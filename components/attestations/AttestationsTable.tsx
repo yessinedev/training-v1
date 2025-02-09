@@ -24,11 +24,10 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { DownloadCloud, FileText, Trash2 } from "lucide-react";
-import { Attestation, Participant } from "@/types";
+import { Attestation} from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { PreviewModal } from "./PreviewModal";
-import { Badge } from "@/components/ui/badge";
 import { Document, pdf } from "@react-pdf/renderer";
 import AttestationPDF from "./AttestationPDF";
 import QRCode from "qrcode";
