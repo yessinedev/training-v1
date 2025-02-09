@@ -90,17 +90,19 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
             throw new Error("No valid data found in the file");
           }
 
-          const insertedPaticipants = await uploadMutation.mutateAsync(processedData);
+          const insertedPaticipants = await uploadMutation.mutateAsync(
+            processedData
+          );
           if (insertedPaticipants) {
             console.log(insertedPaticipants);
-            const actionParticipants = insertedPaticipants.insertedParticipants.map(
-              (part: Participant) => ({
-                participant_id: part.participant_id,
-                statut: "Confirmé",
-              })
-            );
-            const partic = await participateMutation.mutateAsync(actionParticipants);
-            console.log("partic", partic)
+            const actionParticipants =
+              insertedPaticipants.insertedParticipants.map(
+                (part: Participant) => ({
+                  participant_id: part.participant_id,
+                  statut: "Confirmé",
+                })
+              );
+            await participateMutation.mutateAsync(actionParticipants);
           }
         };
         reader.readAsBinaryString(file);
@@ -109,7 +111,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
         alert("Error processing file. Please try again.");
       } finally {
         setIsLoading(false);
-        onOpenChange(false)
+        onOpenChange(false);
       }
     },
     [uploadMutation, participateMutation]
@@ -152,11 +154,6 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
             </div>
           </div>
         </form>
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/50">
-            <p className="text-sm font-medium text-primary">Uploading...</p>
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   );

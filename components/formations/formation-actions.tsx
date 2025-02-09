@@ -25,7 +25,7 @@ export default function FormationActions({
     useState(false);
 
   const { data: formation } = useQuery({
-    queryKey: ["formation1", formationId],
+    queryKey: ["action-formation", formationId],
     queryFn: async () => {
       const response = await axiosInstance.get(`/formations/${formationId}`);
       return response.data;
