@@ -7,6 +7,11 @@ const participantSchema = z.object({
   statut: z.enum(["Confirmé", "En attente", "Liste d'attente"]),
 });
 
+const participantsSchema = z.union([
+  participantSchema, // Single participant
+  z.array(participantSchema), // Multiple participants
+]);
+
 // GET handler to fetch participants for a formation
 export async function GET(
   request: Request,
@@ -41,7 +46,7 @@ export async function PUT(
     const { formationId } = await params;
     const body = await request.json();
     const validatedData = participantSchema.parse(body);
-    console.log(validatedData)
+    console.log(validatedData);
     const updatedParticipant = await prisma.actionFormationParticipant.update({
       where: {
         action_id_participant_id: {
@@ -75,40 +80,51 @@ export async function POST(
   try {
     const { formationId } = await params;
     const body = await request.json();
-    const validatedData = participantSchema.parse(body);
+    // Validate input (can be single object or array)
+    const validatedData = participantsSchema.parse(body);
+    const formationIdInt = parseInt(formationId);
 
-    // Check if participant is already assigned to this formation
-    const existingAssignment =
-      await prisma.actionFormationParticipant.findUnique({
-        where: {
-          action_id_participant_id: {
-            action_id: parseInt(formationId),
-            participant_id: validatedData.participant_id,
+    // Normalize to an array (even if it's a single participant)
+    const participantsArray = Array.isArray(validatedData)
+      ? validatedData
+      : [validatedData];
+
+    // Handle single participant creation
+    if (participantsArray.length === 1) {
+      const createdParticipant = await prisma.actionFormationParticipant.create(
+        {
+          data: {
+            action_id: formationIdInt,
+            participant_id: participantsArray[0].participant_id,
+            date_inscription: new Date(),
+            statut: participantsArray[0].statut,
           },
-        },
-      });
-
-    if (existingAssignment) {
-      return NextResponse.json(
-        { error: "Participant is already assigned to this formation" },
-        { status: 400 }
+          include: { participant: true, action: true },
+        }
       );
+
+      return NextResponse.json(createdParticipant, { status: 201 });
     }
 
-    const participant = await prisma.actionFormationParticipant.create({
-      data: {
-        action_id: parseInt(formationId),
-        participant_id: validatedData.participant_id,
-        date_inscription: new Date(),
-        statut: validatedData.statut,
-      },
-      include: {
-        participant: true,
-        action: true,
-      },
-    });
+    // Handle multiple participants creation
+    const createdParticipants =
+      await prisma.actionFormationParticipant.createMany({
+        data: participantsArray.map((p) => ({
+          action_id: formationIdInt,
+          participant_id: p.participant_id,
+          date_inscription: new Date(),
+          statut: p.statut,
+        })),
+        skipDuplicates: true,
+      });
 
-    return NextResponse.json(participant, { status: 201 });
+    return NextResponse.json(
+      {
+        message: "Participants added successfully",
+        count: createdParticipants.count,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -118,7 +134,7 @@ export async function POST(
     }
 
     return NextResponse.json(
-      { error: "Failed to add participant" },
+      { error: "Failed to add participants" },
       { status: 500 }
     );
   }

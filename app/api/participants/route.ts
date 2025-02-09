@@ -1,16 +1,17 @@
 import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const participantSchema = z.object({
   nom: z.string().min(1, "Last name is required").max(100),
   prenom: z.string().min(1, "First name is required").max(100),
   email: z.string().email().optional().nullable(),
-  telephone: z.string().optional().nullable(),
+  telephone: z.string(),
   entreprise: z.string().optional().nullable(),
   poste: z.string().optional().nullable(),
 });
 
+const participantsSchema = z.array(participantSchema);
 // GET handler to fetch all participants
 export async function GET() {
   try {
@@ -34,24 +35,46 @@ export async function GET() {
 }
 
 // POST handler to create a new participant
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validatedData = participantSchema.parse(body);
+    console.log(body);
+    // Check if body contains an array (for createMany) or a single object
+    if (Array.isArray(body)) {
+      const validatedData = participantsSchema.parse(body);
+      // Use createMany for bulk insertion
+      const createdParticipants = await prisma.participant.createMany({
+        data: validatedData,
+        skipDuplicates: true, // Avoid inserting duplicate records
+      });
 
-    const participant = await prisma.participant.create({
-      data: validatedData,
-      include: {
-        actions: {
-          include: {
-            action: true,
-          },
+      // Retrieve the inserted participants
+      const insertedParticipants = await prisma.participant.findMany({
+        where: {
+          telephone: { in: validatedData.map((p) => p.telephone ) },
         },
-        attestations: true,
-      },
-    });
+      });
 
-    return NextResponse.json(participant, { status: 201 });
+      return NextResponse.json(
+        {
+          insertedParticipants,
+        },
+        { status: 201 }
+      );
+    } else {
+      // Handle single participant creation (existing logic)
+      const validatedData = participantSchema.parse(body);
+
+      const participant = await prisma.participant.create({
+        data: validatedData,
+        include: {
+          actions: { include: { action: true } },
+          attestations: true,
+        },
+      });
+
+      return NextResponse.json(participant, { status: 201 });
+    }
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -61,7 +84,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { error: "Failed to create participant" },
+      { error: "Failed to create participant(s)", message: error },
       { status: 500 }
     );
   }

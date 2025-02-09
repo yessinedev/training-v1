@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { GraduationCap, UserPlus, Award } from "lucide-react";
+import { GraduationCap, UserPlus, Award, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +9,7 @@ import axiosInstance from "@/lib/axios";
 import AssignTrainerDialog from "./assign-trainer-dialog";
 import GenerateAttestationsDialog from "./generate-attestation-dialog";
 import ParticipantForm from "../participants/participant-form";
+import ExcelImportDialog from "../participants/ExcelImportDialog";
 
 type FormationActionsProps = {
   formationId: number;
@@ -18,6 +19,7 @@ export default function FormationActions({
   formationId,
 }: FormationActionsProps) {
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isAddTrainerOpen, setIsAddTrainerOpen] = useState(false);
   const [isGenerateAttestationOpen, setIsGenerateAttestationOpen] =
     useState(false);
@@ -29,7 +31,6 @@ export default function FormationActions({
       return response.data;
     },
   });
-
 
   return (
     <>
@@ -44,6 +45,10 @@ export default function FormationActions({
           >
             <UserPlus className="mr-2 h-4 w-4" />
             Add Participant
+          </Button>
+          <Button variant="outline" className="w-full" onClick={() => setIsUploadOpen(true)}>
+            <Upload className="mr-2 h-4 w-4" />
+            Importer Fichier Excel
           </Button>
           <Button
             className="w-full"
@@ -64,12 +69,11 @@ export default function FormationActions({
         </CardContent>
       </Card>
       {isAddParticipantOpen && (
-        
         <ParticipantForm
-        formationId={formationId}
-        isOpen={isAddParticipantOpen}
-        onOpenChange={setIsAddParticipantOpen}
-      />
+          formationId={formationId}
+          isOpen={isAddParticipantOpen}
+          onOpenChange={setIsAddParticipantOpen}
+        />
       )}
 
       {isAddTrainerOpen && (
@@ -86,6 +90,13 @@ export default function FormationActions({
           isOpen={isGenerateAttestationOpen}
           onOpenChange={setIsGenerateAttestationOpen}
           participants={formation.participants}
+        />
+      )}
+      {isUploadOpen && (
+        <ExcelImportDialog
+          formationId={formationId}
+          isOpen={isUploadOpen}
+          onOpenChange={setIsUploadOpen}
         />
       )}
     </>

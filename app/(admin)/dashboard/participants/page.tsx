@@ -1,8 +1,6 @@
 "use client";
-
-import { useState } from "react";
 import { format } from "date-fns";
-import { Trash2, Upload, FileSpreadsheet, Award } from "lucide-react";
+import { Trash2,  Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -12,29 +10,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Label } from "@/components/ui/label";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { Participant } from "@/types";
 import { toast } from "sonner";
 
 export default function ParticipantsPage() {
-  const [isImportOpen, setIsImportOpen] = useState(false);
-
   const queryClient = useQueryClient();
 
   const {
@@ -78,57 +66,7 @@ export default function ParticipantsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Participants</h2>
-        <div className="flex gap-2">
-          <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Upload className="mr-2 h-4 w-4" />
-                Import
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Import Participants</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="file">Excel File</Label>
-                  <Input
-                    id="file"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                    className="cursor-pointer"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Upload an Excel or CSV file containing participant
-                    information
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" asChild className="w-full">
-                    <a href="#" download>
-                      <FileSpreadsheet className="mr-2 h-4 w-4" />
-                      Download Template
-                    </a>
-                  </Button>
-                </div>
-              </div>
-              <div className="flex justify-end gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsImportOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button>Import</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
+      <h2 className="text-2xl font-bold">Participants</h2>
       <div className="rounded-lg border">
         <Table>
           <TableHeader>

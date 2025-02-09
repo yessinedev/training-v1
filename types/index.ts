@@ -55,6 +55,24 @@ export type Participant = {
   attestations?: Attestation[];
 };
 
+export type CreateParticipant = {
+  nom: string;
+  prenom: string;
+  email?: string;
+  telephone?: string;
+  entreprise?: string;
+  poste?: string;
+};
+
+export type ExcelParticipant = {
+  Nom: string;
+  Prenom: string;
+  Email?: string;
+  Telephone: string;
+  Entreprise: string;
+  Poste?: string;
+}
+
 export type Attestation = {
   attestation_id: number;
   participant_id: number;
