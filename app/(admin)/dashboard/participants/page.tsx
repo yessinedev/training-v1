@@ -1,6 +1,6 @@
 "use client";
 import { format } from "date-fns";
-import { Trash2,  Award } from "lucide-react";
+import { Trash2, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -21,9 +21,23 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { Participant } from "@/types";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
+import { ParticipateManyDialog } from "@/components/participants/ParticipateManyDialog";
 
 export default function ParticipantsPage() {
   const queryClient = useQueryClient();
+  const [checkedParticipants, setCheckedParticipants] = useState<number[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleCheckboxChange = (participantId: number, checked: boolean) => {
+    console.log(participantId, checked)
+    setCheckedParticipants((prev) =>
+      checked
+        ? [...prev, participantId]
+        : prev.filter((id) => id !== participantId)
+    );
+  };
 
   const {
     data: participants,
@@ -66,7 +80,10 @@ export default function ParticipantsPage() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Participants</h2>
+    <div className="flex items-center justify-between px-3">
+    <h2 className="text-2xl font-bold">Participants</h2>
+    {checkedParticipants.length > 0 && <Button onClick={() => setIsDialogOpen(true)}>Ajouter Action Formation</Button>}
+    </div>
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
@@ -83,7 +100,19 @@ export default function ParticipantsPage() {
           <TableBody>
             {participants?.map((participant: Participant) => (
               <TableRow key={participant.participant_id}>
-                <TableCell>{participant.participant_id}</TableCell>
+                <TableCell>
+                  <Checkbox
+                    checked={checkedParticipants.includes(
+                      participant.participant_id
+                    )}
+                    onCheckedChange={(checked) =>
+                      handleCheckboxChange(
+                        participant.participant_id,
+                        checked as boolean
+                      )
+                    }
+                  />
+                </TableCell>
                 <TableCell>{participant.nom}</TableCell>
                 <TableCell>{participant.prenom}</TableCell>
                 <TableCell>{participant.email}</TableCell>
@@ -125,22 +154,6 @@ export default function ParticipantsPage() {
                 <TableCell className="text-right">
                   <TooltipProvider>
                     <div className="flex items-center justify-end gap-2">
-                      {/* <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            // onClick={() => handleOpenDialog(participant)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit participant</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Edit participant</p>
-                        </TooltipContent>
-                      </Tooltip> */}
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -170,6 +183,7 @@ export default function ParticipantsPage() {
           </TableBody>
         </Table>
       </div>
+      {isDialogOpen && <ParticipateManyDialog participantsIds={checkedParticipants} isOpen={isDialogOpen} onOpenChange={setIsDialogOpen} />}
     </div>
   );
 }

@@ -4,9 +4,8 @@ export type Role = {
   users: User[];
 };
 export type User = {
-  user_id: number;
+  user_id: string;
   email: string;
-  password?: string;
   nom: string;
   prenom: string;
   telephone: string;

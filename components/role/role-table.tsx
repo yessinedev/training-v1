@@ -19,18 +19,20 @@ import {
 } from "@/components/ui/tooltip";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Role, User } from "@/types";
+import { Role } from "@/types";
 import axiosInstance from "@/lib/axios";
 import RoleForm from "../user/AddRoleForm";
+import { useAuth } from "@clerk/nextjs";
 
 const RolesTable = () => {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { getToken } = useAuth();
 
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const handleOpenDialog = (role?: Role) => {
-    console.log("selectedRole")
+    console.log("selectedRole");
     setSelectedRole(role ?? null);
     setIsDialogOpen(true);
   };
@@ -47,14 +49,26 @@ const RolesTable = () => {
   } = useQuery({
     queryKey: ["roles"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/roles");
+      const token = await getToken({ template: 'my-jwt-template' });
+      const response = await axiosInstance.get("/roles", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     },
   });
 
   const deleteRoleMutation = useMutation({
     mutationFn: async (roleId: number) => {
-      await axiosInstance.delete(`/roles?id=${roleId}`);
+      const token = await getToken({ template: 'my-jwt-template' });
+      await axiosInstance.delete(`/roles?id=${roleId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
@@ -99,12 +113,7 @@ const RolesTable = () => {
               <TableRow key={role.role_id}>
                 <TableCell>{role.role_id}</TableCell>
                 <TableCell>{role.role_name}</TableCell>
-                <TableCell>
-                  {
-                    roles.filter((user: User) => user.role_id === role.role_id)
-                      .length
-                  }
-                </TableCell>
+                <TableCell>{role.users.length}</TableCell>
                 <TableCell className="text-right">
                   <TooltipProvider>
                     <div className="flex items-center justify-end gap-2">

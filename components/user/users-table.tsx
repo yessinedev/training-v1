@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
 import { Pencil, Trash2, Plus } from "lucide-react";
@@ -22,11 +22,12 @@ import axiosInstance from "@/lib/axios";
 import { User } from "@/types";
 import { toast } from "sonner";
 import UserForm from "./AddUserForm";
+import { useAuth } from "@clerk/nextjs";
 
 const UsersTable = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   const handleOpenDialog = (user?: User) => {
@@ -46,14 +47,26 @@ const UsersTable = () => {
   } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/users");
+      const token = await getToken({ template: "my-jwt-template" });
+      const response = await axiosInstance.get("/user/all", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     },
   });
 
   const deleteUserMutation = useMutation({
-    mutationFn: async (userId: number) => {
-      await axiosInstance.delete(`/users?id=${userId}`);
+    mutationFn: async (userId: string) => {
+      const token = await getToken({ template: "my-jwt-template" });
+      await axiosInstance.delete(`/user/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
@@ -65,7 +78,8 @@ const UsersTable = () => {
     },
   });
 
-  const handleDeleteUser = async (userId: number) => {
+  const handleDeleteUser = async (userId: string) => {
+
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         await deleteUserMutation.mutateAsync(userId);
@@ -85,19 +99,19 @@ const UsersTable = () => {
         <Plus className="mr-2 h-4 w-4" />
         Add User
       </Button>
-
-      <UserForm
-        user={selectedUser || undefined}
-        isOpen={isDialogOpen}
-        onClose={handleCloseDialog}
-        onOpenChange={setIsDialogOpen}
-      />
+      {isDialogOpen && (
+        <UserForm
+          user={selectedUser || undefined}
+          isOpen={isDialogOpen}
+          onClose={handleCloseDialog}
+          onOpenChange={setIsDialogOpen}
+        />
+      )}
 
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Nom</TableHead>
               <TableHead>Prénom</TableHead>
@@ -109,7 +123,6 @@ const UsersTable = () => {
           <TableBody>
             {users?.map((user: User) => (
               <TableRow key={user.user_id}>
-                <TableCell>{user.user_id}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>{user.nom}</TableCell>
                 <TableCell>{user.prenom}</TableCell>

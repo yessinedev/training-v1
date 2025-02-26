@@ -75,7 +75,7 @@ const AttestationPDF = ({
   qrUrl: string;
 }) => {
   const formatDate = (isoString: Date): string => {
-    return format(isoString, "dd/MM/yyyy");
+    return ` ${format(isoString, "dd/MM/yyyy")} `;
   };
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
@@ -95,14 +95,11 @@ const AttestationPDF = ({
             {attestation.action?.theme?.libelle_theme}
           </Text>
           <Text style={styles.text}>
-            organisé à {attestation.action?.lieu} de{" "}
+            organisé à {attestation.action?.lieu} de
             {attestation.action?.date_debut
               ? formatDate(attestation.action.date_debut)
               : "N/A"}
-            à{" "}
-            {attestation.action?.date_fin
-              ? formatDate(attestation.action.date_fin)
-              : "N/A"}
+            à{attestation.action?.date_fin ? formatDate(attestation.action.date_fin): "N/A"}
           </Text>
           <Text style={[styles.text, { fontStyle: "italic" }]}>
             Cette attestation est délivrée à l&apos;intéressé pour servir et

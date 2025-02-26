@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,10 +32,10 @@ import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { Role, User } from "@/types";
+import { useAuth } from "@clerk/nextjs";
 
 const formSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
   nom: z
     .string()
     .min(1, "Last name is required")
@@ -61,12 +61,12 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const isEditing = !!user;
   const queryClient = useQueryClient();
+  const { getToken } = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      password: "",
       nom: "",
       prenom: "",
       telephone: "",
@@ -77,21 +77,22 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
   // Reset form when user changes or dialog opens/closes
   useEffect(() => {
     if (isOpen) {
-      const values = user ? {
-        email: user.email,
-        password: user.password,
-        nom: user.nom,
-        prenom: user.prenom,
-        telephone: user.telephone,
-        role_id: user.role_id.toString(),
-      } : {
-        email: "",
-        password: "",
-        nom: "",
-        prenom: "",
-        telephone: "",
-        role_id: "",
-      };
+      const values = user
+        ? {
+            email: user.email,
+            nom: user.nom,
+            prenom: user.prenom,
+            telephone: user.telephone,
+            role_id: user.role_id.toString(),
+          }
+        : {
+            email: "",
+            password: "",
+            nom: "",
+            prenom: "",
+            telephone: "",
+            role_id: "",
+          };
       console.log("Resetting form with values:", values);
       form.reset(values);
     }
@@ -100,7 +101,13 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
   const { data: roles, isLoading: rolesLoading } = useQuery({
     queryKey: ["roles"],
     queryFn: async () => {
-      const response = await axiosInstance.get("/roles");
+      const token = await getToken({ template: "my-jwt-template" });
+      const response = await axiosInstance.get("/roles", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     },
   });
@@ -113,14 +120,30 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
       };
 
       if (isEditing && user) {
-        console.log(user)
-        const response = await axiosInstance.put(`/users`, {
-          user_id: user.user_id,
-          ...payload,
-        });
+        console.log(user);
+        const token = await getToken({ template: "my-jwt-template" });
+        const response = await axiosInstance.put(
+          `/users`,
+          {
+            user_id: user.user_id,
+            ...payload,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         return response.data;
       } else {
-        const response = await axiosInstance.post("/users", payload);
+        const token = await getToken({ template: "my-jwt-template" });
+        const response = await axiosInstance.post("/user/create", payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
         return response.data;
       }
     },
@@ -130,8 +153,13 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
       onClose();
     },
     onError: (error: Error) => {
-      toast.error(`Failed to ${isEditing ? "update" : "create"} user: ${error.message}`);
-      console.error(`Error ${isEditing ? "updating" : "creating"} user:`, error);
+      toast.error(
+        `Failed to ${isEditing ? "update" : "create"} user: ${error.message}`
+      );
+      console.error(
+        `Error ${isEditing ? "updating" : "creating"} user:`,
+        error
+      );
     },
   });
 
@@ -161,10 +189,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form 
-            onSubmit={form.handleSubmit(onSubmit)} 
-            className="space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="email"
@@ -178,19 +203,6 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
                 </FormItem>
               )}
             />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             <FormField
               control={form.control}
               name="nom"
@@ -236,10 +248,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    value={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a role" />
@@ -261,17 +270,10 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
               )}
             />
             <div className="flex justify-end gap-4 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-              >
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={isLoading}
-              >
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
               </Button>
             </div>

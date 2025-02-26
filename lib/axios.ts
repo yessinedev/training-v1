@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "/api", // Use the proxy route
+  baseURL: "http://localhost:5000/api", // Use the proxy route
 });
 
 export default axiosInstance;
