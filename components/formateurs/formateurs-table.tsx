@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
 import { Pencil, Trash2, Plus, FileText, Badge } from "lucide-react";
@@ -24,7 +24,9 @@ import { toast } from "sonner";
 import FormateurForm from "./formateur-form";
 
 const FormateursTable = () => {
-  const [selectedFormateur, setSelectedFormateur] = useState<Formateur | null>(null);
+  const [selectedFormateur, setSelectedFormateur] = useState<Formateur | null>(
+    null
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const queryClient = useQueryClient();
@@ -52,8 +54,8 @@ const FormateursTable = () => {
   });
 
   const deleteFormateurMutation = useMutation({
-    mutationFn: async (formateurId: number) => {
-      await axiosInstance.delete(`/formateurs?id=${formateurId}`);
+    mutationFn: async (formateurId: string) => {
+      await axiosInstance.delete(`/formateurs/${formateurId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["formateurs"] });
@@ -65,7 +67,7 @@ const FormateursTable = () => {
     },
   });
 
-  const handleDeleteFormateur = async (formateurId: number) => {
+  const handleDeleteFormateur = async (formateurId: string) => {
     if (window.confirm("Are you sure you want to delete this formateur?")) {
       try {
         await deleteFormateurMutation.mutateAsync(formateurId);
@@ -86,13 +88,14 @@ const FormateursTable = () => {
           Add Formateur
         </Button>
       </div>
-
-      <FormateurForm
-        formateur={selectedFormateur || undefined}
-        isOpen={isDialogOpen}
-        onClose={handleCloseDialog}
-        onOpenChange={setIsDialogOpen}
-      />
+      {isDialogOpen && (
+        <FormateurForm
+          formateur={selectedFormateur || undefined}
+          isOpen={isDialogOpen}
+          onClose={handleCloseDialog}
+          onOpenChange={setIsDialogOpen}
+        />
+      )}
 
       <div className="rounded-lg border">
         <Table>
@@ -107,8 +110,8 @@ const FormateursTable = () => {
           </TableHeader>
           <TableBody>
             {formateurs?.map((formateur: Formateur) => (
-              <TableRow key={formateur.formateur_id}>
-                <TableCell>{formateur.formateur_id}</TableCell>
+              <TableRow key={formateur.user_id}>
+                <TableCell>{formateur.user_id}</TableCell>
                 <TableCell>
                   {formateur.user.prenom} {formateur.user.nom}
                 </TableCell>
@@ -123,7 +126,9 @@ const FormateursTable = () => {
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={() => window.open(formateur.cv_path, '_blank')}
+                              onClick={() =>
+                                window.open(formateur.cv_path, "_blank")
+                              }
                             >
                               <FileText className="h-4 w-4" />
                             </Button>
@@ -140,7 +145,9 @@ const FormateursTable = () => {
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={() => window.open(formateur.badge_path, '_blank')}
+                              onClick={() =>
+                                window.open(formateur.badge_path, "_blank")
+                              }
                             >
                               <Badge className="h-4 w-4" />
                             </Button>
@@ -176,7 +183,9 @@ const FormateursTable = () => {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive"
-                            onClick={() => handleDeleteFormateur(formateur.formateur_id)}
+                            onClick={() =>
+                              handleDeleteFormateur(formateur.user_id)
+                            }
                             disabled={deleteFormateurMutation.isPending}
                           >
                             <Trash2 className="h-4 w-4" />

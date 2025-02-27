@@ -23,8 +23,7 @@ export type FormUser = Omit<
 };
 
 export type Formateur = {
-  formateur_id: number;
-  user_id: number;
+  user_id: string;
   cv_path?: string;
   badge_path?: string;
   user: User;

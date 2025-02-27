@@ -1,5 +1,4 @@
-'use client';
-
+"use client";
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -19,7 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -29,10 +27,12 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
+import { useQueryClient } from "@tanstack/react-query";
 import { Formateur, User } from "@/types";
-import { Upload } from "lucide-react";
+import { useAuthQuery } from "@/hooks/useAuthQuery";
+import { useFormateurMutation } from "@/hooks/useFormateurMutation";
+import FileInput from "../FileInput";
+import { fetchUsers } from "@/services/userService";
 
 const formSchema = z.object({
   user_id: z.string().min(1, "User is required"),
@@ -49,13 +49,17 @@ type FormateurFormProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const FormateurForm = ({ formateur, isOpen, onClose, onOpenChange }: FormateurFormProps) => {
+const FormateurForm = ({
+  formateur,
+  isOpen,
+  onClose,
+  onOpenChange,
+}: FormateurFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [badgeFile, setBadgeFile] = useState<File | null>(null);
   const isEditing = !!formateur;
   const queryClient = useQueryClient();
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,17 +67,11 @@ const FormateurForm = ({ formateur, isOpen, onClose, onOpenChange }: FormateurFo
     },
   });
 
-  const { data: users } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/users");
-      return response.data;
-    },
-  });
+  const { data: users } = useAuthQuery(["users"], fetchUsers);
 
   const availableUsers = users?.filter(
-    (user: User) => 
-      user.role.role_name === 'Formateur' && 
+    (user: User) =>
+      user.role.role_name === "Formateur" &&
       (!formateur || user.user_id === formateur.user_id)
   );
 
@@ -91,26 +89,29 @@ const FormateurForm = ({ formateur, isOpen, onClose, onOpenChange }: FormateurFo
     }
   }, [formateur, isOpen, form]);
 
-  const mutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      if (isEditing) {
-        const response = await axiosInstance.put(`/formateurs`, data);
-        return response.data;
-      } else {
-        const response = await axiosInstance.post("/formateurs", data);
-        return response.data;
-      }
-    },
-    onSuccess: () => {
+  const mutation = useFormateurMutation(
+    isEditing,
+    () => {
       queryClient.invalidateQueries({ queryKey: ["formateurs"] });
-      toast.success(`Formateur ${isEditing ? "updated" : "created"} successfully`);
+      toast.success(
+        `Formateur ${isEditing ? "updated" : "created"} successfully`
+      );
       onClose();
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to ${isEditing ? "update" : "create"} formateur: ${error.message}`);
-      console.error(`Error ${isEditing ? "updating" : "creating"} formateur:`, error);
-    },
-  });
+    (error) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(
+        `Failed to ${
+          isEditing ? "update" : "create"
+        } formateur: ${errorMessage}`
+      );
+      console.error(
+        `Error ${isEditing ? "updating" : "creating"} formateur:`,
+        error
+      );
+    }
+  );
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -118,17 +119,17 @@ const FormateurForm = ({ formateur, isOpen, onClose, onOpenChange }: FormateurFo
       const formData = new FormData();
 
       if (isEditing) {
-        formData.append('formateur_id', formateur.formateur_id.toString());
+        formData.append("formateur_id", formateur.user_id);
       } else {
-        formData.append('user_id', values.user_id);
+        formData.append("user_id", values.user_id);
       }
 
       if (cvFile) {
-        formData.append('cv', cvFile);
+        formData.append("cv", cvFile);
       }
 
       if (badgeFile) {
-        formData.append('badge', badgeFile);
+        formData.append("badge", badgeFile);
       }
 
       await mutation.mutateAsync(formData);
@@ -139,23 +140,13 @@ const FormateurForm = ({ formateur, isOpen, onClose, onOpenChange }: FormateurFo
     }
   };
 
-  const handleCvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      setCvFile(e.target.files[0]);
-    }
-  };
-
-  const handleBadgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      setBadgeFile(e.target.files[0]);
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Formateur" : "Add New Formateur"}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Edit Formateur" : "Add New Formateur"}
+          </DialogTitle>
           <DialogDescription>
             {isEditing
               ? "Update the formateur information and click the update button"
@@ -171,10 +162,7 @@ const FormateurForm = ({ formateur, isOpen, onClose, onOpenChange }: FormateurFo
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>User</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select user" />
@@ -196,53 +184,29 @@ const FormateurForm = ({ formateur, isOpen, onClose, onOpenChange }: FormateurFo
                 )}
               />
             )}
-
             <FormItem>
-              <FormLabel>CV Document</FormLabel>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleCvChange}
-                />
-                <Button type="button" variant="outline" size="icon">
-                  <Upload className="h-4 w-4" />
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Accepted formats: PDF, DOC, DOCX
-              </p>
+              <FileInput
+                accept=".pdf,.doc,.docx"
+                label="CV Document"
+                onChange={(e) =>
+                  e.target.files?.[0] && setCvFile(e.target.files[0])
+                }
+              />
             </FormItem>
-
             <FormItem>
-              <FormLabel>Badge Photo</FormLabel>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleBadgeChange}
-                />
-                <Button type="button" variant="outline" size="icon">
-                  <Upload className="h-4 w-4" />
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Accepted formats: JPG, PNG, GIF
-              </p>
+              <FileInput
+                accept="image/*"
+                label="Badge Photo"
+                onChange={(e) =>
+                  e.target.files?.[0] && setBadgeFile(e.target.files[0])
+                }
+              />
             </FormItem>
-
             <div className="flex justify-end gap-4 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-              >
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button 
-                type="submit"
-                disabled={isLoading}
-              >
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
               </Button>
             </div>

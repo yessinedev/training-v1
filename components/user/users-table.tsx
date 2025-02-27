@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,17 +16,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
-import { User } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import UserForm from "./AddUserForm";
-import { useAuth } from "@clerk/nextjs";
+import { useAuthQuery } from "@/hooks/useAuthQuery";
+import { useAuthMutation } from "@/hooks/useAuthMutation";
+import { User } from "@/types";
+import { deleteUser, fetchUsers } from "@/services/userService";
 
 const UsersTable = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   const handleOpenDialog = (user?: User) => {
@@ -44,47 +43,26 @@ const UsersTable = () => {
     data: users,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const token = await getToken({ template: "my-jwt-template" });
-      const response = await axiosInstance.get("/user/all", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      return response.data;
-    },
-  });
+  } = useAuthQuery(["users"], fetchUsers);
 
-  const deleteUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      const token = await getToken({ template: "my-jwt-template" });
-      await axiosInstance.delete(`/user/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-    },
+  const deleteUserMutation = useAuthMutation(deleteUser, {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("User deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete user: ${error.message}`);
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      toast.error(`Failed to delete user: ${errorMessage}`);
       console.error("Error deleting user:", error);
     },
   });
 
   const handleDeleteUser = async (userId: string) => {
-
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         await deleteUserMutation.mutateAsync(userId);
       } catch (error) {
-        // Error is handled by mutation's onError
         console.error("Delete submission error:", error);
       }
     }
