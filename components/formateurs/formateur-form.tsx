@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -67,13 +67,9 @@ const FormateurForm = ({
     },
   });
 
-  const { data: users } = useAuthQuery(["users"], fetchUsers);
+  const { data: users } = useAuthQuery(["users"], fetchUsers, "3");
 
-  const availableUsers = users?.filter(
-    (user: User) =>
-      user.role.role_name === "Formateur" &&
-      (!formateur || user.user_id === formateur.user_id)
-  );
+  
 
   useEffect(() => {
     if (isOpen && formateur) {
@@ -117,21 +113,23 @@ const FormateurForm = ({
     try {
       setIsLoading(true);
       const formData = new FormData();
-
+  
       if (isEditing) {
         formData.append("formateur_id", formateur.user_id);
       } else {
         formData.append("user_id", values.user_id);
       }
-
+  
       if (cvFile) {
-        formData.append("cv", cvFile);
+        formData.append("files", cvFile); // 👈 Corrected key name to 'files'
       }
-
+  
       if (badgeFile) {
-        formData.append("badge", badgeFile);
+        formData.append("files", badgeFile); // 👈 Same key for multiple files
       }
-
+  
+      console.log("Form data:", [...formData]); // Debugging
+  
       await mutation.mutateAsync(formData);
     } catch (error) {
       console.error("Form submission error:", error);
@@ -139,6 +137,7 @@ const FormateurForm = ({
       setIsLoading(false);
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -169,7 +168,7 @@ const FormateurForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {availableUsers?.map((user: User) => (
+                        {users?.map((user: User) => (
                           <SelectItem
                             key={user.user_id}
                             value={user.user_id.toString()}

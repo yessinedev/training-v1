@@ -9,7 +9,6 @@ export const createOrUpdateFormateur = async (
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
     },
   };
 
@@ -21,3 +20,14 @@ export const createOrUpdateFormateur = async (
     return response.data;
   }
 };
+
+
+export const fetchFormateurs = async (token: string): Promise<any> => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const response = await axiosInstance.get("/formateurs", config);
+  return response.data;
+}

@@ -20,7 +20,7 @@ export default function Home() {
             <span className="text-xl font-bold">TrainingManager</span>
           </div>
           <Button asChild>
-            <Link href="/dashboard">Go to Dashboard</Link>
+            <Link href="/dashboard-redirect">Go to Dashboard</Link>
           </Button>
         </div>
       </header>
