@@ -42,13 +42,10 @@ export type Theme = {
 };
 
 export type Participant = {
-  participant_id: number;
-  nom: string;
-  prenom: string;
-  email?: string;
-  telephone?: string;
+  user_id: string;
   entreprise?: string;
   poste?: string;
+  user: User;
   actions?: ActionFormationParticipant[];
   attestations?: Attestation[];
 };

@@ -24,14 +24,20 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { ParticipateManyDialog } from "@/components/participants/ParticipateManyDialog";
+import { useAuthQuery } from "@/hooks/useAuthQuery";
+import {
+  deleteParticipant,
+  fetchParticipants,
+} from "@/services/participantService";
+import { useAuthMutation } from "@/hooks/useAuthMutation";
 
 export default function ParticipantsPage() {
   const queryClient = useQueryClient();
-  const [checkedParticipants, setCheckedParticipants] = useState<number[]>([]);
+  const [checkedParticipants, setCheckedParticipants] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleCheckboxChange = (participantId: number, checked: boolean) => {
-    console.log(participantId, checked)
+  const handleCheckboxChange = (participantId: string, checked: boolean) => {
+    console.log(participantId, checked);
     setCheckedParticipants((prev) =>
       checked
         ? [...prev, participantId]
@@ -43,29 +49,25 @@ export default function ParticipantsPage() {
     data: participants,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["participants"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/participants");
-      return response.data;
-    },
-  });
+  } = useAuthQuery(["participants"], fetchParticipants);
 
-  const deleteParticipantMutation = useMutation({
-    mutationFn: async (participantId: number) => {
+  const deleteParticipantMutation = useAuthMutation(deleteParticipant, {
+    mutationFn: async (participantId: string) => {
       await axiosInstance.delete(`/participants?id=${participantId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["participants"] });
       toast.success("Participant deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete participant: ${error.message}`);
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      toast.error(`Failed to delete participant: ${errorMessage}`);
       console.error("Error deleting participant:", error);
     },
   });
 
-  const handleDeleteParticipant = async (participantId: number) => {
+  const handleDeleteParticipant = async (participantId: string) => {
     if (window.confirm("Are you sure you want to delete this participant?")) {
       try {
         await deleteParticipantMutation.mutateAsync(participantId);
@@ -80,10 +82,14 @@ export default function ParticipantsPage() {
 
   return (
     <div className="space-y-4">
-    <div className="flex items-center justify-between px-3">
-    <h2 className="text-2xl font-bold">Participants</h2>
-    {checkedParticipants.length > 0 && <Button onClick={() => setIsDialogOpen(true)}>Ajouter Action Formation</Button>}
-    </div>
+      <div className="flex items-center justify-between px-3">
+        <h2 className="text-2xl font-bold">Participants</h2>
+        {checkedParticipants.length > 0 && (
+          <Button onClick={() => setIsDialogOpen(true)}>
+            Ajouter Action Formation
+          </Button>
+        )}
+      </div>
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
@@ -93,30 +99,30 @@ export default function ParticipantsPage() {
               <TableHead>Prénom</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Entreprise</TableHead>
+              <TableHead>Poste</TableHead>
               <TableHead>Formations</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {participants?.map((participant: Participant) => (
-              <TableRow key={participant.participant_id}>
+              <TableRow key={participant.user_id}>
                 <TableCell>
                   <Checkbox
-                    checked={checkedParticipants.includes(
-                      participant.participant_id
-                    )}
+                    checked={checkedParticipants.includes(participant.user_id)}
                     onCheckedChange={(checked) =>
                       handleCheckboxChange(
-                        participant.participant_id,
+                        participant.user_id,
                         checked as boolean
                       )
                     }
                   />
                 </TableCell>
-                <TableCell>{participant.nom}</TableCell>
-                <TableCell>{participant.prenom}</TableCell>
-                <TableCell>{participant.email}</TableCell>
+                <TableCell>{participant.user.nom}</TableCell>
+                <TableCell>{participant.user.prenom}</TableCell>
+                <TableCell>{participant.user.email}</TableCell>
                 <TableCell>{participant.entreprise}</TableCell>
+                <TableCell>{participant.poste}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {participant.actions?.map((pa) => (
@@ -161,9 +167,7 @@ export default function ParticipantsPage() {
                             size="icon"
                             className="h-8 w-8 text-destructive"
                             onClick={() =>
-                              handleDeleteParticipant(
-                                participant.participant_id
-                              )
+                              handleDeleteParticipant(participant.user_id)
                             }
                             disabled={deleteParticipantMutation.isPending}
                           >
@@ -183,7 +187,13 @@ export default function ParticipantsPage() {
           </TableBody>
         </Table>
       </div>
-      {isDialogOpen && <ParticipateManyDialog participantsIds={checkedParticipants} isOpen={isDialogOpen} onOpenChange={setIsDialogOpen} />}
+      {isDialogOpen && (
+        <ParticipateManyDialog
+          participantsIds={checkedParticipants}
+          isOpen={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+        />
+      )}
     </div>
   );
 }

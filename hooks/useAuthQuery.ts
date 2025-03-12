@@ -13,7 +13,6 @@ export function useAuthQuery<T>(
 
   const queryFn: QueryFunction<T> = async () => {
     const token = await getToken({ template: 'my-jwt-template' });
-    console.log(token);
     return authQueryFn(token!, roleId);
   };
 

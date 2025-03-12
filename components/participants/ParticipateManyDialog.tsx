@@ -12,7 +12,7 @@ import { format } from "date-fns";
 
 export type ParticipateManyDialogProps = {
   isOpen: boolean;
-  participantsIds: number[];
+  participantsIds: string[];
   onOpenChange: (open: boolean) => void;
 };
 
@@ -34,7 +34,7 @@ export function ParticipateManyDialog({
   });
 
   const mutation = useMutation({
-    mutationFn: async ({ formationId, participants }: { formationId: string; participants: { participant_id: number; statut: string }[] }) => {
+    mutationFn: async ({ formationId, participants }: { formationId: string; participants: { participant_id: string; statut: string }[] }) => {
       const response = await axiosInstance.post(`/formations/${formationId}/participants`, participants)
       return response.data;
     },

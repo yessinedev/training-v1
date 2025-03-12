@@ -121,14 +121,13 @@ const FormateurForm = ({
       }
   
       if (cvFile) {
-        formData.append("files", cvFile); // 👈 Corrected key name to 'files'
+        formData.append("files", cvFile); 
       }
   
       if (badgeFile) {
-        formData.append("files", badgeFile); // 👈 Same key for multiple files
+        formData.append("files", badgeFile);
       }
   
-      console.log("Form data:", [...formData]); // Debugging
   
       await mutation.mutateAsync(formData);
     } catch (error) {
