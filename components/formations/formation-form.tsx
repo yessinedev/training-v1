@@ -42,7 +42,7 @@ const formSchema = z.object({
   duree_heures: z.string().min(1, "Duration in hours is required"),
   lieu: z.string().min(1, "Location is required"),
   nb_participants_prevu: z.string().min(1, "Number of participants is required"),
-  formateur_id: z.string().optional(),
+  user_id: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -70,7 +70,7 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
       duree_heures: "",
       lieu: "",
       nb_participants_prevu: "",
-      formateur_id: "",
+      user_id: "",
     },
   });
 
@@ -85,7 +85,7 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
         duree_heures: formation.duree_heures.toString(),
         lieu: formation.lieu,
         nb_participants_prevu: formation.nb_participants_prevu.toString(),
-        formateur_id: formation.formateurs[0]?.formateur_id.toString() || "",
+        user_id: formation.formateurs[0]?.formateur_id.toString() || "",
       });
     }
   }, [formation, isOpen, form]);
@@ -114,8 +114,10 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
         duree_jours: parseInt(data.duree_jours),
         duree_heures: parseInt(data.duree_heures),
         nb_participants_prevu: parseInt(data.nb_participants_prevu),
-        formateur_id: data.formateur_id ? parseInt(data.formateur_id) : undefined,
+        user_id: data.user_id ? data.user_id : undefined,
       };
+
+      console.log(payload)
 
       if (isEditing && formation) {
         const response = await axiosInstance.put(`/formations`, {
@@ -304,7 +306,7 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
 
             <FormField
               control={form.control}
-              name="formateur_id"
+              name="user_id"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Trainer</FormLabel>
@@ -317,8 +319,8 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
                     <SelectContent>
                       {formateurs?.map((formateur: Formateur) => (
                         <SelectItem
-                          key={formateur.formateur_id}
-                          value={formateur.formateur_id.toString()}
+                          key={formateur.user_id}
+                          value={formateur.user_id.toString()}
                         >
                           {formateur.user.prenom} {formateur.user.nom}
                         </SelectItem>

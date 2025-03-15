@@ -1,5 +1,4 @@
-'use client';
-
+"use client";
 import React, { useState } from "react";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,12 +17,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
+import { useQueryClient } from "@tanstack/react-query";
 import { Domain, Theme } from "@/types";
 import { toast } from "sonner";
 import DomainForm from "./domain-form";
 import ThemeForm from "../themes/theme-form";
+import { deleteDomaine, fetchDomaines } from "@/services/domaineService";
+import { useAuthQuery } from "@/hooks/useAuthQuery";
+import { useAuthMutation } from "@/hooks/useAuthMutation";
+import { deleteTheme, fetchThemes } from "@/services/themeService";
 
 const DomainsTable = () => {
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
@@ -57,50 +59,36 @@ const DomainsTable = () => {
     data: domains,
     isLoading: domainsLoading,
     isError: domainsError,
-  } = useQuery({
-    queryKey: ["domaines"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/domaines");
-      return response.data;
-    },
-  });
+  } = useAuthQuery(["domaines"], fetchDomaines);
 
   const {
     data: themes,
     isLoading: themesLoading,
     isError: themesError,
-  } = useQuery({
-    queryKey: ["themes"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/themes");
-      return response.data;
-    },
-  });
+  } = useAuthQuery(["themes"], fetchThemes);
 
-  const deleteDomainMutation = useMutation({
-    mutationFn: async (domainId: number) => {
-      await axiosInstance.delete(`/domaines?id=${domainId}`);
-    },
+  const deleteDomainMutation = useAuthMutation(deleteDomaine, {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["domaines"] });
       toast.success("Domain deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete domain: ${error.message}`);
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      toast.error(`Failed to delete user: ${errorMessage}`);
       console.error("Error deleting domain:", error);
     },
   });
 
-  const deleteThemeMutation = useMutation({
-    mutationFn: async (themeId: number) => {
-      await axiosInstance.delete(`/themes?id=${themeId}`);
-    },
+  const deleteThemeMutation = useAuthMutation(deleteTheme, {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["themes"] });
       toast.success("Theme deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete theme: ${error.message}`);
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      toast.error(`Failed to delete user: ${errorMessage}`);
       console.error("Error deleting theme:", error);
     },
   });
@@ -221,7 +209,9 @@ const DomainsTable = () => {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-destructive"
-                              onClick={() => handleDeleteDomain(domain.domaine_id)}
+                              onClick={() =>
+                                handleDeleteDomain(domain.domaine_id)
+                              }
                               disabled={deleteDomainMutation.isPending}
                             >
                               <Trash2 className="h-4 w-4" />

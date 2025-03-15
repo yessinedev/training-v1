@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { Domain } from "@/types";
+import { createDomaine, updateDomaine } from "@/services/domaineService";
 
 const formSchema = z.object({
   libelle_domaine: z.string()
@@ -32,7 +33,7 @@ const formSchema = z.object({
     .max(100, "Domain name must be less than 100 characters"),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+export type FormValues = z.infer<typeof formSchema>;
 
 type DomainFormProps = {
   domain?: Domain;
@@ -64,14 +65,9 @@ const DomainForm = ({ domain, isOpen, onClose, onOpenChange }: DomainFormProps) 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
       if (isEditing && domain) {
-        const response = await axiosInstance.put(`/domaines`, {
-          domaine_id: domain.domaine_id,
-          ...data,
-        });
-        return response.data;
+        await updateDomaine(domain.domaine_id, data)
       } else {
-        const response = await axiosInstance.post("/domaines", data);
-        return response.data;
+        await createDomaine(data)
       }
     },
     onSuccess: () => {

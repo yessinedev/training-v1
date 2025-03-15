@@ -52,9 +52,6 @@ export default function ParticipantsPage() {
   } = useAuthQuery(["participants"], fetchParticipants);
 
   const deleteParticipantMutation = useAuthMutation(deleteParticipant, {
-    mutationFn: async (participantId: string) => {
-      await axiosInstance.delete(`/participants?id=${participantId}`);
-    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["participants"] });
       toast.success("Participant deleted successfully");

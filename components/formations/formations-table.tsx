@@ -1,8 +1,16 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { Pencil, Trash2, Plus, Calendar, MapPin, Users, ArrowRight } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  Plus,
+  Calendar,
+  MapPin,
+  Users,
+  ArrowRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -24,17 +32,19 @@ import axiosInstance from "@/lib/axios";
 import { Domain, Formation, Theme } from "@/types";
 import { toast } from "sonner";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderTree, BookOpen } from "lucide-react";
 import FormationForm from "./formation-form";
+import { useAuthQuery } from "@/hooks/useAuthQuery";
+import { deleteFormation, fetchFormations } from "@/services/formationService";
+import { fetchDomaines } from "@/services/domaineService";
+import { fetchThemes } from "@/services/themeService";
+import { useAuthMutation } from "@/hooks/useAuthMutation";
 
 const FormationsTable = () => {
-  const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null);
+  const [selectedFormation, setSelectedFormation] = useState<Formation | null>(
+    null
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const queryClient = useQueryClient();
@@ -53,40 +63,21 @@ const FormationsTable = () => {
     data: formations,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ["formations"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/formations");
-      return response.data;
-    },
-  });
+  } = useAuthQuery(["formations"], fetchFormations);
 
-  const { data: domaines } = useQuery({
-    queryKey: ["domaines"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/domaines");
-      return response.data;
-    },
-  });
+  const { data: domaines } = useAuthQuery(["domaines"], fetchDomaines);
 
-  const { data: themes } = useQuery({
-    queryKey: ["themes"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/themes");
-      return response.data;
-    },
-  });
+  const { data: themes } = useAuthQuery(["themes"], fetchThemes);
 
-  const deleteFormationMutation = useMutation({
-    mutationFn: async (formationId: number) => {
-      await axiosInstance.delete(`/formations?id=${formationId}`);
-    },
+  const deleteFormationMutation = useAuthMutation(deleteFormation, {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["formations"] });
       toast.success("Formation deleted successfully");
     },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete formation: ${error.message}`);
+    onError: (error: unknown) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      toast.error(`Failed to delete user: ${errorMessage}`);
       console.error("Error deleting formation:", error);
     },
   });
@@ -156,7 +147,9 @@ const FormationsTable = () => {
                               <TableHead>Location</TableHead>
                               <TableHead>Participants</TableHead>
                               <TableHead>Trainer</TableHead>
-                              <TableHead className="text-right">Actions</TableHead>
+                              <TableHead className="text-right">
+                                Actions
+                              </TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -177,7 +170,8 @@ const FormationsTable = () => {
                                   </div>
                                 </TableCell>
                                 <TableCell>
-                                  {formation.duree_jours} days ({formation.duree_heures}h)
+                                  {formation.duree_jours} days (
+                                  {formation.duree_heures}h)
                                 </TableCell>
                                 <TableCell>
                                   <div className="flex items-center gap-2">
@@ -192,7 +186,10 @@ const FormationsTable = () => {
                                   </div>
                                 </TableCell>
                                 <TableCell>
-                                  {formation.formateurs[0]?.formateur.user.prenom}{" "}
+                                  {
+                                    formation.formateurs[0]?.formateur.user
+                                      .prenom
+                                  }{" "}
                                   {formation.formateurs[0]?.formateur.user.nom}
                                 </TableCell>
                                 <TableCell className="text-right">
@@ -206,9 +203,13 @@ const FormationsTable = () => {
                                             className="h-8 w-8"
                                             asChild
                                           >
-                                            <Link href={`/dashboard/formations/${formation.action_id}`}>
+                                            <Link
+                                              href={`/dashboard/formations/${formation.action_id}`}
+                                            >
                                               <ArrowRight className="h-4 w-4" />
-                                              <span className="sr-only">Manage session</span>
+                                              <span className="sr-only">
+                                                Manage session
+                                              </span>
                                             </Link>
                                           </Button>
                                         </TooltipTrigger>
@@ -222,10 +223,14 @@ const FormationsTable = () => {
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8"
-                                            onClick={() => handleOpenDialog(formation)}
+                                            onClick={() =>
+                                              handleOpenDialog(formation)
+                                            }
                                           >
                                             <Pencil className="h-4 w-4" />
-                                            <span className="sr-only">Edit formation</span>
+                                            <span className="sr-only">
+                                              Edit formation
+                                            </span>
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
@@ -238,11 +243,19 @@ const FormationsTable = () => {
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8 text-destructive"
-                                            onClick={() => handleDeleteFormation(formation.action_id)}
-                                            disabled={deleteFormationMutation.isPending}
+                                            onClick={() =>
+                                              handleDeleteFormation(
+                                                formation.action_id
+                                              )
+                                            }
+                                            disabled={
+                                              deleteFormationMutation.isPending
+                                            }
                                           >
                                             <Trash2 className="h-4 w-4" />
-                                            <span className="sr-only">Delete formation</span>
+                                            <span className="sr-only">
+                                              Delete formation
+                                            </span>
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
