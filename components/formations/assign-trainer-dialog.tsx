@@ -122,8 +122,8 @@ export default function AssignTrainerDialog({
                     <SelectContent>
                       {formateurs?.map((formateur: Formateur) => (
                         <SelectItem
-                          key={formateur.formateur_id}
-                          value={formateur.formateur_id.toString()}
+                          key={formateur.user_id}
+                          value={formateur.user_id}
                         >
                           {formateur.user.prenom} {formateur.user.nom}
                         </SelectItem>

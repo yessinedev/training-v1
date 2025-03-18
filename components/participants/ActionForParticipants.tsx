@@ -46,7 +46,7 @@ const ActionForParticipants = ({ actionId }: Props) => {
   });
 
   const removeParticipantMutation = useMutation({
-    mutationFn: async ({ participantId }: { participantId: number }) => {
+    mutationFn: async ({ participantId }: { participantId: string }) => {
       await axiosInstance.delete(
         `/formations/${actionId}/participants?participantId=${participantId}`
       );
@@ -80,9 +80,9 @@ const ActionForParticipants = ({ actionId }: Props) => {
             </TableHeader>
             <TableBody>
               {participants.map((p: ActionFormationParticipant) => (
-                <TableRow key={p.participant.participant_id}>
+                <TableRow key={p.participant.user_id}>
                   <TableCell>
-                    {p.participant.prenom} {p.participant.nom}
+                    {p.participant.user.prenom} {p.participant.user.nom}
                   </TableCell>
                   <TableCell>{p.participant.entreprise}</TableCell>
                   <TableCell>{p.participant.poste}</TableCell>
@@ -117,7 +117,7 @@ const ActionForParticipants = ({ actionId }: Props) => {
                             className="h-8 w-8 text-destructive"
                             onClick={() =>
                               removeParticipantMutation.mutate({
-                                participantId: p.participant.participant_id,
+                                participantId: p.participant.user_id,
                               })
                             }
                           >

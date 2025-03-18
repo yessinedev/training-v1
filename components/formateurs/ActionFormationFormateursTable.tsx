@@ -46,7 +46,7 @@ const ActionFormationFormateursTable = ({ actionId }: Props) => {
   });
 
   const removeTrainerMutation = useMutation({
-    mutationFn: async ({ formateurId }: { formateurId: number }) => {
+    mutationFn: async ({ formateurId }: { formateurId: string }) => {
       await axiosInstance.delete(
         `/formations/${actionId}/formateurs?formateurId=${formateurId}`
       );
@@ -79,7 +79,7 @@ const ActionFormationFormateursTable = ({ actionId }: Props) => {
               </TableHeader>
               <TableBody>
                 {trainers.map((f: ActionFormationFormateur) => (
-                  <TableRow key={f.formateur.formateur_id}>
+                  <TableRow key={f.formateur.user_id}>
                     <TableCell>
                       {f.formateur.user.prenom} {f.formateur.user.nom}
                     </TableCell>
@@ -95,7 +95,7 @@ const ActionFormationFormateursTable = ({ actionId }: Props) => {
                               className="h-8 w-8 text-destructive"
                               onClick={() =>
                                 removeTrainerMutation.mutate({
-                                  formateurId: f.formateur.formateur_id,
+                                  formateurId: f.formateur.user_id,
                                 })
                               }
                             >

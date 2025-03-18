@@ -51,7 +51,7 @@ const AttestationsTable = ({ actionId }: Props) => {
     },
   });
 
-  const generateQR = async (id: number) => {
+  const generateQR = async (id: string) => {
     try {
       const qrData = `https://training-v1.vercel.app/verify/${id}`;
 
@@ -74,7 +74,7 @@ const AttestationsTable = ({ actionId }: Props) => {
         certifications.map(async (attestation: Attestation) => ({
           attestation,
           qrUrl: await generateQR(
-            attestation.participant?.participant_id as number
+            attestation.participant?.user_id as string
           ),
         }))
       );
@@ -140,10 +140,10 @@ const AttestationsTable = ({ actionId }: Props) => {
               </TableHeader>
               <TableBody>
                 {certifications.map((c: Attestation) => (
-                  <TableRow key={c.participant?.participant_id}>
-                    <TableCell>{c.participant?.nom}</TableCell>
-                    <TableCell>{c.participant?.prenom}</TableCell>
-                    <TableCell>{c.participant?.telephone}</TableCell>
+                  <TableRow key={c.participant?.user_id}>
+                    <TableCell>{c.participant?.user.nom}</TableCell>
+                    <TableCell>{c.participant?.user.prenom}</TableCell>
+                    <TableCell>{c.participant?.user.telephone}</TableCell>
                     <TableCell>{c.participant?.entreprise}</TableCell>
                     <TableCell className="text-right">
                       <TooltipProvider>

@@ -27,7 +27,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
 
   const uploadMutation = useMutation({
     mutationFn: async (data: CreateParticipant[]) => {
-      const response = await axiosInstance.post("/participants", data);
+      const response = await axiosInstance.post(`/participant/create`, data);
       return response.data;
     },
     onSuccess: () => {
@@ -84,6 +84,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
             telephone: String(row["Telephone"] || "").trim(),
             email: String(row["Email"] || "").trim(),
             poste: String(row["Poste"] || "").trim(),
+            role_id: 4
           }));
 
           if (processedData.length === 0) {
@@ -96,9 +97,9 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
           if (insertedPaticipants) {
             console.log(insertedPaticipants);
             const actionParticipants =
-              insertedPaticipants.insertedParticipants.map(
+              insertedPaticipants.successful.map(
                 (part: Participant) => ({
-                  participant_id: part.participant_id,
+                  participant_id: part.user_id,
                   statut: "Confirmé",
                 })
               );

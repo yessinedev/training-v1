@@ -19,14 +19,14 @@ export const PreviewModal: React.FC<PreviewModalProps> = ({
     attestation,
   onClose,
 }) => {
-  const qrUrl = useQR(attestation?.participant?.participant_id as number);
+  const qrUrl = useQR(attestation?.participant?.user_id as string);
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[800px] h-[90vh] bg-white flex flex-col gap-2 justify-start items-center">
       <DialogHeader>
           <DialogTitle>
-            Attestation de : {attestation?.participant?.nom} {attestation?.participant?.prenom}
+            Attestation de : {attestation?.participant?.user.nom} {attestation?.participant?.user.prenom}
           </DialogTitle>
         </DialogHeader>
         {qrUrl && (

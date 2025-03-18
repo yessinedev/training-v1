@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 
 import QRCode from "qrcode";
 
-export const useQR = (id: number) => {
+export const useQR = (id: string) => {
   const [qrUrl, setQrUrl] = useState<string>("");
 
   useEffect(() => {
-    const generateQR = async (id: number) => {
+    const generateQR = async (id: string) => {
       try {
         const qrData = `https://training-center25.netlify.app/verify/${id}`;
 

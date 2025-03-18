@@ -87,7 +87,7 @@ const AttestationPDF = ({
             présente que :
           </Text>
           <Text style={[styles.text, styles.bold]}>
-            {attestation.participant?.nom} {attestation.participant?.prenom} (
+            {attestation.participant?.user.nom} {attestation.participant?.user.prenom} (
             {attestation.participant?.entreprise})
           </Text>
           <Text style={styles.text}>a participé au séminaire</Text>
