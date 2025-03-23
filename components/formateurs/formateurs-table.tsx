@@ -101,7 +101,6 @@ const FormateursTable = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Documents</TableHead>
@@ -111,7 +110,6 @@ const FormateursTable = () => {
           <TableBody>
             {formateurs?.map((formateur: Formateur) => (
               <TableRow key={formateur.user_id}>
-                <TableCell>{formateur.user_id}</TableCell>
                 <TableCell>
                   {formateur.user.prenom} {formateur.user.nom}
                 </TableCell>

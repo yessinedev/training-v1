@@ -31,8 +31,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
-import { Role, User } from "@/types";
+import { CreateParticipant, Role, User } from "@/types";
 import { useAuth } from "@clerk/nextjs";
+import FileInput from "../FileInput";
+import { createOrUpdateFormateur } from "@/services/formateurService";
+import { createOrUpdateParticipant } from "@/services/participantService";
 
 const formSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
@@ -46,6 +49,10 @@ const formSchema = z.object({
     .max(100, "First name must be less than 100 characters"),
   telephone: z.string().min(1, "Phone number is required"),
   role_id: z.string().min(1, "Role is required"),
+  cv_file: z.instanceof(File).optional(),
+  badge_file: z.instanceof(File).optional(),
+  entreprise: z.string().optional(),
+  poste: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -71,6 +78,10 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
       prenom: "",
       telephone: "",
       role_id: "",
+      cv_file: undefined,
+      badge_file: undefined,
+      entreprise: "",
+      poste: "",
     },
   });
 
@@ -114,8 +125,11 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const payload = {
-        ...data,
+      const userPayload = {
+        email: data.email,
+        nom: data.nom,
+        prenom: data.prenom,
+        telephone: data.telephone,
         role_id: parseInt(data.role_id),
       };
 
@@ -126,7 +140,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
           `/users`,
           {
             user_id: user.user_id,
-            ...payload,
+            ...userPayload,
           },
           {
             headers: {
@@ -138,13 +152,33 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
         return response.data;
       } else {
         const token = await getToken({ template: "my-jwt-template" });
-        const response = await axiosInstance.post("/user/create", payload, {
+        const response = await axiosInstance.post("/user/create", userPayload, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
-        return response.data;
+        if (response.status === 201) {
+          if (data.role_id === "3") {
+            const formData = new FormData();
+            formData.append("user_id", response.data.user_id);
+            formData.append("files", data.cv_file as File);
+            formData.append("files", data.badge_file as File);
+
+            await createOrUpdateFormateur(token as string, formData, false);
+          } else if (data.role_id === "4") {
+            const participantPayload: CreateParticipant = {
+              user_id: response.data.user_id,
+              entreprise: data.entreprise as string,
+              poste: data.poste as string,
+            };
+            await createOrUpdateParticipant(
+              token as string,
+              participantPayload,
+              false
+            );
+          }
+        }
       }
     },
     onSuccess: () => {
@@ -269,6 +303,85 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
                 </FormItem>
               )}
             />
+            {form.watch("role_id") === "3" && (
+              <div className="flex flex-col gap-3">
+                <FormField
+                  control={form.control}
+                  name="cv_file"
+                  render={({ field: { onChange, ...field } }) => (
+                    <FormItem>
+                      <FormControl>
+                        <FileInput
+                          accept=".pdf,.doc,.docx"
+                          label="CV Document"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              onChange(file);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="badge_file"
+                  render={({ field: { onChange, ...field } }) => (
+                    <FormItem>
+                      <FormControl>
+                        <FileInput
+                          accept="image/*"
+                          label="Badge Photo"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              onChange(file);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+            {form.watch("role_id") === "4" && (
+              <div>
+                <FormField
+                  control={form.control}
+                  name="entreprise"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Entreprise</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nom d'entreprise" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="poste"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Poste</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Poste actuelle dans l'entreprise"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
             <div className="flex justify-end gap-4 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel

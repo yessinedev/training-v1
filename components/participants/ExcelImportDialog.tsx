@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { FileSpreadsheet} from "lucide-react";
 import { QueryClient, useMutation } from "@tanstack/react-query";
-import { CreateParticipant, ExcelParticipant, Participant } from "@/types";
+import { CreateUserParticipant, ExcelParticipant, Participant } from "@/types";
 import * as XLSX from "xlsx";
 import axiosInstance from "@/lib/axios";
 
@@ -26,7 +26,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const uploadMutation = useMutation({
-    mutationFn: async (data: CreateParticipant[]) => {
+    mutationFn: async (data: CreateUserParticipant[]) => {
       const response = await axiosInstance.post(`/participant/create`, data);
       return response.data;
     },

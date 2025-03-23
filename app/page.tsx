@@ -12,7 +12,6 @@ import {
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Hero Section */}
       <header className="bg-background border-b">
         <div className="container mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center gap-2">

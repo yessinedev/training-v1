@@ -1,4 +1,19 @@
 import axiosInstance from "@/lib/axios";
+import { CreateParticipant} from "@/types";
+
+export const createOrUpdateParticipant = async(token: string, data: CreateParticipant, isEditiong: boolean ) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  }
+
+  if (isEditiong) {
+    await axiosInstance.put("/participants", data, config);
+  } else {
+    await axiosInstance.post("/participant/create", data, config);
+  }
+}
 
 export const fetchParticipants = async (token: string): Promise<any> => {
   const config = {

@@ -9,65 +9,144 @@ import {
   UserPlus,
   BookOpen,
   Home,
-  ChevronDown,
-  ChevronUp,
+  Calculator,
+  FileText,
+  Wallet,
+  LineChart,
+  DollarSign,
+  Calendar,
+  ClipboardList,
+  Folder,
+  LayoutList,
+  Tag,
+  File,
+  Euro,
+  BarChart,
+  TrendingUp,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { title } from "process";
 
 const navItems = [
   {
-    title: "Accueil",
+    title: "Tableau de bord",
     href: "/dashboard",
     icon: Home,
   },
   {
-    title: "Gestion d'accès",
+    title: "Gestion des accès",
     icon: Users,
     children: [
       {
-        title: "Gestion d'utilisateurs",
+        title: "Utilisateurs",
         href: "/dashboard/users",
-        icon: Users,
+        icon: UserPlus,
       },
       {
-        title: "Gestion des roles",
+        title: "Rôles et permissions",
         href: "/dashboard/roles",
         icon: UserCog,
       },
       {
-        title: "Gestion des formateurs",
+        title: "Formateurs",
         href: "/dashboard/formateurs",
         icon: GraduationCap,
       },
       {
-        title: "Gestion des participants",
+        title: "Participants",
         href: "/dashboard/participants",
-        icon: UserPlus,
+        icon: Users,
       },
     ],
   },
   {
-    title: "Formations",
+    title: "Gestion des formations",
     icon: BookOpen,
     children: [
       {
-        title: "Catalog de Formations",
+        title: "Catalogue de formations",
         href: "/dashboard/formations",
-        icon: BookOpen
+        icon: BookOpen,
       },
+      {
+        title: "Sessions planifiées",
+        href: "/dashboard/sessions",
+        icon: Calendar,
+      },
+      {
+        title: "Inscriptions",
+        href: "/dashboard/inscriptions",
+        icon: ClipboardList,
+      },
+    ],
+  },
+  {
+    title: "Contenu pédagogique",
+    icon: Folder,
+    children: [
       {
         title: "Domaines",
         href: "/dashboard/domaines",
-        icon: BookOpen
+        icon: Folder,
       },
       {
-        title: "Thémes",
+        title: "Thèmes",
         href: "/dashboard/themes",
-        icon: BookOpen
-      }
-    ]
+        icon: Tag,
+      },
+    ],
+  },
+  {
+    title: "Gestion financière",
+    icon: Euro,
+    children: [
+      {
+        title: "Devis",
+        href: "/dashboard/finance/devis",
+        icon: FileText,
+      },
+      {
+        title: "Facturation",
+        href: "/dashboard/finance/factures",
+        icon: File,
+      },
+      {
+        title: "Coûts et budgets",
+        href: "/dashboard/finance/couts",
+        icon: Calculator,
+      },
+      {
+        title: "Suivi des paiements",
+        href: "/dashboard/finance/paiements",
+        icon: Wallet,
+      },
+      {
+        title: "Rapports financiers",
+        href: "/dashboard/finance/rapports",
+        icon: LineChart,
+      },
+    ],
+  },
+  {
+    title: "Analyses et rapports",
+    icon: BarChart,
+    children: [
+      {
+        title: "Participation",
+        href: "/dashboard/rapports/participation",
+        icon: Users,
+      },
+      {
+        title: "Progression des formations",
+        href: "/dashboard/rapports/progression",
+        icon: TrendingUp,
+      },
+    ],
+  },
+  {
+    title: "Paramètres",
+    icon: Settings,
+    href: "/dashboard/parametres",
   },
 ];
 
@@ -75,9 +154,9 @@ export function DashboardNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="grid gap-1 w-[200px]">
+    <nav className="grid gap-1 w-[250px]">
       {navItems.map((item) => (
-        <div key={item.title} className="w-full">
+        <div key={item.title} className="w-full overflow-hidden">
           <Button
             variant={pathname === item.href ? "secondary" : "ghost"}
             className="justify-start w-full"

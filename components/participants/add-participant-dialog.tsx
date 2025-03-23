@@ -124,10 +124,10 @@ export default function AddParticipantDialog({
                     <SelectContent>
                       {participants?.map((participant: Participant) => (
                         <SelectItem
-                          key={participant.participant_id}
-                          value={participant.participant_id.toString()}
+                          key={participant.user_id}
+                          value={participant.user_id}
                         >
-                          {participant.prenom} {participant.nom} - {participant.entreprise}
+                          {participant.user.prenom} {participant.user.nom} - {participant.entreprise}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -40,7 +40,11 @@ export type Theme = {
   domaine_id: number;
   domaine?: Domain;
 };
-
+export type CreateParticipant = {
+  user_id: string;
+  entreprise: string;
+  poste: string;
+}
 export type Participant = {
   user_id: string;
   entreprise?: string;
@@ -50,7 +54,7 @@ export type Participant = {
   attestations?: Attestation[];
 };
 
-export type CreateParticipant = {
+export type CreateUserParticipant = {
   nom: string;
   prenom: string;
   email?: string;
