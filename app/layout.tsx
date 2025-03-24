@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "@/providers/providers";
 import { ClerkProvider } from "@clerk/nextjs";
 
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -11,18 +12,19 @@ export const metadata: Metadata = {
   description: "Training Center Management",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
     <ClerkProvider>
-    <html lang="en">
-      <body className={inter.className}>
-        <Providers>{children}</Providers>
-      </body>
-    </html>
+      <html lang="en">
+        <body className={inter.className}>
+          <Providers>{children}</Providers>
+        </body>
+      </html>
     </ClerkProvider>
   );
 }
