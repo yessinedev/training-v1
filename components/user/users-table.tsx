@@ -23,6 +23,8 @@ import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { useAuthMutation } from "@/hooks/useAuthMutation";
 import { User } from "@/types";
 import { deleteUser, fetchUsers } from "@/services/userService";
+import { DataTable } from "../data-table/data-table";
+import { columns } from "../data-table/columns";
 
 const UsersTable = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -75,7 +77,7 @@ const UsersTable = () => {
     <>
       <Button onClick={() => handleOpenDialog()}>
         <Plus className="mr-2 h-4 w-4" />
-        Add User
+        Ajouter un utilisateur
       </Button>
       {isDialogOpen && (
         <UserForm
@@ -86,69 +88,8 @@ const UsersTable = () => {
         />
       )}
 
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Email</TableHead>
-              <TableHead>Nom</TableHead>
-              <TableHead>Prénom</TableHead>
-              <TableHead>Téléphone</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users?.map((user: User) => (
-              <TableRow key={user.user_id}>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.nom}</TableCell>
-                <TableCell>{user.prenom}</TableCell>
-                <TableCell>{user.telephone}</TableCell>
-                <TableCell>{user.role.role_name}</TableCell>
-                <TableCell className="text-right">
-                  <TooltipProvider>
-                    <div className="flex items-center justify-end gap-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => handleOpenDialog(user)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit user</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Edit user</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive"
-                            onClick={() => handleDeleteUser(user.user_id)}
-                            disabled={deleteUserMutation.isPending}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete user</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete user</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </TooltipProvider>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="">
+        <DataTable data={users} columns={columns} />
       </div>
     </>
   );
