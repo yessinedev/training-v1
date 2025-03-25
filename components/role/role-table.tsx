@@ -1,28 +1,47 @@
 "use client";
 import React, { useState } from "react";
-import { Trash2, Plus, Pencil } from "lucide-react";
+import { Plus, Edit, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Role } from "@/types";
 import axiosInstance from "@/lib/axios";
 import RoleForm from "../user/AddRoleForm";
 import { useAuth } from "@clerk/nextjs";
+import { createActionColumn, createGenericColumns } from "../dt/columns";
+import { DataTable } from "../dt/data-table";
+import { Badge } from "../ui/badge";
+
+const columns = [
+  ...createGenericColumns([
+    {
+      accessorKey: "role_name",
+      headerLabel: "Nom du rôle",
+      isSortable: true,
+    },
+    {
+      accessorKey: "users",
+      headerLabel: "Nombre d'utilisateurs",
+      cellRenderer: (role: Role) => {
+        return <Badge variant={"secondary"}>{role.users.length}</Badge>;
+      },
+    },
+  ]),
+  createActionColumn<Role>([
+    {
+      label: "Edit",
+      icon: <Edit className="h-4 w-4" />,
+      onClick: (data) => console.log("Edit", data),
+      variant: "outline",
+    },
+    {
+      label: "Delete",
+      icon: <Trash className="h-4 w-4" />,
+      onClick: (data) => console.log("Delete", data),
+      variant: "destructive",
+    },
+  ]),
+];
 
 const RolesTable = () => {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
@@ -49,7 +68,7 @@ const RolesTable = () => {
   } = useQuery({
     queryKey: ["roles"],
     queryFn: async () => {
-      const token = await getToken({ template: 'my-jwt-template' });
+      const token = await getToken({ template: "my-jwt-template" });
       const response = await axiosInstance.get("/roles", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,7 +81,7 @@ const RolesTable = () => {
 
   const deleteRoleMutation = useMutation({
     mutationFn: async (roleId: number) => {
-      const token = await getToken({ template: 'my-jwt-template' });
+      const token = await getToken({ template: "my-jwt-template" });
       await axiosInstance.delete(`/roles?id=${roleId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -98,65 +117,7 @@ const RolesTable = () => {
         onOpenChange={setIsDialogOpen}
       />
 
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Users Count</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {roles?.map((role: Role) => (
-              <TableRow key={role.role_id}>
-                <TableCell>{role.role_id}</TableCell>
-                <TableCell>{role.role_name}</TableCell>
-                <TableCell>{role.users.length}</TableCell>
-                <TableCell className="text-right">
-                  <TooltipProvider>
-                    <div className="flex items-center justify-end gap-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-primary"
-                            onClick={() => handleOpenDialog(role)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit Role</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Edit role</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive"
-                            onClick={() => handleDeleteRole(role.role_id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete role</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete role</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </TooltipProvider>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable columns={columns} data={roles} searchColumn="role_name" />
     </>
   );
 };
