@@ -11,7 +11,7 @@ export default clerkMiddleware(async (auth, request) => {
 
   if (pathname === "/") {
     const redirectMap: Record<string, string> = {
-      ADMIN: "/dashboard",
+      ADMIN: "/admin-dashboard",
       GESTIONNAIRE: "/gestionnaire-dashboard",
       FORMATEUR: "/formateurs-dashboard",
     };

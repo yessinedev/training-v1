@@ -14,7 +14,7 @@ export default function DashboardRedirect() {
       const role = (user.publicMetadata as { role: { role_name: string, role_id: number } }).role.role_name;
 
       if (role === "ADMIN") {
-        router.replace("/dashboard");
+        router.replace("/admin-dashboard");
       } else if (role === "GESTIONNAIRE") {
         router.replace("/gestionnaire-dashboard");
       } else {
