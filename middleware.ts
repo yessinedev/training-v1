@@ -1,5 +1,4 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
@@ -16,12 +15,15 @@ export default clerkMiddleware(async (auth, request) => {
       GESTIONNAIRE: "/gestionnaire-dashboard",
       FORMATEUR: "/formateurs-dashboard",
     };
-
+    if (!role) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
     return NextResponse.redirect(
-      new URL(redirectMap[role ?? ""] || "/dashboard", request.url)
+      new URL(redirectMap[role] || "/dashboard", request.url)
     );
   }
   if (pathname.startsWith("/dashboard") && role !== "ADMIN") {
+    console.log("role if dashboard", role);
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
   if (

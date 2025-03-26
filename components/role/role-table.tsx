@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { Plus, Edit, Trash } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,40 +8,8 @@ import { Role } from "@/types";
 import axiosInstance from "@/lib/axios";
 import RoleForm from "../user/AddRoleForm";
 import { useAuth } from "@clerk/nextjs";
-import { createActionColumn, createGenericColumns } from "../dt/columns";
 import { DataTable } from "../dt/data-table";
-import { Badge } from "../ui/badge";
-
-const columns = [
-  ...createGenericColumns([
-    {
-      accessorKey: "role_name",
-      headerLabel: "Nom du rôle",
-      isSortable: true,
-    },
-    {
-      accessorKey: "users",
-      headerLabel: "Nombre d'utilisateurs",
-      cellRenderer: (role: Role) => {
-        return <Badge variant={"secondary"}>{role.users.length}</Badge>;
-      },
-    },
-  ]),
-  createActionColumn<Role>([
-    {
-      label: "Edit",
-      icon: <Edit className="h-4 w-4" />,
-      onClick: (data) => console.log("Edit", data),
-      variant: "outline",
-    },
-    {
-      label: "Delete",
-      icon: <Trash className="h-4 w-4" />,
-      onClick: (data) => console.log("Delete", data),
-      variant: "destructive",
-    },
-  ]),
-];
+import { getRolesColumns } from "./role-columns";
 
 const RolesTable = () => {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
@@ -99,6 +67,11 @@ const RolesTable = () => {
       deleteRoleMutation.mutate(roleId);
     }
   };
+
+  const columns = useMemo(
+    () => getRolesColumns((role) => handleOpenDialog(role), handleDeleteRole),
+    []
+  );
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching roles</p>;

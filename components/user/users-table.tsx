@@ -1,21 +1,7 @@
 "use client";
-import React, { useState } from "react";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import UserForm from "./AddUserForm";
@@ -23,8 +9,8 @@ import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { useAuthMutation } from "@/hooks/useAuthMutation";
 import { User } from "@/types";
 import { deleteUser, fetchUsers } from "@/services/userService";
-import { DataTable } from "../data-table/data-table";
-import { columns } from "../data-table/columns";
+import { getUserColumns } from "./user-columns";
+import { DataTable } from "../dt/data-table";
 
 const UsersTable = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -70,6 +56,12 @@ const UsersTable = () => {
     }
   };
 
+  const columns = useMemo(
+      () => getUserColumns((user) => handleOpenDialog(user), handleDeleteUser),
+      []
+    );
+  
+
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching users</p>;
 
@@ -89,7 +81,7 @@ const UsersTable = () => {
       )}
 
       <div className="">
-        <DataTable data={users} columns={columns} />
+        <DataTable data={users} columns={columns} searchColumn="email" />
       </div>
     </>
   );
