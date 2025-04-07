@@ -204,17 +204,17 @@ const FormationsTable = () => {
                                             asChild
                                           >
                                             <Link
-                                              href={`/dashboard/formations/${formation.action_id}`}
+                                              href={`/admin-dashboard/sessions/${formation.action_id}`}
                                             >
                                               <ArrowRight className="h-4 w-4" />
                                               <span className="sr-only">
-                                                Manage session
+                                                Gérer la session
                                               </span>
                                             </Link>
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          <p>Manage session</p>
+                                          <p> Gérer la session</p>
                                         </TooltipContent>
                                       </Tooltip>
                                       <Tooltip>
@@ -229,12 +229,12 @@ const FormationsTable = () => {
                                           >
                                             <Pencil className="h-4 w-4" />
                                             <span className="sr-only">
-                                              Edit formation
+                                              Modifier la session
                                             </span>
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          <p>Edit formation</p>
+                                          <p>Modifier la session</p>
                                         </TooltipContent>
                                       </Tooltip>
                                       <Tooltip>
@@ -254,12 +254,12 @@ const FormationsTable = () => {
                                           >
                                             <Trash2 className="h-4 w-4" />
                                             <span className="sr-only">
-                                              Delete formation
+                                              Supprimer la session
                                             </span>
                                           </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          <p>Delete formation</p>
+                                          <p>Supprimer la session </p>
                                         </TooltipContent>
                                       </Tooltip>
                                     </div>

@@ -17,12 +17,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
+import { useQueryClient } from "@tanstack/react-query";
 import { Participant } from "@/types";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ParticipateManyDialog } from "@/components/participants/ParticipateManyDialog";
 import { useAuthQuery } from "@/hooks/useAuthQuery";
 import {
@@ -30,6 +29,8 @@ import {
   fetchParticipants,
 } from "@/services/participantService";
 import { useAuthMutation } from "@/hooks/useAuthMutation";
+import { getParticipantColumns } from "@/components/participants/participant-columns";
+import { DataTable } from "@/components/dt/data-table";
 
 export default function ParticipantsPage() {
   const queryClient = useQueryClient();
@@ -74,6 +75,11 @@ export default function ParticipantsPage() {
     }
   };
 
+  const columns = useMemo(
+        () => getParticipantColumns(() => handleDeleteParticipant),
+        []
+      );
+
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching participants</p>;
 
@@ -87,103 +93,7 @@ export default function ParticipantsPage() {
           </Button>
         )}
       </div>
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Nom</TableHead>
-              <TableHead>Prénom</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Entreprise</TableHead>
-              <TableHead>Poste</TableHead>
-              <TableHead>Formations</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {participants?.map((participant: Participant) => (
-              <TableRow key={participant.user_id}>
-                <TableCell>
-                  <Checkbox
-                    checked={checkedParticipants.includes(participant.user_id)}
-                    onCheckedChange={(checked) =>
-                      handleCheckboxChange(
-                        participant.user_id,
-                        checked as boolean
-                      )
-                    }
-                  />
-                </TableCell>
-                <TableCell>{participant.user.nom}</TableCell>
-                <TableCell>{participant.user.prenom}</TableCell>
-                <TableCell>{participant.user.email}</TableCell>
-                <TableCell>{participant.entreprise}</TableCell>
-                <TableCell>{participant.poste}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {participant.actions?.map((pa) => (
-                      <TooltipProvider
-                        key={`${pa.action_id}-${pa.participant_id}`}
-                      >
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center gap-1">
-                              <span className="text-sm">
-                                {pa.action.type_action}
-                              </span>
-                              {participant.attestations?.some(
-                                (att) => att.action_id === pa.action_id
-                              ) && <Award className="h-4 w-4 text-green-500" />}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {pa.action.type_action} - {pa.action.lieu}
-                              <br />
-                              {format(
-                                new Date(pa.action.date_debut),
-                                "dd/MM/yyyy"
-                              )}
-                              <br />
-                              Status: {pa.statut}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <TooltipProvider>
-                    <div className="flex items-center justify-end gap-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive"
-                            onClick={() =>
-                              handleDeleteParticipant(participant.user_id)
-                            }
-                            disabled={deleteParticipantMutation.isPending}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete participant</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete participant</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </TooltipProvider>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+        <DataTable data={participants} columns={columns} searchColumn="email" />
       {isDialogOpen && (
         <ParticipateManyDialog
           participantsIds={checkedParticipants}

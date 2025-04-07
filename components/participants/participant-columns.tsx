@@ -1,14 +1,14 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "../ui/badge";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Eye, Trash } from "lucide-react";
 import { createActionColumn, createGenericColumns } from "../dt/columns";
-import { User } from "@/types";
+import { Participant, User } from "@/types";
 import { Checkbox } from "../ui/checkbox";
 
-export const getUserColumns = (
-  handleEdit: (user: User) => void,
-  handleDelete: (userId: string) => void
-): ColumnDef<User>[] => [
+export const getParticipantColumns = (
+  handleDelete: (userId: string) => void,
+  handleEdit?: (participant: Participant) => void
+): ColumnDef<Participant>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -31,51 +31,53 @@ export const getUserColumns = (
     enableSorting: false,
     enableHiding: false,
   },
-  ...createGenericColumns<User>([
+  ...createGenericColumns<Participant>([
     {
       accessorKey: "nom",
       headerLabel: "Nom",
       isSortable: true,
+      accessorFn: (row) => row.user.nom,
+      cellRenderer: (row) => row.user.nom,
     },
     {
       accessorKey: "prenom",
       headerLabel: "Prenom",
       isSortable: true,
+      accessorFn: (row) => row.user.prenom,
+      cellRenderer: (row) => row.user.prenom,
     },
     {
       accessorKey: "email",
       headerLabel: "Email",
+      accessorFn: (row) => row.user.email,
+      cellRenderer: (row) => row.user.email,
     },
     {
       accessorKey: "telephone",
       headerLabel: "Telephone",
+      accessorFn: (row) => row.user.telephone,
+      cellRenderer: (row) => row.user.telephone,
     },
     {
-      accessorKey: "role",
-      headerLabel: "Role",
-      cellRenderer: (user: User) => (
-        <Badge variant={"secondary"}>{user.role.role_name}</Badge>
-      ),
+      accessorKey: "entreprise",
+      headerLabel: "Entreprise",
     },
     {
-      accessorKey: "statut",
-      headerLabel: "Statut",
-      cellRenderer: (user: User) => (
-        <Badge
-          className={`${
-            user.user_id.startsWith("inv") ? "bg-violet-500" : "bg-green-500"
-          }`}
-        >
-          {user.user_id.startsWith("inv") ? "Invité" : "Vérifié"}
-        </Badge>
-      ),
+      accessorKey: "poste",
+      headerLabel: "Poste",
     },
   ]),
-  createActionColumn<User>([
+  createActionColumn<Participant>([
+    {
+      label: "Profile",
+      icon: <Eye className="h-4 w-4" />,
+      onClick: (data) => handleEdit && handleEdit(data),
+      variant: "default",
+    },
     {
       label: "Edit",
       icon: <Edit className="h-4 w-4" />,
-      onClick: (data) => handleEdit(data),
+      onClick: (data) => handleEdit && handleEdit(data),
       variant: "outline",
     },
     {

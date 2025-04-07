@@ -24,8 +24,7 @@ export type FormUser = Omit<
 
 export type Formateur = {
   user_id: string;
-  cv_path?: string;
-  badge_path?: string;
+  files: File[];
   user: User;
 };
 
@@ -118,3 +117,26 @@ export type FormFormation = Omit<Formation, "action_id" | "formateurs"> & {
   action_id?: number;
   formateur_id?: number;
 };
+
+
+export type SeanceType = 'présentiel' | 'distanciel' | 'hybride';
+
+export type Seance = {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  type: SeanceType;
+  description?: string;
+}
+
+export type File = {
+  file_id: number;
+  file_path: string;
+  type: string;
+  formateur_id?: string;
+  action_id?: number;
+
+  formateur?: Formateur;
+  action?: Formation
+}

@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 export const createGenericColumns = <T extends unknown>(
   columnsConfig: Array<{
     accessorKey: string;
+    accessorFn?: (row: T) => string | number;
     headerLabel: string;
     isSortable?: boolean;
     cellRenderer?: (row: T) => React.ReactNode;
@@ -13,6 +14,7 @@ export const createGenericColumns = <T extends unknown>(
 ): ColumnDef<T>[] => {
   return columnsConfig.map((config) => ({
     accessorKey: config.accessorKey,
+    accessorFn: config.accessorFn,
     header: ({ column }) => config.isSortable ? (
       <Button
         variant="ghost"
