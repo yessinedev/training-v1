@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Pencil, Trash2, Plus, FileText, Badge } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,8 @@ import axiosInstance from "@/lib/axios";
 import { Formateur } from "@/types";
 import { toast } from "sonner";
 import FormateurForm from "./formateur-form";
+import { DataTable } from "../dt/data-table";
+import { getFormateurColumns } from "./formateur-columns";
 
 const FormateursTable = () => {
   const [selectedFormateur, setSelectedFormateur] = useState<Formateur | null>(
@@ -77,6 +79,11 @@ const FormateursTable = () => {
     }
   };
 
+  const columns = useMemo(
+    () => getFormateurColumns(() => handleDeleteFormateur, handleOpenDialog),
+    []
+  );
+
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching formateurs</p>;
 
@@ -97,111 +104,7 @@ const FormateursTable = () => {
         />
       )}
 
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Documents</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {formateurs?.map((formateur: Formateur) => (
-              <TableRow key={formateur.user_id}>
-                <TableCell>
-                  {formateur.user.prenom} {formateur.user.nom}
-                </TableCell>
-                <TableCell>{formateur.user.email}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {formateur.cv_path && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() =>
-                                window.open(formateur.cv_path, "_blank")
-                              }
-                            >
-                              <FileText className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>View CV</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                    {formateur.badge_path && (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() =>
-                                window.open(formateur.badge_path, "_blank")
-                              }
-                            >
-                              <Badge className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>View Badge</TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <TooltipProvider>
-                    <div className="flex items-center justify-end gap-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => handleOpenDialog(formateur)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit formateur</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Edit formateur</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive"
-                            onClick={() =>
-                              handleDeleteFormateur(formateur.user_id)
-                            }
-                            disabled={deleteFormateurMutation.isPending}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete formateur</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete formateur</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </TooltipProvider>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable data={formateurs} columns={columns} />
     </>
   );
 };

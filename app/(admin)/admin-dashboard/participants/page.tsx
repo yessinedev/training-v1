@@ -76,9 +76,9 @@ export default function ParticipantsPage() {
   };
 
   const columns = useMemo(
-        () => getParticipantColumns(() => handleDeleteParticipant),
-        []
-      );
+    () => getParticipantColumns(() => handleDeleteParticipant),
+    []
+  );
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching participants</p>;
@@ -93,7 +93,7 @@ export default function ParticipantsPage() {
           </Button>
         )}
       </div>
-        <DataTable data={participants} columns={columns} searchColumn="email" />
+      <DataTable data={participants} columns={columns} searchColumn="email" />
       {isDialogOpen && (
         <ParticipateManyDialog
           participantsIds={checkedParticipants}
