@@ -4,28 +4,13 @@ import * as React from "react";
 import {
   BarChart,
   BookOpen,
-  Bot,
-  Calculator,
-  Euro,
   EuroIcon,
-  FileText,
-  Folder,
-  Frame,
-  GraduationCap,
   Home,
-  LineChart,
-  Map,
-  PieChart,
   Settings2,
-  SquareTerminal,
-  UserCog,
-  UserPlus,
   Users,
-  Wallet,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
@@ -80,30 +65,15 @@ const data = {
       items: [
         {
           title: "Catalogue de formations",
-          url: "/admin-dashboard/formations",
+          url: "/admin-dashboard/catalogue",
         },
         {
           title: "Sessions planifiées",
           url: "/admin-dashboard/sessions",
         },
         {
-          title: "Inscriptions",
-          url: "/admin-dashboard/inscriptions",
-        },
-      ],
-    },
-    {
-      title: "Contenu pédagogique",
-      url: "#",
-      icon: Folder,
-      items: [
-        {
-          title: "Domaines",
-          url: "/admin-dashboard/domaines",
-        },
-        {
-          title: "Thèmes",
-          url: "/admin-dashboard/themes",
+          title: "Calendrier des seances",
+          url: "/admin-dashboard/calendrier",
         },
       ],
     },
@@ -114,23 +84,23 @@ const data = {
       items: [
         {
           title: "Devis",
-          url: "/dashboard/finance/devis",
+          url: "/admin-dashboard/devis",
         },
         {
           title: "Facturation",
-          url: "/dashboard/finance/factures",
+          url: "/admin-dashboard/factures",
         },
         {
           title: "Coûts et budgets",
-          url: "/dashboard/finance/couts",
+          url: "/finance/couts",
         },
         {
           title: "Suivi des paiements",
-          url: "/dashboard/finance/paiements",
+          url: "/finance/paiements",
         },
         {
           title: "Rapports financiers",
-          url: "/dashboard/finance/rapports",
+          url: "/finance/rapports",
         },
       ],
     },
