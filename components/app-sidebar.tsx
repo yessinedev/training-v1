@@ -142,15 +142,14 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
-  console.log("user", user);
 
   const role = (
     user?.publicMetadata as { role: { role_name: string; role_id: number } }
   )?.role.role_name;
-console.log("role", role);
+
   const filterNavItems = (items: typeof data.navMain) => {
     if (!role) return [];
-
+    
     return items.filter((item) => {
       // Always show dashboard
       if (item.url === "/dashboard") return true;
