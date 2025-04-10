@@ -1,26 +1,8 @@
 "use client";
-import { format } from "date-fns";
-import { Trash2, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useQueryClient } from "@tanstack/react-query";
-import { Participant } from "@/types";
 import { toast } from "sonner";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useMemo, useState } from "react";
 import { ParticipateManyDialog } from "@/components/participants/ParticipateManyDialog";
 import { useAuthQuery } from "@/hooks/useAuthQuery";
@@ -31,20 +13,12 @@ import {
 import { useAuthMutation } from "@/hooks/useAuthMutation";
 import { getParticipantColumns } from "@/components/participants/participant-columns";
 import { DataTable } from "@/components/dt/data-table";
+import { ParticipantOverviewCards } from "@/components/participants/participants-overview-cards";
 
 export default function ParticipantsPage() {
   const queryClient = useQueryClient();
   const [checkedParticipants, setCheckedParticipants] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const handleCheckboxChange = (participantId: string, checked: boolean) => {
-    console.log(participantId, checked);
-    setCheckedParticipants((prev) =>
-      checked
-        ? [...prev, participantId]
-        : prev.filter((id) => id !== participantId)
-    );
-  };
 
   const {
     data: participants,
@@ -85,8 +59,9 @@ export default function ParticipantsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between px-3">
-        <h2 className="text-2xl font-bold">Participants</h2>
+      <div className="flex flex-row items-center justify-start space-y-4 md:flex-col md:items-start md:space-y-1">
+        <ParticipantOverviewCards participants={participants} />
+        <h2 className="text-2xl font-bold">Gestion des participants</h2>
         {checkedParticipants.length > 0 && (
           <Button onClick={() => setIsDialogOpen(true)}>
             Ajouter Action Formation
