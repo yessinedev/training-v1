@@ -21,17 +21,27 @@ const isGestionnaireRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) return NextResponse.next();
-
   const { pathname } = request.nextUrl;
   const { sessionClaims } = await auth();
   const role = sessionClaims?.metadata.role?.role_name;
+  if (!isPublicRoute(request)) {
+    if (pathname === "/") {
+      // if (!role) {
+      //   return NextResponse.redirect(new URL("/sign-in", request.url));
+      // }
+      console.log("true")
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+    return NextResponse.next();
+  }
 
+  
   // Redirect root path to dashboard or sign-in
   if (pathname === "/") {
-    if (!role) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
-    }
+    // if (!role) {
+    //   return NextResponse.redirect(new URL("/sign-in", request.url));
+    // }
+    console.log("true")
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 

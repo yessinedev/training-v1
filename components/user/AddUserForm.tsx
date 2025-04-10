@@ -162,7 +162,6 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
             },
           }
         );
@@ -180,14 +179,15 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
           }
         );
         if (response.status === 201) {
-          if (data.role_id === "3") {
+          if (data.role_name === "FORMATEUR") {
             const formData = new FormData();
+            console.log("user_id", response.data);
             formData.append("user_id", response.data.user_id);
             formData.append("files", data.cv_file as File);
             formData.append("files", data.badge_file as File);
 
             await createOrUpdateFormateur(token as string, formData, false);
-          } else if (data.role_id === "4") {
+          } else if (data.role_name === "PARTICIPANT") {
             const participantPayload: CreateParticipant = {
               user_id: response.data.user_id,
               entreprise: data.entreprise as string,
