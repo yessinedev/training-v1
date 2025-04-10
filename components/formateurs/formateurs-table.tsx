@@ -88,13 +88,12 @@ const FormateursTable = () => {
   if (isError) return <p>Error fetching formateurs</p>;
 
   return (
-    <>
-      <div className="flex justify-end mb-4">
-        <Button onClick={() => handleOpenDialog()}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Formateur
-        </Button>
-      </div>
+    <div className="">
+      <Button onClick={() => handleOpenDialog()}>
+        <Plus className="mr-2 h-4 w-4" />
+        Ajouter Formateur
+      </Button>
+      <DataTable data={formateurs} columns={columns} />
       {isDialogOpen && (
         <FormateurForm
           formateur={selectedFormateur || undefined}
@@ -103,9 +102,7 @@ const FormateursTable = () => {
           onOpenChange={setIsDialogOpen}
         />
       )}
-
-      <DataTable data={formateurs} columns={columns} />
-    </>
+    </div>
   );
 };
 

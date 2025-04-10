@@ -49,6 +49,7 @@ const formSchema = z.object({
     .max(100, "First name must be less than 100 characters"),
   telephone: z.string().min(1, "Phone number is required"),
   role_id: z.string().min(1, "Role is required"),
+  role_name: z.string().optional(),
   cv_file: z.instanceof(File).optional(),
   badge_file: z.instanceof(File).optional(),
   entreprise: z.string().optional(),
@@ -78,36 +79,13 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
       prenom: "",
       telephone: "",
       role_id: "",
+      role_name: "",
       cv_file: undefined,
       badge_file: undefined,
       entreprise: "",
       poste: "",
     },
   });
-
-  // Reset form when user changes or dialog opens/closes
-  useEffect(() => {
-    if (isOpen) {
-      const values = user
-        ? {
-            email: user.email,
-            nom: user.nom,
-            prenom: user.prenom,
-            telephone: user.telephone,
-            role_id: user.role_id.toString(),
-          }
-        : {
-            email: "",
-            password: "",
-            nom: "",
-            prenom: "",
-            telephone: "",
-            role_id: "",
-          };
-      console.log("Resetting form with values:", values);
-      form.reset(values);
-    }
-  }, [user, isOpen, form]);
 
   const { data: roles, isLoading: rolesLoading } = useQuery({
     queryKey: ["roles"],
@@ -116,12 +94,51 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
       const response = await axiosInstance.get("/roles", {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
       });
       return response.data;
     },
   });
+
+  // Reset form when user changes or dialog opens/closes
+  useEffect(() => {
+    if (isOpen && roles) {
+      const selectedRole = roles.find(
+        (r) => r.role_id.toString() === user?.role_id.toString()
+      );
+      const values = user
+        ? {
+            email: user.email,
+            nom: user.nom,
+            prenom: user.prenom,
+            telephone: user.telephone,
+            role_id: user.role_id.toString(),
+            role_name: selectedRole?.role_name || "",
+          }
+        : {
+            email: "",
+            password: "",
+            nom: "",
+            prenom: "",
+            telephone: "",
+            role_id: "",
+            role_name: "",
+          };
+      console.log("Resetting form with values:", values);
+      form.reset(values);
+    }
+  }, [user, isOpen, form]);
+
+  const watchRoleId = form.watch("role_id");
+
+  useEffect(() => {
+    if (watchRoleId && roles) {
+      const selectedRole = roles.find(
+        (r) => r.role_id.toString() === watchRoleId
+      );
+      form.setValue("role_name", selectedRole?.role_name || "");
+    }
+  }, [watchRoleId, roles, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
@@ -152,12 +169,16 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
         return response.data;
       } else {
         const token = await getToken({ template: "my-jwt-template" });
-        const response = await axiosInstance.post("/user/create", userPayload, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await axiosInstance.post(
+          "/users/create",
+          userPayload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         if (response.status === 201) {
           if (data.role_id === "3") {
             const formData = new FormData();
@@ -215,11 +236,13 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit User" : "Add New User"}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Modifier un Utilisateur" : "Ajouter un utilisateur"}
+          </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the user information and click the update button"
-              : "Enter the user information and click the save button"}
+              ? "modifier les informations de l'utilisateur et cliquer sur le bouton de mise à jour"
+              : "ajouter un nouvel utilisateur et cliquer sur le bouton d'enregistrement"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -242,9 +265,9 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
               name="nom"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Last Name</FormLabel>
+                  <FormLabel>Nom</FormLabel>
                   <FormControl>
-                    <Input placeholder="Last Name" {...field} />
+                    <Input placeholder="Nom" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -255,9 +278,9 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
               name="prenom"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>First Name</FormLabel>
+                  <FormLabel>Prenom</FormLabel>
                   <FormControl>
-                    <Input placeholder="First Name" {...field} />
+                    <Input placeholder="Prenom" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -268,9 +291,9 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
               name="telephone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
+                  <FormLabel>Telephone</FormLabel>
                   <FormControl>
-                    <Input placeholder="Phone Number" {...field} />
+                    <Input placeholder="Numero de telephone" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -282,10 +305,21 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      const selectedRole = roles.find(
+                        (r) => r.role_id.toString() === value
+                      );
+                      form.setValue("role_name", selectedRole?.role_name || "");
+                    }}
+                    value={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
+                        <SelectValue placeholder="Selectionner un role">
+                          {form.watch("role_name") || "Selectionner un role"}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -303,7 +337,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
                 </FormItem>
               )}
             />
-            {form.watch("role_id") === "3" && (
+            {form.watch("role_name") === "FORMATEUR" && (
               <div className="flex flex-col gap-3">
                 <FormField
                   control={form.control}
@@ -349,7 +383,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
                 />
               </div>
             )}
-            {form.watch("role_id") === "4" && (
+            {form.watch("role_name") === "PARTICIPANT" && (
               <div>
                 <FormField
                   control={form.control}

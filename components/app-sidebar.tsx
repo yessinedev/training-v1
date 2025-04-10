@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import {
   BarChart,
@@ -19,8 +18,8 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useUser } from "@clerk/nextjs";
 
-// This is sample data.
 const data = {
   user: {
     name: "shadcn",
@@ -31,7 +30,7 @@ const data = {
   navMain: [
     {
       title: "Tableau de bord",
-      url: "/admin-dashboard",
+      url: "/dashboard",
       icon: Home,
       isActive: true,
     },
@@ -42,19 +41,19 @@ const data = {
       items: [
         {
           title: "Utilisateurs",
-          url: "/admin-dashboard/users",
+          url: "/dashboard/utilisateurs",
         },
         {
           title: "Rôles et permissions",
-          url: "/admin-dashboard/roles",
+          url: "/dashboard/roles",
         },
         {
           title: "Formateurs",
-          url: "/admin-dashboard/formateurs",
+          url: "/dashboard/formateurs",
         },
         {
           title: "Participants",
-          url: "/admin-dashboard/participants",
+          url: "/dashboard/participants",
         },
       ],
     },
@@ -65,15 +64,15 @@ const data = {
       items: [
         {
           title: "Catalogue de formations",
-          url: "/admin-dashboard/catalogue",
+          url: "/dashboard/catalogue",
         },
         {
           title: "Sessions planifiées",
-          url: "/admin-dashboard/sessions",
+          url: "/dashboard/sessions",
         },
         {
           title: "Calendrier des seances",
-          url: "/admin-dashboard/calendrier",
+          url: "/dashboard/calendrier",
         },
       ],
     },
@@ -84,11 +83,11 @@ const data = {
       items: [
         {
           title: "Devis",
-          url: "/admin-dashboard/devis",
+          url: "/dashboard/devis",
         },
         {
           title: "Facturation",
-          url: "/admin-dashboard/factures",
+          url: "/dashboard/factures",
         },
         {
           title: "Coûts et budgets",
@@ -126,29 +125,60 @@ const data = {
       items: [
         {
           title: "Généraux",
-          url: "/admin-dashboard/settings",
+          url: "/dashboard/settings",
         },
         {
           title: "Notifications",
-          url: "/admin-dashboard/notifications",
+          url: "/dashboard/notifications",
         },
         {
           title: "Intégrations",
-          url: "/admin-dashboard/integrations",
+          url: "/dashboard/integrations",
         },
       ],
     },
   ],
-  
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useUser();
+  console.log("user", user);
+
+  const role = (
+    user?.publicMetadata as { role: { role_name: string; role_id: number } }
+  )?.role.role_name;
+console.log("role", role);
+  const filterNavItems = (items: typeof data.navMain) => {
+    if (!role) return [];
+
+    return items.filter((item) => {
+      // Always show dashboard
+      if (item.url === "/dashboard") return true;
+
+      // Admin sees all items
+      if (role === "ADMIN") return true;
+
+      // Gestionnaire sees specific sections
+      if (role === "GESTIONNAIRE") {
+        const allowedTitles = [
+          "Gestion des formations",
+          "Analyses et rapports",
+          "Paramètres",
+        ];
+        return allowedTitles.includes(item.title);
+      }
+
+      return false;
+    });
+  };
+
+  const filteredNavMain = filterNavItems(data.navMain);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader></SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        {/* <NavProjects projects={data.projects} /> */}
+        <NavMain items={filteredNavMain} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

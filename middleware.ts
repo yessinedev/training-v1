@@ -2,43 +2,64 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+const isAdminRoute = createRouteMatcher([
+  "/dashboard/utilisateurs",
+  "/dashboard/roles",
+  "/dashboard/participants",
+  "/dashboard/catalogue",
+  "/dashboard/sessions",
+  "/dashboard/calendrier",
+  "/dashboard/devis",
+  "/dashboard/factures",
+]);
+
+const isGestionnaireRoute = createRouteMatcher([
+  "/dashboard/participants",
+  "/dashboard/catalogue",
+  "/dashboard/sessions",
+  "/dashboard/calendrier",
+]);
 
 export default clerkMiddleware(async (auth, request) => {
-  if (isPublicRoute(request)) return NextResponse.next();
+  if (!isPublicRoute(request)) return NextResponse.next();
 
   const { pathname } = request.nextUrl;
-  const role = (await auth()).sessionClaims?.metadata.role.role_name;
+  const { sessionClaims } = await auth();
+  const role = sessionClaims?.metadata.role?.role_name;
 
+  // Redirect root path to dashboard or sign-in
   if (pathname === "/") {
-    const redirectMap: Record<string, string> = {
-      ADMIN: "/admin-dashboard",
-      GESTIONNAIRE: "/gestionnaire-dashboard",
-      FORMATEUR: "/formateurs-dashboard",
-    };
     if (!role) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
-    return NextResponse.redirect(
-      new URL(redirectMap[role] || "/dashboard", request.url)
-    );
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
-  if (pathname.startsWith("/dashboard") && role !== "ADMIN") {
-    console.log("role if dashboard", role);
-    return NextResponse.redirect(new URL("/unauthorized", request.url));
+
+  // Require authentication and role for non-public routes
+  if (!role) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
   }
-  if (
-    pathname.startsWith("/gestionnaire-dashboard") &&
-    role !== "GESTIONNAIRE"
-  ) {
-    return NextResponse.redirect(new URL("/unauthorized", request.url));
+
+  // Admin route protection
+  if (isAdminRoute(request)) {
+    if (role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
   }
+
+  // Gestionnaire route protection
+  if (isGestionnaireRoute(request)) {
+    if (role !== "GESTIONNAIRE") {
+      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    }
+  }
+
+  return NextResponse.next();
 });
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
     "/(api|trpc)(.*)",
   ],
 };

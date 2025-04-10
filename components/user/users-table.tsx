@@ -57,20 +57,20 @@ const UsersTable = () => {
   };
 
   const columns = useMemo(
-      () => getUserColumns((user) => handleOpenDialog(user), handleDeleteUser),
-      []
-    );
-  
+    () => getUserColumns((user) => handleOpenDialog(user), handleDeleteUser),
+    []
+  );
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error fetching users</p>;
 
   return (
-    <>
+    <div className="">
       <Button onClick={() => handleOpenDialog()}>
         <Plus className="mr-2 h-4 w-4" />
         Ajouter un utilisateur
       </Button>
+      <DataTable data={users} columns={columns} searchColumn="email" />
       {isDialogOpen && (
         <UserForm
           user={selectedUser || undefined}
@@ -79,11 +79,7 @@ const UsersTable = () => {
           onOpenChange={setIsDialogOpen}
         />
       )}
-
-      <div className="">
-        <DataTable data={users} columns={columns} searchColumn="email" />
-      </div>
-    </>
+    </div>
   );
 };
 
