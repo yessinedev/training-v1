@@ -11,7 +11,7 @@ export const createOrUpdateParticipant = async(token: string, data: CreatePartic
   if (isEditiong) {
     await axiosInstance.put("/participants", data, config);
   } else {
-    await axiosInstance.post("/participant/create", data, config);
+    await axiosInstance.post("/participants/create", data, config);
   }
 }
 
@@ -21,7 +21,7 @@ export const fetchParticipants = async (token: string): Promise<any> => {
       Authorization: `Bearer ${token}`,
     },
   };
-  const response = await axiosInstance.get("/participant", config);
+  const response = await axiosInstance.get("/participants", config);
   return response.data;
 };
 

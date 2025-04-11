@@ -21,8 +21,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
+import { Role } from "@/types";
 
 const formSchema = z.object({
   nom: z.string().min(1, "Last name is required").max(100),
@@ -71,32 +72,45 @@ const ParticipantForm = ({
       poste: "",
     });
   }, [isOpen, form]);
-
-  const createParticipantMutation = useMutation({
-    mutationFn: async (data: FormValues) => {
-      const response = await axiosInstance.post("/participants", {
-        nom: data.nom,
-        prenom: data.prenom,
-        email: data.email || null,
-        telephone: data.telephone || null,
-        entreprise: data.entreprise || null,
-        poste: data.poste || null,
-      });
+  const { data: roles } = useQuery<Role[]>({
+    queryKey: ["roles"],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/roles");
       return response.data;
     },
   });
 
+  const createParticipantMutation = useMutation({
+    mutationFn: async (data: FormValues) => {
+      const participantRole = roles?.find((r) => r.role_name === "PARTICIPANT");
+      const userPayload = {
+        email: data.email,
+        nom: data.nom,
+        prenom: data.prenom,
+        telephone: data.telephone,
+        role_id: participantRole?.role_id,
+      };
+
+      const res = await axiosInstance.post("/users/create", userPayload);
+      if (res.status === 201) {
+        const response = await axiosInstance.post("/participants/create", {
+          user_id: res.data.user_id,
+          entreprise: data.entreprise || null,
+          poste: data.poste || null,
+        });
+        console.log("Participant created:", response.data);
+        return response.data;
+      }
+    },
+  });
+
   const assignToFormationMutation = useMutation({
-    mutationFn: async ({
-      participantId,
-    }: {
-      participantId: number;
-    }) => {
+    mutationFn: async ({ participantId }: { participantId: number }) => {
       const response = await axiosInstance.post(
         `/formations/${formationId}/participants`,
         {
           participant_id: participantId,
-          statut: 'Confirmé',
+          statut: "Confirmé",
         }
       );
       return response.data;
@@ -111,11 +125,13 @@ const ParticipantForm = ({
 
       if (formationId) {
         await assignToFormationMutation.mutateAsync({
-          participantId: newParticipant.participant_id,
+          participantId: newParticipant.user_id,
         });
       }
 
-      queryClient.invalidateQueries({ queryKey: ["formation-participants", formationId] });
+      queryClient.invalidateQueries({
+        queryKey: ["formation-participants", formationId],
+      });
       toast.success(`Participant created successfully`);
       onOpenChange(false);
     } catch (error) {
@@ -256,11 +272,15 @@ const ParticipantForm = ({
             />
 
             <div className="flex justify-end gap-4 pt-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving...": "Save"}
+                {isLoading ? "Saving..." : "Save"}
               </Button>
             </div>
           </form>

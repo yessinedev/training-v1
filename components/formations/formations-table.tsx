@@ -27,8 +27,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
+import { useQueryClient } from "@tanstack/react-query";
 import { Domain, Formation, Theme } from "@/types";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -100,7 +99,7 @@ const FormationsTable = () => {
       <div className="flex justify-end mb-4">
         <Button onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Formation
+          Ajouter une session
         </Button>
       </div>
 
@@ -204,7 +203,7 @@ const FormationsTable = () => {
                                             asChild
                                           >
                                             <Link
-                                              href={`/admin-dashboard/sessions/${formation.action_id}`}
+                                              href={`/dashboard/sessions/${formation.action_id}`}
                                             >
                                               <ArrowRight className="h-4 w-4" />
                                               <span className="sr-only">

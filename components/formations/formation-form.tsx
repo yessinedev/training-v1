@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,10 +38,12 @@ const formSchema = z.object({
   theme_id: z.string().min(1, "Theme is required"),
   date_debut: z.string().min(1, "Start date is required"),
   date_fin: z.string().min(1, "End date is required"),
-  duree_jours: z.string().min(1, "Duration in days is required"),
+  duree_jours: z.number().min(1, "Duration in days is required"),
   duree_heures: z.string().min(1, "Duration in hours is required"),
   lieu: z.string().min(1, "Location is required"),
-  nb_participants_prevu: z.string().min(1, "Number of participants is required"),
+  nb_participants_prevu: z
+    .string()
+    .min(1, "Number of participants is required"),
   user_id: z.string().optional(),
 });
 
@@ -54,7 +56,12 @@ type FormationFormProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFormProps) => {
+const FormationForm = ({
+  formation,
+  isOpen,
+  onClose,
+  onOpenChange,
+}: FormationFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const isEditing = !!formation;
   const queryClient = useQueryClient();
@@ -66,7 +73,7 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
       theme_id: "",
       date_debut: "",
       date_fin: "",
-      duree_jours: "",
+      duree_jours: 1,
       duree_heures: "",
       lieu: "",
       nb_participants_prevu: "",
@@ -74,13 +81,30 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
     },
   });
 
+  const startDate = form.watch("date_debut");
+  const endDate = form.watch("date_fin");
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      // Add +1 if you want inclusive counting (same day = 1 day)
+      form.setValue("duree_jours", diffDays + 1);
+    } else {
+      form.setValue("duree_jours", 1);
+    }
+  }, [startDate, endDate, form]);
+
   useEffect(() => {
     if (isOpen && formation) {
       form.reset({
         type_action: formation.type_action,
         theme_id: formation.theme_id.toString(),
-        date_debut: new Date(formation.date_debut).toISOString().split('T')[0],
-        date_fin: new Date(formation.date_fin).toISOString().split('T')[0],
+        date_debut: new Date(formation.date_debut).toISOString().split("T")[0],
+        date_fin: new Date(formation.date_fin).toISOString().split("T")[0],
         duree_jours: formation.duree_jours.toString(),
         duree_heures: formation.duree_heures.toString(),
         lieu: formation.lieu,
@@ -117,7 +141,7 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
         user_id: data.user_id ? data.user_id : undefined,
       };
 
-      console.log(payload)
+      console.log(payload);
 
       if (isEditing && formation) {
         const response = await axiosInstance.put(`/formations`, {
@@ -132,12 +156,21 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["formations"] });
-      toast.success(`Formation ${isEditing ? "updated" : "created"} successfully`);
+      toast.success(
+        `Formation ${isEditing ? "updated" : "created"} successfully`
+      );
       onClose();
     },
     onError: (error: Error) => {
-      toast.error(`Failed to ${isEditing ? "update" : "create"} formation: ${error.message}`);
-      console.error(`Error ${isEditing ? "updating" : "creating"} formation:`, error);
+      toast.error(
+        `Failed to ${isEditing ? "update" : "create"} formation: ${
+          error.message
+        }`
+      );
+      console.error(
+        `Error ${isEditing ? "updating" : "creating"} formation:`,
+        error
+      );
     },
   });
 
@@ -156,11 +189,13 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Formation" : "Add New Formation"}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Modifier la session" : "Nouvelle session"}
+          </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the formation information and click the update button"
-              : "Enter the formation information and click the save button"}
+              ? "Mettez à jour les informations de la session et cliquez sur le bouton de mise à jour"
+              : "Entrez les informations de la session et cliquez sur le bouton enregistrer"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -174,13 +209,13 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
+                        <SelectValue placeholder="Sélectionner le type de session" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="formation">Formation</SelectItem>
-                      <SelectItem value="workshop">Workshop</SelectItem>
-                      <SelectItem value="seminar">Seminar</SelectItem>
+                      <SelectItem value="presentielle">Presentielle</SelectItem>
+                      <SelectItem value="distance">A distance</SelectItem>
+                      <SelectItem value="hybride">Hybride</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -197,7 +232,7 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select theme" />
+                        <SelectValue placeholder="Selectionner le theme" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -222,7 +257,7 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
                 name="date_debut"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start Date</FormLabel>
+                    <FormLabel>Date de début</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -236,7 +271,7 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
                 name="date_fin"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>End Date</FormLabel>
+                    <FormLabel>Date de fin</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -245,7 +280,6 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
                 )}
               />
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -254,7 +288,7 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
                   <FormItem>
                     <FormLabel>Duration (Days)</FormLabel>
                     <FormControl>
-                      <Input type="number" min="1" {...field} />
+                      <Input type="number" min="1" readOnly {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -333,17 +367,10 @@ const FormationForm = ({ formation, isOpen, onClose, onOpenChange }: FormationFo
             />
 
             <div className="flex justify-end gap-4 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-              >
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button 
-                type="submit"
-                disabled={isLoading}
-              >
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
               </Button>
             </div>

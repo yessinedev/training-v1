@@ -11,13 +11,14 @@ export function UserOverviewCards() {
     data: users,
     isLoading,
     isError,
-  } = useAuthQuery(["users"], fetchUsers);
+  } = useAuthQuery<User[]>(["users"], fetchUsers);
 
   if (isLoading) return <div>Loading...</div>;
   // Calculate statistics
-  const totalUsers = users?.length;
-  const activeUsers = users?.length; // In this mock, all users are considered active
-  const inactiveUsers = 0;
+  const totalUsers = users?.length ?? 0;
+  const activeUsers =
+    users?.filter((user) => !user.user_id.startsWith("inv")).length ?? 0;
+  const inactiveUsers = totalUsers - activeUsers;
 
   // Count users by role
   const roleDistribution = users?.reduce((acc, user: User) => {
@@ -26,7 +27,7 @@ export function UserOverviewCards() {
   }, {} as Record<string, number>);
 
   // Get most recent user
-  const mostRecentUser = users[users?.length - 1];
+  const mostRecentUser = users?.[users?.length - 1] ?? null;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -40,7 +41,7 @@ export function UserOverviewCards() {
               <p className="text-sm font-medium text-muted-foreground">
                 Total Utilisateurs
               </p>
-              <h3 className="text-xl font-bold">{totalUsers} Utilisateurs</h3>
+              <h3 className="text-md font-bold">{totalUsers} Utilisateurs</h3>
             </div>
           </div>
         </CardContent>
@@ -56,15 +57,14 @@ export function UserOverviewCards() {
               <p className="text-sm font-medium text-muted-foreground">
                 Statut Utilisateurs
               </p>
-              <h3 className="text-xl font-bold">
+              <h3 className="text-md font-bold flex flex-col items-center">
                 <span className="text-green-600 dark:text-green-400">
-                  🟢 {activeUsers} Actifs
+                  🟢 {activeUsers} Vérifiés
                 </span>
-                {inactiveUsers > 0 && (
-                  <span className="text-red-600 dark:text-red-400 ml-2">
-                    • 🔴 {inactiveUsers} Inactifs
-                  </span>
-                )}
+
+                <span className="text-red-600 dark:text-red-400 ml-2">
+                  🔴 {inactiveUsers} En Cours
+                </span>
               </h3>
             </div>
           </div>
@@ -82,7 +82,10 @@ export function UserOverviewCards() {
                 Distribution des Rôles
               </p>
               {Object.entries(roleDistribution).map(([role, count]) => (
-                <h3 className="text-sm font-bold">{`${count} ${role}`}</h3>
+                <h3
+                  key={role}
+                  className="text-sm font-bold"
+                >{`${count} ${role}`}</h3>
               ))}
             </div>
           </div>
@@ -102,7 +105,7 @@ export function UserOverviewCards() {
               <h3 className="text-base font-medium">
                 Dernier utilisateur ajouté:
                 <br />
-                {mostRecentUser.prenom} {mostRecentUser.nom}
+                {mostRecentUser?.prenom} {mostRecentUser?.nom}
               </h3>
             </div>
           </div>

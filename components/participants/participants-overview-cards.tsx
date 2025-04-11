@@ -20,7 +20,7 @@ export function ParticipantOverviewCards({ participants }: ParticipantOverviewCa
 
   // Count participants in active formations
   const activeInFormations = participants.filter(
-    participant => participant.actions?.some(action => action.statut  === 'EN_COURS')
+    participant => participant.actions?.some(action => action.statut  === 'Confirmé')
   ).length;
 
   // Get most recent participant

@@ -87,7 +87,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
     },
   });
 
-  const { data: roles, isLoading: rolesLoading } = useQuery({
+  const { data: roles, isLoading: rolesLoading } = useQuery<Role[]>({
     queryKey: ["roles"],
     queryFn: async () => {
       const token = await getToken({ template: "my-jwt-template" });
@@ -308,7 +308,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value);
-                      const selectedRole = roles.find(
+                      const selectedRole = roles?.find(
                         (r) => r.role_id.toString() === value
                       );
                       form.setValue("role_name", selectedRole?.role_name || "");
