@@ -13,8 +13,6 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchFormations } from '@/services/formationService';
 import { fetchSeancesByFormationId } from '@/services/seanceService';
 
-// Import the ShadCN UI Select components.
-// Adjust the import paths according to your project structure.
 import {
   Select,
   SelectContent,
@@ -26,20 +24,17 @@ import { useAuthQuery } from '@/hooks/useAuthQuery';
 import { formatDate, setHours, setMinutes } from 'date-fns';
 
 export function Calendar() {
-  // States for selected formation and modal/session handling
   const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null);
   const [selectedSession, setSelectedSession] = useState<Seance | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 
-  // First, fetch the available formations.
   const {
       data: formations,
       isLoading: formationsLoading,
       isError: formationsError,
     } = useAuthQuery<Formation[]>(["formations"], fetchFormations);
 
-  // Now, based on the selected formation, fetch its sessions.
   const {
     data: sessions = [],
     isLoading: sessionsLoading,
@@ -52,23 +47,16 @@ export function Calendar() {
     enabled: Boolean(selectedFormation),
   });
 
-  // Callback for when a formation is selected from the dropdown.
   const handleFormationSelect = useCallback((formationId: number) => {
     const formation = formations?.find(f => f.action_id === formationId) || null;
     setSelectedFormation(formation);
     // The sessions query will trigger because of the enabled flag once selectedFormation is set.
   }, [formations]);
 
-  // Callbacks for Calendar events.
   const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
     setModalMode('create');
-    setSelectedSession({
-      id: crypto.randomUUID(),
-      title: '',
-      start: selectInfo.start,
-      end: selectInfo.end,
-      type: 'présentiel',
-    });
+    console.log('Selected date:', selectInfo);
+
     setIsModalOpen(true);
   }, []);
 
@@ -151,7 +139,6 @@ export function Calendar() {
               start: setMinutes(setHours(session.date, parseInt(session.heure)), 0),
               date: session.date,
               end: setMinutes(setHours(session.date, parseInt(session.heure) + session.duree_heures), 0),
-              // You might convert heure and other properties as needed.
               backgroundColor: '#f3f4f6',
               borderColor: '#d1d5db',
               textColor: '#1f2937',
@@ -169,6 +156,7 @@ export function Calendar() {
       {isModalOpen && selectedSession && (
         <SeanceModal
           session={selectedSession}
+          formation={selectedFormation}
           mode={modalMode}
           onSave={handleSaveSession}
           onDelete={handleDeleteSession}

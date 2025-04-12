@@ -5,6 +5,7 @@ import {
   BookOpen,
   EuroIcon,
   Home,
+  PenTool,
   Settings2,
   Users,
 } from "lucide-react";
@@ -115,6 +116,25 @@ const data = {
         {
           title: "Progression des formations",
           url: "/dashboard/rapports/progression",
+        },
+      ],
+    },
+    {
+      title: "Applications",
+      url: "#",
+      icon: PenTool,
+      items: [
+        {
+          title: "Questionnaires",
+          url: "/dashboard/questionnaires",
+        },
+        {
+          title: "Évaluations",
+          url: "/dashboard/evaluations",
+        },
+        {
+          title: "Certificats",
+          url: "/dashboard/certificats",
         },
       ],
     },

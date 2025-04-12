@@ -1,5 +1,5 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client';
+
 import { useState } from "react";
 import { format } from "date-fns";
 import {
@@ -9,10 +9,22 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Seance, SeanceType } from "@/types";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Formation, Seance, SeanceStatut } from "@/types";
+import { getDatesBetween } from "@/lib/utils";
 
 interface SessionModalProps {
   session: Seance;
+  formation: Formation | null;
   mode: "create" | "edit";
   onSave: (session: Seance) => void;
   onDelete: (sessionId: string) => void;
@@ -21,20 +33,22 @@ interface SessionModalProps {
 
 export function SeanceModal({
   session,
+  formation,
   mode,
   onSave,
   onDelete,
   onClose,
 }: SessionModalProps) {
-  const [formData, setFormData] = useState(session);
+  const [formData, setFormData] = useState<Seance>(session);
 
+  // Handle form submission.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
   };
 
   return (
-    <Dialog open={true} onOpenChange={() => onClose()}>
+    <Dialog open onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
@@ -42,102 +56,124 @@ export function SeanceModal({
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Statut Selection */}
           <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Titre
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
+            <Label htmlFor="statut">Type</Label>
+            <Select
+              value={formData.statut as unknown as string}
+              onValueChange={(value) =>
+                setFormData({ ...formData, statut: value as unknown as SeanceStatut })
               }
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Type
-            </label>
-            <select
-              value={formData.type}
-              onChange={(e) =>
-                setFormData({ ...formData, type: e.target.value as SeanceType })
-              }
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <option value="présentiel">Présentiel</option>
-              <option value="distanciel">Distanciel</option>
-              <option value="hybride">Hybride</option>
-            </select>
+              <SelectTrigger id="statut">
+                <SelectValue placeholder="Sélectionnez le statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="EN_ATTENTE">EN_ATTENTE</SelectItem>
+                <SelectItem value="EN_COURS">EN_COURS</SelectItem>
+                <SelectItem value="TERMINEE">TERMINEE</SelectItem>
+                <SelectItem value="ANNULEE">ANNULEE</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
+          {/* Date and Hour Selections */}
           <div className="grid grid-cols-2 gap-4">
+            {/* Date Selector */}
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Date de début
-              </label>
-              <input
-                type="datetime-local"
-                value={format(formData.start, "yyyy-MM-dd'T'HH:mm")}
-                onChange={(e) =>
-                  setFormData({ ...formData, start: new Date(e.target.value) })
+              <Label htmlFor="date">Date</Label>
+              <Select
+                value={
+                  formData.date
+                    ? new Date(formData.date).toISOString()
+                    : ""
                 }
-                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                required
-              />
+                onValueChange={(val) =>
+                  setFormData({ ...formData, date: new Date(val) })
+                }
+              >
+                <SelectTrigger id="date" className="w-full">
+                  <SelectValue placeholder="Sélectionnez une date" />
+                </SelectTrigger>
+                <SelectContent>
+                  {formation &&
+                    getDatesBetween(
+                      new Date(formation.date_debut),
+                      new Date(formation.date_fin)
+                    ).map((date) => (
+                      <SelectItem
+                        key={date.toISOString()}
+                        value={date.toISOString()}
+                      >
+                        {format(date, "dd/MM/yyyy")}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
 
+            {/* Heure Debut Selector */}
             <div className="space-y-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Date de fin
-              </label>
-              <input
-                type="datetime-local"
-                value={format(formData.end, "yyyy-MM-dd'T'HH:mm")}
-                onChange={(e) =>
-                  setFormData({ ...formData, end: new Date(e.target.value) })
+              <Label htmlFor="heure">Heure Début</Label>
+              <Select
+                value={formData.heure || ""}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, heure: value })
                 }
-                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                required
-              />
+              >
+                <SelectTrigger id="heure" className="w-full">
+                  <SelectValue placeholder="Sélectionnez une heure" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => i + 8).map(
+                    (hour) => (
+                      <SelectItem key={hour} value={`${hour}:00`}>
+                        {hour}:00
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
+          {/* Durée Input */}
           <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Description
-            </label>
-            <textarea
-              value={formData.description || ""}
+            <Label htmlFor="duree">Durée (heures)</Label>
+            <Input
+              id="duree"
+              type="number"
+              min={1}
+              max={8}
+              value={String(formData.duree_heures)}
               onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
+                setFormData({
+                  ...formData,
+                  duree_heures: Number(e.target.value),
+                })
               }
-              className="flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-              rows={3}
+              className="w-full"
             />
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex justify-end space-x-2">
             {mode === "edit" && (
               <Button
                 type="button"
                 variant="destructive"
-                onClick={() => onDelete(formData.id)}
+                onClick={() =>
+                  onDelete(formData.seance_id.toString())
+                }
               >
                 Supprimer
               </Button>
             )}
-            <div className="flex space-x-2">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Annuler
-              </Button>
-              <Button type="submit">
-                {mode === "create" ? "Créer" : "Enregistrer"}
-              </Button>
-            </div>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Annuler
+            </Button>
+            <Button type="submit">
+              {mode === "create" ? "Créer" : "Enregistrer"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

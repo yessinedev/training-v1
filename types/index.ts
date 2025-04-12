@@ -119,7 +119,7 @@ export type FormFormation = Omit<Formation, "action_id" | "formateurs"> & {
 };
 
 
-enum SeanceStatut {
+export enum SeanceStatut {
   EN_ATTENTE,
   EN_COURS,
   TERMINEE,
@@ -167,4 +167,14 @@ export type File = {
 
   formateur?: Formateur;
   action?: Formation
+}
+
+export type QuestionType = 'text' | 'choice' | 'rating' | 'boolean';
+
+export interface Question {
+  id: string;
+  type: QuestionType;
+  text: string;
+  required: boolean;
+  options?: string[];
 }
