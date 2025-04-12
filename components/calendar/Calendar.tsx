@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
@@ -7,67 +7,59 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import frLocale from '@fullcalendar/core/locales/fr';
 import { EventClickArg, DateSelectArg, EventDropArg } from '@fullcalendar/core';
-import { addDays, setHours, setMinutes } from 'date-fns';
 import { SeanceModal } from './SeanceModal';
-import { Seance, SeanceType } from '@/types';
+import { Formation, Seance } from '@/types';
+import { useQuery } from '@tanstack/react-query';
+import { fetchFormations } from '@/services/formationService';
+import { fetchSeancesByFormationId } from '@/services/seanceService';
 
-const sessionColors: Record<SeanceType, { background: string; border: string }> = {
-  présentiel: { background: '#bfdbfe', border: '#3b82f6' },
-  distanciel: { background: '#bbf7d0', border: '#22c55e' },
-  hybride: { background: '#fde68a', border: '#f59e0b' },
-};
-
-// Generate mock data for the current week
-const today = new Date();
-const mockSessions: Seance[] = [
-  {
-    id: crypto.randomUUID(),
-    title: 'Introduction au React',
-    start: setMinutes(setHours(today, 9), 0),
-    end: setMinutes(setHours(today, 12), 0),
-    type: 'présentiel',
-    description: 'Formation fondamentale sur React et ses concepts de base',
-  },
-  {
-    id: crypto.randomUUID(),
-    title: 'Workshop TypeScript Avancé',
-    start: setMinutes(setHours(addDays(today, 1), 14), 0),
-    end: setMinutes(setHours(addDays(today, 1), 17), 0),
-    type: 'distanciel',
-    description: 'Session pratique sur les fonctionnalités avancées de TypeScript',
-  },
-  {
-    id: crypto.randomUUID(),
-    title: 'Architecture Microservices',
-    start: setMinutes(setHours(addDays(today, 2), 10), 0),
-    end: setMinutes(setHours(addDays(today, 2), 16), 0),
-    type: 'hybride',
-    description: 'Formation complète sur la conception et l\'implémentation de microservices',
-  },
-  {
-    id: crypto.randomUUID(),
-    title: 'DevOps & CI/CD',
-    start: setMinutes(setHours(addDays(today, 3), 9), 30),
-    end: setMinutes(setHours(addDays(today, 3), 15), 30),
-    type: 'distanciel',
-    description: 'Introduction aux pratiques DevOps et aux pipelines CI/CD',
-  },
-  {
-    id: crypto.randomUUID(),
-    title: 'UX/UI Design Principles',
-    start: setMinutes(setHours(addDays(today, 4), 13), 0),
-    end: setMinutes(setHours(addDays(today, 4), 17), 0),
-    type: 'présentiel',
-    description: 'Les fondamentaux du design d\'interface utilisateur',
-  }
-];
+// Import the ShadCN UI Select components.
+// Adjust the import paths according to your project structure.
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAuthQuery } from '@/hooks/useAuthQuery';
+import { formatDate, setHours, setMinutes } from 'date-fns';
 
 export function Calendar() {
-  const [sessions, setSessions] = useState<Seance[]>(mockSessions);
+  // States for selected formation and modal/session handling
+  const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null);
   const [selectedSession, setSelectedSession] = useState<Seance | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 
+  // First, fetch the available formations.
+  const {
+      data: formations,
+      isLoading: formationsLoading,
+      isError: formationsError,
+    } = useAuthQuery<Formation[]>(["formations"], fetchFormations);
+
+  // Now, based on the selected formation, fetch its sessions.
+  const {
+    data: sessions = [],
+    isLoading: sessionsLoading,
+    isError: sessionsError,
+    refetch: refetchSessions,
+  } = useQuery<Seance[]>({
+    queryKey: ['seances', selectedFormation?.action_id],
+    queryFn: () =>
+      fetchSeancesByFormationId(selectedFormation!.action_id),
+    enabled: Boolean(selectedFormation),
+  });
+
+  // Callback for when a formation is selected from the dropdown.
+  const handleFormationSelect = useCallback((formationId: number) => {
+    const formation = formations?.find(f => f.action_id === formationId) || null;
+    setSelectedFormation(formation);
+    // The sessions query will trigger because of the enabled flag once selectedFormation is set.
+  }, [formations]);
+
+  // Callbacks for Calendar events.
   const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
     setModalMode('create');
     setSelectedSession({
@@ -87,70 +79,92 @@ export function Calendar() {
   }, []);
 
   const handleEventDrop = useCallback((dropInfo: EventDropArg) => {
-    setSessions(prev => {
-      const sessionId = dropInfo.event.id;
-      return prev.map(session => {
-        if (session.id === sessionId) {
-          return {
-            ...session,
-            start: dropInfo.event.start!,
-            end: dropInfo.event.end!,
-          };
-        }
-        return session;
-      });
-    });
-  }, []);
+    // Optionally update the session by re-fetching or applying optimistic updates.
+    // For example:
+    refetchSessions();
+  }, [refetchSessions]);
 
   const handleSaveSession = useCallback((session: Seance) => {
-    setSessions(prev => {
-      if (modalMode === 'create') {
-        return [...prev, session];
-      }
-      return prev.map(s => (s.id === session.id ? session : s));
-    });
+    // Update the session list here.
+    // You might want to use queryClient.setQueryData for optimistic updates.
+    // Here, just refetch the sessions after a successful update.
+    refetchSessions();
     setIsModalOpen(false);
-  }, [modalMode]);
+  }, [refetchSessions]);
 
   const handleDeleteSession = useCallback((sessionId: string) => {
-    setSessions(prev => prev.filter(s => s.id !== sessionId));
+    // Remove the session and update the list accordingly.
+    refetchSessions();
     setIsModalOpen(false);
-  }, []);
+  }, [refetchSessions]);
 
   return (
     <div className="h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)] bg-white">
+      <div className="p-4">
+        {/* Formation select */}
+        <Select onValueChange={(val) => handleFormationSelect(Number(val))}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Sélectionnez une formation" />
+          </SelectTrigger>
+          <SelectContent>
+            {formationsLoading ? (
+              <SelectItem value="loading">Loading...</SelectItem>
+            ) : formations && formations.length > 0 ? (
+              formations.map((formation) => (
+                <SelectItem key={formation.action_id} value={String(formation.action_id)}>
+                  {formation.theme?.libelle_theme} - {formatDate(new Date(formation.date_debut), 'dd/MM/yyyy')}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="none">Aucune formation</SelectItem>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
       <div className="calendar-container h-full">
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay',
-          }}
-          initialView="timeGridWeek"
-          editable={true}
-          selectable={true}
-          selectMirror={true}
-          dayMaxEvents={true}
-          weekends={false}
-          allDaySlot={false}
-          slotMinTime="08:00:00"
-          slotMaxTime="19:00:00"
-          locale={frLocale}
-          events={sessions.map(session => ({
-            ...session,
-            backgroundColor: sessionColors[session.type].background,
-            borderColor: sessionColors[session.type].border,
-            textColor: '#1f2937',
-            className: 'rounded-lg shadow-sm border-l-4',
-          }))}
-          select={handleDateSelect}
-          eventClick={handleEventClick}
-          eventDrop={handleEventDrop}
-          height="100%"
-          stickyHeaderDates={true}
-          expandRows={true}
-        />
+        {sessionsLoading ? (
+          <p>Loading sessions...</p>
+        ) : sessionsError ? (
+          <p>Error loading sessions.</p>
+        ) : (
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay',
+            }}
+            initialDate={selectedFormation ? new Date(selectedFormation.date_debut) : new Date()}
+            initialView="timeGridWeek"
+            editable={true}
+            selectable={true}
+            selectMirror={true}
+            dayMaxEvents={true}
+            weekends={true}
+            allDaySlot={false}
+            slotMinTime="08:00:00"
+            slotMaxTime="19:00:00"
+            locale={frLocale}
+            events={sessions?.map((session) => ({
+              id: String(session.seance_id),
+              title: String(session.statut),
+              start: setMinutes(setHours(session.date, parseInt(session.heure)), 0),
+              date: session.date,
+              end: setMinutes(setHours(session.date, parseInt(session.heure) + session.duree_heures), 0),
+              // You might convert heure and other properties as needed.
+              backgroundColor: '#f3f4f6',
+              borderColor: '#d1d5db',
+              textColor: '#1f2937',
+              className: 'rounded-lg shadow-sm border-l-4',
+            }))}
+            select={handleDateSelect}
+            eventClick={handleEventClick}
+            eventDrop={handleEventDrop}
+            height="100%"
+            stickyHeaderDates={true}
+            expandRows={true}
+          />
+        )}
       </div>
       {isModalOpen && selectedSession && (
         <SeanceModal

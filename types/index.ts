@@ -119,15 +119,43 @@ export type FormFormation = Omit<Formation, "action_id" | "formateurs"> & {
 };
 
 
-export type SeanceType = 'présentiel' | 'distanciel' | 'hybride';
-
+enum SeanceStatut {
+  EN_ATTENTE,
+  EN_COURS,
+  TERMINEE,
+  ANNULEE
+}
 export type Seance = {
-  id: string;
-  title: string;
-  start: Date;
-  end: Date;
-  type: SeanceType;
-  description?: string;
+  seance_id: number;
+  action_id: number;
+  date: Date;
+  heure: string;
+  duree_heures: number;
+  statut: SeanceStatut;
+  formateur_id: string;
+
+  action?: Formation;
+  formateur?: Formateur;
+  presences?: Presence[];
+}
+
+enum PresenceStatus {
+  PRESENT,
+  ABSENT,
+  RETARD
+}
+
+export type Presence = {
+  presence_id: number;
+  status: PresenceStatus;
+  noted_at: Date;
+  participant_id: string;
+  seance_id: number;
+  formateur_id?: string;
+  
+  participant?: Participant;
+  seance?: Seance;
+  formateur?: Formateur;
 }
 
 export type File = {
