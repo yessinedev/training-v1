@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios";
+import { Seance } from "@/types";
 
 export const fetchSeances = async () => {
   const response = await axiosInstance.get("/seances");
@@ -16,21 +17,17 @@ export const fetchSeancesByFormationId = async (formationId: number) => {
 };
     
 
-// export const createDomaine = async (data: FormValues) => {
-//   const response = await axiosInstance.post("/seances", data);
-//   return response.data;
-// };
+export const createSeance = async (seance: Omit<Seance, 'seance_id'>) => {
+  const response = await axiosInstance.post("/seances", seance);
+  return response.data;
+};
 
-// export const updateDomaine = async (domainId: number, data: FormValues) => {
-//   const response = await axiosInstance.put(`/domaines/${domainId}`, data);
-//   return response.data;
-// };
+export const updateSeance = async (seance: Seance) => {
+  const response = await axiosInstance.put(`/seances/${seance.seance_id}`, seance);
+  return response.data;
+};
 
-// export const deleteDomaine = async (token: string, domainId: number) => {
-//   const config = {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   };
-//   await axiosInstance.delete(`/domaines/${domainId}`, config);
-// };
+export const deleteSeance = async (seanceId: number) => {
+  const response = await axiosInstance.delete(`/seances/${seanceId}`);
+  return response.data;
+};

@@ -11,7 +11,9 @@ import { SeanceModal } from './SeanceModal';
 import { Formation, Seance, SeanceStatut } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchFormations } from '@/services/formationService';
-import { fetchSeancesByFormationId } from '@/services/seanceService';
+import { fetchSeancesByFormationId, createSeance, updateSeance, deleteSeance } from '@/services/seanceService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import {
   Select,
@@ -47,10 +49,50 @@ export function Calendar() {
     enabled: Boolean(selectedFormation),
   });
 
+  const queryClient = useQueryClient();
+
+  // Create mutation
+  const createSeanceMutation = useMutation({
+    mutationFn: (seance: Omit<Seance, 'seance_id'>) => createSeance(seance),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seances', selectedFormation?.action_id] });
+      toast.success('Séance créée avec succès');
+      setIsModalOpen(false);
+    },
+    onError: (error: Error) => {
+      toast.error(`Erreur lors de la création: ${error.message}`);
+    },
+  });
+
+  // Update mutation
+  const updateSeanceMutation = useMutation({
+    mutationFn: (seance: Seance) => updateSeance(seance),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seances', selectedFormation?.action_id] });
+      toast.success('Séance mise à jour avec succès');
+      setIsModalOpen(false);
+    },
+    onError: (error: Error) => {
+      toast.error(`Erreur lors de la mise à jour: ${error.message}`);
+    },
+  });
+
+  // Delete mutation
+  const deleteSeanceMutation = useMutation({
+    mutationFn: (seanceId: number) => deleteSeance(seanceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['seances', selectedFormation?.action_id] });
+      toast.success('Séance supprimée avec succès');
+      setIsModalOpen(false);
+    },
+    onError: (error: Error) => {
+      toast.error(`Erreur lors de la suppression: ${error.message}`);
+    },
+  });
+
   const handleFormationSelect = useCallback((formationId: number) => {
     const formation = formations?.find(f => f.action_id === formationId) || null;
     setSelectedFormation(formation);
-    // The sessions query will trigger because of the enabled flag once selectedFormation is set.
   }, [formations]);
 
   const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
@@ -87,24 +129,34 @@ export function Calendar() {
   }, [selectedFormation]);
 
   const handleEventDrop = useCallback((dropInfo: EventDropArg) => {
-    // Optionally update the session by re-fetching or applying optimistic updates.
-    // For example:
-    refetchSessions();
-  }, [refetchSessions]);
+    const seanceId = Number(dropInfo.event.id);
+    const seance = sessions?.find(s => s.seance_id === seanceId);
+    
+    if (seance) {
+      const updatedSeance: Seance = {
+        ...seance,
+        date: dropInfo.event.start!,
+        heure: dropInfo.event.start!.toTimeString().slice(0, 5)
+      };
+      
+      updateSeanceMutation.mutate(updatedSeance);
+    }
+  }, [sessions, updateSeanceMutation]);
 
   const handleSaveSession = useCallback((session: Seance) => {
-    // Update the session list here.
-    // You might want to use queryClient.setQueryData for optimistic updates.
-    // Here, just refetch the sessions after a successful update.
-    refetchSessions();
-    setIsModalOpen(false);
-  }, [refetchSessions]);
+    if (modalMode === 'create') {
+      const { seance_id, ...newSeance } = session;
+      createSeanceMutation.mutate(newSeance);
+    } else {
+      updateSeanceMutation.mutate(session);
+    }
+  }, [modalMode, createSeanceMutation, updateSeanceMutation]);
 
   const handleDeleteSession = useCallback((sessionId: string) => {
-    // Remove the session and update the list accordingly.
-    refetchSessions();
-    setIsModalOpen(false);
-  }, [refetchSessions]);
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette séance ?')) {
+      deleteSeanceMutation.mutate(Number(sessionId));
+    }
+  }, [deleteSeanceMutation]);
 
   return (
     <div className="h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)] bg-white">
