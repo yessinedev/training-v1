@@ -1,7 +1,6 @@
-'use client';
+"use client";
 
 import { useState } from "react";
-import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -20,10 +19,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Formation, Seance, SeanceStatut } from "@/types";
-import { getDatesBetween } from "@/lib/utils";
+import TimePicker from "./TimePicker";
 
 interface SessionModalProps {
-  session: Seance;
+  seance: Seance;
   formation: Formation | null;
   mode: "create" | "edit";
   onSave: (session: Seance) => void;
@@ -32,15 +31,17 @@ interface SessionModalProps {
 }
 
 export function SeanceModal({
-  session,
+  seance,
   formation,
   mode,
   onSave,
   onDelete,
   onClose,
 }: SessionModalProps) {
-  const [formData, setFormData] = useState<Seance>(session);
+  const [formData, setFormData] = useState<Seance>(seance);
+  const [selectedTime, setSelectedTime] = useState(seance.heure || "08:00");
 
+console.log(formData)
   // Handle form submission.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,8 +62,12 @@ export function SeanceModal({
             <Label htmlFor="statut">Type</Label>
             <Select
               value={formData.statut as unknown as string}
+              defaultValue={formData.statut as unknown as string}
               onValueChange={(value) =>
-                setFormData({ ...formData, statut: value as unknown as SeanceStatut })
+                setFormData({
+                  ...formData,
+                  statut: value as unknown as SeanceStatut,
+                })
               }
             >
               <SelectTrigger id="statut">
@@ -79,61 +84,40 @@ export function SeanceModal({
 
           {/* Date and Hour Selections */}
           <div className="grid grid-cols-2 gap-4">
-            {/* Date Selector */}
+            {/* Date Input */}
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
-              <Select
-                value={
-                  formData.date
-                    ? new Date(formData.date).toISOString()
+              <Input
+                id="date"
+                type="date"
+                min={
+                  formation
+                    ? new Date(formation.date_debut).toISOString().split("T")[0]
                     : ""
                 }
-                onValueChange={(val) =>
-                  setFormData({ ...formData, date: new Date(val) })
+                max={
+                  formation
+                    ? new Date(formation.date_fin).toISOString().split("T")[0]
+                    : ""
                 }
-              >
-                <SelectTrigger id="date" className="w-full">
-                  <SelectValue placeholder="Sélectionnez une date" />
-                </SelectTrigger>
-                <SelectContent>
-                  {formation &&
-                    getDatesBetween(
-                      new Date(formation.date_debut),
-                      new Date(formation.date_fin)
-                    ).map((date) => (
-                      <SelectItem
-                        key={date.toISOString()}
-                        value={date.toISOString()}
-                      >
-                        {format(date, "dd/MM/yyyy")}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+                value={
+                  mode === "create"
+                    ? formData.date
+                      ? formData.date.toISOString().split("T")[0]
+                      : ""
+                    : new Date(formData.date).toISOString().split("T")[0]
+                }
+                onChange={(e) =>
+                  setFormData({ ...formData, date: new Date(e.target.value) })
+                }
+                className="w-full"
+              />
             </div>
 
-            {/* Heure Debut Selector */}
+            {/* Time Input */}
             <div className="space-y-2">
               <Label htmlFor="heure">Heure Début</Label>
-              <Select
-                value={formData.heure || ""}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, heure: value })
-                }
-              >
-                <SelectTrigger id="heure" className="w-full">
-                  <SelectValue placeholder="Sélectionnez une heure" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 12 }, (_, i) => i + 8).map(
-                    (hour) => (
-                      <SelectItem key={hour} value={`${hour}:00`}>
-                        {hour}:00
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
+              <TimePicker value={selectedTime} onChange={setSelectedTime} />
             </div>
           </div>
 
@@ -161,9 +145,7 @@ export function SeanceModal({
               <Button
                 type="button"
                 variant="destructive"
-                onClick={() =>
-                  onDelete(formData.seance_id.toString())
-                }
+                onClick={() => onDelete(formData.seance_id.toString())}
               >
                 Supprimer
               </Button>

@@ -8,7 +8,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import frLocale from '@fullcalendar/core/locales/fr';
 import { EventClickArg, DateSelectArg, EventDropArg } from '@fullcalendar/core';
 import { SeanceModal } from './SeanceModal';
-import { Formation, Seance } from '@/types';
+import { Formation, Seance, SeanceStatut } from '@/types';
 import { useQuery } from '@tanstack/react-query';
 import { fetchFormations } from '@/services/formationService';
 import { fetchSeancesByFormationId } from '@/services/seanceService';
@@ -25,7 +25,7 @@ import { formatDate, setHours, setMinutes } from 'date-fns';
 
 export function Calendar() {
   const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null);
-  const [selectedSession, setSelectedSession] = useState<Seance | null>(null);
+  const [selectedSeance, setSelectedSeance] = useState<Seance | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
 
@@ -56,15 +56,35 @@ export function Calendar() {
   const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
     setModalMode('create');
     console.log('Selected date:', selectInfo);
-
+    const start = new Date(selectInfo.startStr);
+    const end = new Date(selectInfo.endStr);
+  
+    const selectedDate = new Date(start.toDateString()); // remove time
+    const heure = start.toTimeString().slice(0, 5); // "HH:MM"
+    const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60); // in hours
+  
+    const newSeance: Seance = {
+      seance_id: 0,
+      action_id: selectedFormation?.action_id ?? 0,
+      date: selectedDate,
+      heure: heure,
+      duree_heures: duration,
+      statut: SeanceStatut.EN_ATTENTE,
+    };
+    
+  
+    setSelectedSeance(newSeance);
     setIsModalOpen(true);
-  }, []);
+  }, [selectedFormation]);
 
   const handleEventClick = useCallback((clickInfo: EventClickArg) => {
     setModalMode('edit');
-    setSelectedSession(clickInfo.event.extendedProps as Seance);
+    const seance = selectedFormation?.seances?.find((s) => s.seance_id === Number(clickInfo.event.id));
+    console.log('Clicked event:', seance);
+    if (!seance) return;
+    setSelectedSeance(seance!);
     setIsModalOpen(true);
-  }, []);
+  }, [selectedFormation]);
 
   const handleEventDrop = useCallback((dropInfo: EventDropArg) => {
     // Optionally update the session by re-fetching or applying optimistic updates.
@@ -153,9 +173,9 @@ export function Calendar() {
           />
         )}
       </div>
-      {isModalOpen && selectedSession && (
+      {isModalOpen && selectedSeance && (
         <SeanceModal
-          session={selectedSession}
+          seance={selectedSeance}
           formation={selectedFormation}
           mode={modalMode}
           onSave={handleSaveSession}

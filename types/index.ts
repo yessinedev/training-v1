@@ -110,6 +110,7 @@ export type Formation = {
   theme?: Theme;
   formateurs: ActionFormationFormateur[];
   participants: ActionFormationParticipant[];
+  seances?: Seance[];
   attestations?: Attestation[];
 };
 
@@ -132,7 +133,7 @@ export type Seance = {
   heure: string;
   duree_heures: number;
   statut: SeanceStatut;
-  formateur_id: string;
+  formateur_id?: string;
 
   action?: Formation;
   formateur?: Formateur;
