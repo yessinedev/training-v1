@@ -52,6 +52,8 @@ export type Participant = {
   user: User;
   actions?: ActionFormationParticipant[];
   attestations?: Attestation[];
+  presences?: Presence[];
+  seances?: Seance[];
 };
 
 export type CreateUserParticipant = {
@@ -140,10 +142,10 @@ export type Seance = {
   presences?: Presence[];
 };
 
-enum PresenceStatus {
-  PRESENT,
-  ABSENT,
-  RETARD,
+export enum PresenceStatus {
+  PRESENT = "PRESENT",
+  ABSENT = "ABSENT",
+  RETARD = "RETARD",
 }
 
 export type Presence = {
