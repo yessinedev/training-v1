@@ -87,7 +87,9 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <LogOut />
-              <SignOutButton children="Déconnexion" />
+              <SignOutButton>
+                Déconnexion
+              </SignOutButton>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

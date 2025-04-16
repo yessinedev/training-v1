@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ParticipateManyDialog } from "@/components/participants/ParticipateManyDialog";
 import { useAuthQuery } from "@/hooks/useAuthQuery";
 import {
@@ -39,19 +39,21 @@ export default function ParticipantsPage() {
     },
   });
 
-  const handleDeleteParticipant = async (participantId: string) => {
-    if (window.confirm("Are you sure you want to delete this participant?")) {
-      try {
-        await deleteParticipantMutation.mutateAsync(participantId);
-      } catch (error) {
-        console.error("Delete submission error:", error);
+  const handleDeleteParticipant = useCallback(() => {
+    async (participantId: string) => {
+      if (window.confirm("Are you sure you want to delete this participant?")) {
+        try {
+          await deleteParticipantMutation.mutateAsync(participantId);
+        } catch (error) {
+          console.error("Delete submission error:", error);
+        }
       }
-    }
-  };
+    };
+  }, [deleteParticipantMutation]);
 
   const columns = useMemo(
     () => getParticipantColumns(() => handleDeleteParticipant),
-    []
+    [handleDeleteParticipant]
   );
 
   if (isLoading) return <p>Loading...</p>;

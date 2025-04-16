@@ -80,7 +80,7 @@ const AttestationPDF = ({
   return (
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.container}>
-        <Image src="/image1.png" style={styles.background} />
+        <Image src="/image1.png" style={styles.background}  />
         <View style={styles.content}>
           <Text style={styles.text}>
             Le cabinet de formation continue STAT + TRAINING atteste par la

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Pencil, Trash2, Plus, FileText, Badge } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -76,7 +76,7 @@ const FormateursTable = () => {
     },
   });
 
-  const handleDeleteFormateur = async (formateurId: string) => {
+  const handleDeleteFormateur = useCallback(async (formateurId: string) => {
     if (window.confirm("Are you sure you want to delete this formateur?")) {
       try {
         await deleteFormateurMutation.mutateAsync(formateurId);
@@ -84,16 +84,16 @@ const FormateursTable = () => {
         console.error("Delete submission error:", error);
       }
     }
-  };
+  }, [deleteFormateurMutation]);
 
   const columns = useMemo(
     () =>
       getFormateurColumns(
-        () => handleDeleteFormateur,
+        handleDeleteFormateur,
         handleOpenDialog,
         handleShowProfile
       ),
-    []
+    [handleDeleteFormateur]
   );
 
   if (isLoading) return <p>Loading...</p>;

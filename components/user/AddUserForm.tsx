@@ -122,7 +122,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
       console.log("Resetting form with values:", values);
       form.reset(values);
     }
-  }, [user, isOpen, form]);
+  }, [user, isOpen, form, roles]);
 
   const watchRoleId = form.watch("role_id");
 

@@ -228,7 +228,7 @@ export function CreateInvoiceDialog() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="date">Date d'émission</Label>
+                <Label htmlFor="date">{"Date d'émission"}</Label>
                 <Input
                   id="date"
                   type="date"
@@ -237,7 +237,7 @@ export function CreateInvoiceDialog() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="dueDate">Date d'échéance</Label>
+                <Label htmlFor="dueDate">{"Date d'échéance"}</Label>
                 <Input
                   id="dueDate"
                   type="date"

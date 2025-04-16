@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -62,15 +62,15 @@ const RolesTable = () => {
     },
   });
 
-  const handleDeleteRole = (roleId: number) => {
-    if (window.confirm("Are you sure you want to delete this role?")) {
-      deleteRoleMutation.mutate(roleId);
-    }
-  };
+  const handleDeleteRole = useCallback((roleId: number) => {
+      if (window.confirm("Are you sure you want to delete this role?")) {
+        deleteRoleMutation.mutate(roleId);
+      }
+    }, [deleteRoleMutation]);
 
   const columns = useMemo(
     () => getRolesColumns((role) => handleOpenDialog(role), handleDeleteRole),
-    []
+    [handleDeleteRole]
   );
 
   if (isLoading) return <p>Loading...</p>;

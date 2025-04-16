@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
@@ -36,29 +36,27 @@ const UsersTable = () => {
   const deleteUserMutation = useAuthMutation(deleteUser, {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
-      toast.success("User deleted successfully");
     },
     onError: (error: unknown) => {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to delete user: ${errorMessage}`);
-      console.error("Error deleting user:", error);
+      console.error("Error deleting user:", errorMessage);
     },
   });
 
-  const handleDeleteUser = async (userId: string) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        await deleteUserMutation.mutateAsync(userId);
-      } catch (error) {
-        console.error("Delete submission error:", error);
+  const handleDeleteUser = useCallback(async (userId: string) => {
+      if (window.confirm("Are you sure you want to delete this user?")) {
+        try {
+          await deleteUserMutation.mutateAsync(userId);
+        } catch (error) {
+          console.error("Delete submission error:", error);
+        }
       }
-    }
-  };
+    }, [deleteUserMutation]);
 
   const columns = useMemo(
     () => getUserColumns((user) => handleOpenDialog(user), handleDeleteUser),
-    []
+    [handleDeleteUser]
   );
 
   if (isLoading) return <p>Loading...</p>;

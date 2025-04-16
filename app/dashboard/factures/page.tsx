@@ -142,8 +142,8 @@ export default function InvoicesPage() {
               <TableRow>
                 <TableHead>N° Facture</TableHead>
                 <TableHead>Client</TableHead>
-                <TableHead>Date d'émission</TableHead>
-                <TableHead>Date d'échéance</TableHead>
+                <TableHead>{"Date d'émission"}</TableHead>
+                <TableHead>{"Date d'échéance"}</TableHead>
                 <TableHead>Montant</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
