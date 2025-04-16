@@ -119,7 +119,7 @@ const FormateursTable = () => {
         <FormateurProfile
           formateur={selectedFormateur}
           isOpen={showProfile}
-          onOpenChange={setIsDialogOpen}
+          onOpenChange={setShowProfile}
         />
       )}
     </div>

@@ -1,5 +1,4 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,9 +8,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   FileIcon,
-  UserIcon,
-  PhoneIcon,
-  MailIcon,
   CalendarIcon,
 } from "lucide-react";
 import { Formateur, SeanceStatut } from "@/types";
@@ -68,33 +64,34 @@ const FormateurProfile = ({ formateur, isOpen, onOpenChange }: Props) => {
             <div className="space-y-4">
               <h4 className="text-lg font-semibold">Séances</h4>
               <div className="space-y-3">
-                          {formateur.seances
-                            .filter((seance) => seance.formateur_id === formateur.user_id)
-                            .map((seance) => (
-                              <div
-                                key={seance.seance_id}
-                                className="flex items-center justify-between p-3 rounded-lg border"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <CalendarIcon className="h-5 w-5" />
-                                  <span>
-                                    {new Date(seance.date).toLocaleDateString()} à {seance.heure}
-                                  </span>
-                                </div>
-                                <Badge
-                                  variant={
-                                    seance.statut === SeanceStatut.TERMINEE
-                                      ? 'default'
-                                      : seance.statut === SeanceStatut.EN_ATTENTE
-                                      ? 'secondary'
-                                      : 'destructive'
-                                  }
-                                >
-                                  {seance.statut}
-                                </Badge>
-                              </div>
-                            ))}
-                        </div>
+                {formateur.seances
+                  .filter((seance) => seance.formateur_id === formateur.user_id)
+                  .map((seance) => (
+                    <div
+                      key={seance.seance_id}
+                      className="flex items-center justify-between p-3 rounded-lg border"
+                    >
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="h-5 w-5" />
+                        <span>
+                          {new Date(seance.date).toLocaleDateString()} à{" "}
+                          {seance.heure}
+                        </span>
+                      </div>
+                      <Badge
+                        variant={
+                          seance.statut === SeanceStatut.TERMINEE
+                            ? "default"
+                            : seance.statut === SeanceStatut.EN_ATTENTE
+                            ? "secondary"
+                            : "destructive"
+                        }
+                      >
+                        {seance.statut}
+                      </Badge>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
         )}
