@@ -7,7 +7,8 @@ import { Checkbox } from "../ui/checkbox";
 
 export const getFormateurColumns = (
   handleDelete: (userId: string) => void,
-  handleEdit?: (participant: Formateur) => void
+  handleEdit?: (participant: Formateur) => void,
+  showProfile?: (participant: Formateur) => void
 ): ColumnDef<Formateur>[] => [
   {
     id: "select",
@@ -63,7 +64,7 @@ export const getFormateurColumns = (
     {
       label: "Profile",
       icon: <Eye className="h-4 w-4" />,
-      onClick: (data) => handleEdit && handleEdit(data),
+      onClick: (data) => showProfile && showProfile(data),
       variant: "default",
     },
     {

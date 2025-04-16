@@ -26,6 +26,7 @@ export type Formateur = {
   user_id: string;
   files: File[];
   user: User;
+  seances: Seance[];
 };
 
 export type Domain = {
@@ -43,7 +44,7 @@ export type CreateParticipant = {
   user_id: string;
   entreprise: string;
   poste: string;
-}
+};
 export type Participant = {
   user_id: string;
   entreprise?: string;
@@ -69,7 +70,7 @@ export type ExcelParticipant = {
   Telephone: string;
   Entreprise: string;
   Poste?: string;
-}
+};
 
 export type Attestation = {
   attestation_id: number;
@@ -119,12 +120,11 @@ export type FormFormation = Omit<Formation, "action_id" | "formateurs"> & {
   formateur_id?: number;
 };
 
-
 export enum SeanceStatut {
-  EN_ATTENTE,
-  EN_COURS,
-  TERMINEE,
-  ANNULEE
+  EN_ATTENTE = "EN_ATTENTE",
+  EN_COURS = "EN_COURS",
+  TERMINEE = "TERMINEE",
+  ANNULEE = "ANNULEE",
 }
 export type Seance = {
   seance_id: number;
@@ -138,12 +138,12 @@ export type Seance = {
   action?: Formation;
   formateur?: Formateur;
   presences?: Presence[];
-}
+};
 
 enum PresenceStatus {
   PRESENT,
   ABSENT,
-  RETARD
+  RETARD,
 }
 
 export type Presence = {
@@ -153,11 +153,11 @@ export type Presence = {
   participant_id: string;
   seance_id: number;
   formateur_id?: string;
-  
+
   participant?: Participant;
   seance?: Seance;
   formateur?: Formateur;
-}
+};
 
 export type File = {
   file_id: number;
@@ -167,10 +167,10 @@ export type File = {
   action_id?: number;
 
   formateur?: Formateur;
-  action?: Formation
-}
+  action?: Formation;
+};
 
-export type QuestionType = 'text' | 'choice' | 'rating' | 'boolean';
+export type QuestionType = "text" | "choice" | "rating" | "boolean";
 
 export interface Question {
   id: string;

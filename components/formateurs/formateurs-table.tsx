@@ -24,18 +24,25 @@ import { toast } from "sonner";
 import FormateurForm from "./formateur-form";
 import { DataTable } from "../dt/data-table";
 import { getFormateurColumns } from "./formateur-columns";
+import FormateurProfile from "./formateur-profile";
 
 const FormateursTable = () => {
   const [selectedFormateur, setSelectedFormateur] = useState<Formateur | null>(
     null
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const queryClient = useQueryClient();
 
   const handleOpenDialog = (formateur?: Formateur) => {
     setSelectedFormateur(formateur ?? null);
     setIsDialogOpen(true);
+  };
+
+  const handleShowProfile = (formateur: Formateur) => {
+    setSelectedFormateur(formateur);
+    setShowProfile(true);
   };
 
   const handleCloseDialog = () => {
@@ -80,7 +87,12 @@ const FormateursTable = () => {
   };
 
   const columns = useMemo(
-    () => getFormateurColumns(() => handleDeleteFormateur, handleOpenDialog),
+    () =>
+      getFormateurColumns(
+        () => handleDeleteFormateur,
+        handleOpenDialog,
+        handleShowProfile
+      ),
     []
   );
 
@@ -99,6 +111,14 @@ const FormateursTable = () => {
           formateur={selectedFormateur || undefined}
           isOpen={isDialogOpen}
           onClose={handleCloseDialog}
+          onOpenChange={setIsDialogOpen}
+        />
+      )}
+
+      {showProfile && selectedFormateur && (
+        <FormateurProfile
+          formateur={selectedFormateur}
+          isOpen={showProfile}
           onOpenChange={setIsDialogOpen}
         />
       )}
