@@ -1,7 +1,7 @@
 import axiosInstance from "@/lib/axios";
 
 export const fetchUsers = async (token: string, roleId?: string) => {
-  const response = await axiosInstance.get("/userS/all", {
+  const response = await axiosInstance.get("/users/all", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -13,7 +13,7 @@ export const fetchUsers = async (token: string, roleId?: string) => {
 
 
 export const deleteUser = async (token: string, userId: string) => {
-    await axiosInstance.delete(`/userS/${userId}`, {
+    await axiosInstance.delete(`/users/${userId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

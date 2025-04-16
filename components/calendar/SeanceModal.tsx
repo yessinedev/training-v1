@@ -126,9 +126,7 @@ console.log(formData)
             <Label htmlFor="duree">Durée (heures)</Label>
             <Input
               id="duree"
-              type="number"
-              min={1}
-              max={8}
+              type="string"
               value={String(formData.duree_heures)}
               onChange={(e) =>
                 setFormData({

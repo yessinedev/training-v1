@@ -74,11 +74,11 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      nom: "",
-      prenom: "",
-      telephone: "",
-      role_id: "",
+      email: user?.email || "",
+      nom: user?.nom || "",
+      prenom: user?.prenom || "",
+      telephone: user?.telephone || "",
+      role_id: user?.role_id?.toString() || "",
       role_name: "",
       cv_file: undefined,
       badge_file: undefined,
@@ -108,11 +108,6 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
       );
       const values = user
         ? {
-            email: user.email,
-            nom: user.nom,
-            prenom: user.prenom,
-            telephone: user.telephone,
-            role_id: user.role_id.toString(),
             role_name: selectedRole?.role_name || "",
           }
         : {
@@ -154,7 +149,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
         console.log(user);
         const token = await getToken({ template: "my-jwt-template" });
         const response = await axiosInstance.put(
-          `/users`,
+          `/users/${user.user_id}`,
           {
             user_id: user.user_id,
             ...userPayload,
