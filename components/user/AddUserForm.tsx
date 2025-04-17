@@ -65,78 +65,63 @@ type UserFormProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+const getDefaultValues = (user?: User, roles?: Role[]) => {
+  const role = roles?.find(
+    (r) => r.role_id.toString() === user?.role_id.toString()
+  );
+  return {
+    email: user?.email || "",
+    nom: user?.nom || "",
+    prenom: user?.prenom || "",
+    telephone: user?.telephone || "",
+    role_id: user?.role_id?.toString() || "",
+    role_name: role?.role_name || "",
+    cv_file: undefined,
+    badge_file: undefined,
+    entreprise: "",
+    poste: "",
+  };
+};
+
 const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const isEditing = !!user;
+  const isEditing = Boolean(user);
   const queryClient = useQueryClient();
   const { getToken } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: user?.email || "",
-      nom: user?.nom || "",
-      prenom: user?.prenom || "",
-      telephone: user?.telephone || "",
-      role_id: user?.role_id?.toString() || "",
-      role_name: "",
-      cv_file: undefined,
-      badge_file: undefined,
-      entreprise: "",
-      poste: "",
-    },
+    defaultValues: getDefaultValues(user),
   });
 
-  const { data: roles, isLoading: rolesLoading } = useQuery<Role[]>({
+  const { data: roles = [], isLoading: rolesLoading } = useQuery<Role[]>({
     queryKey: ["roles"],
     queryFn: async () => {
       const token = await getToken({ template: "my-jwt-template" });
-      const response = await axiosInstance.get("/roles", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const { data } = await axiosInstance.get("/roles", {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      return response.data;
+      return data;
     },
   });
 
-  // Reset form when user changes or dialog opens/closes
   useEffect(() => {
     if (isOpen && roles) {
-      const selectedRole = roles.find(
-        (r) => r.role_id.toString() === user?.role_id.toString()
-      );
-      const values = user
-        ? {
-            role_name: selectedRole?.role_name || "",
-          }
-        : {
-            email: "",
-            password: "",
-            nom: "",
-            prenom: "",
-            telephone: "",
-            role_id: "",
-            role_name: "",
-          };
-      console.log("Resetting form with values:", values);
-      form.reset(values);
+      form.reset(getDefaultValues(user, roles));
     }
-  }, [user, isOpen, form, roles]);
+  }, [isOpen, roles.length]);
 
-  const watchRoleId = form.watch("role_id");
+  const roleName = form.watch("role_name");
+  const roleId = form.watch("role_id");
 
   useEffect(() => {
-    if (watchRoleId && roles) {
-      const selectedRole = roles.find(
-        (r) => r.role_id.toString() === watchRoleId
-      );
-      form.setValue("role_name", selectedRole?.role_name || "");
-    }
-  }, [watchRoleId, roles, form]);
+    const selectedRole = roles.find((r) => r.role_id.toString() === roleId);
+    form.setValue("role_name", selectedRole?.role_name || "");
+  }, [roleId]);
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
+      const token = await getToken({ template: "my-jwt-template" });
       const userPayload = {
         email: data.email,
         nom: data.nom,
@@ -145,55 +130,36 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
         role_id: parseInt(data.role_id),
       };
 
-      if (isEditing && user) {
-        console.log(user);
-        const token = await getToken({ template: "my-jwt-template" });
-        const response = await axiosInstance.put(
-          `/users/${user.user_id}`,
-          {
-            user_id: user.user_id,
-            ...userPayload,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        return response.data;
-      } else {
-        const token = await getToken({ template: "my-jwt-template" });
-        const response = await axiosInstance.post(
-          "/users/create",
-          userPayload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        if (response.status === 201) {
-          if (data.role_name === "FORMATEUR") {
-            const formData = new FormData();
-            console.log("user_id", response.data);
-            formData.append("user_id", response.data.user_id);
-            formData.append("files", data.cv_file as File);
-            formData.append("files", data.badge_file as File);
+      const endpoint = isEditing ? `/users/${user?.user_id}` : "/users/create";
+      const method = isEditing ? "put" : "post";
 
-            await createOrUpdateFormateur(token as string, formData, false);
-          } else if (data.role_name === "PARTICIPANT") {
-            const participantPayload: CreateParticipant = {
-              user_id: response.data.user_id,
-              entreprise: data.entreprise as string,
-              poste: data.poste as string,
-            };
-            await createOrUpdateParticipant(
-              token as string,
-              participantPayload,
-              false
-            );
-          }
+      const { data: createdUser } = await axiosInstance[method](
+        endpoint,
+        userPayload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!isEditing && createdUser?.user_id) {
+        if (roleName === "FORMATEUR") {
+          const formData = new FormData();
+          formData.append("user_id", createdUser.user_id);
+          formData.append("files", data.cv_file as File);
+          formData.append("files", data.badge_file as File);
+          await createOrUpdateFormateur(token!, formData, false);
+        }
+
+        if (roleName === "PARTICIPANT") {
+          await createOrUpdateParticipant(
+            token!,
+            {
+              user_id: createdUser.user_id,
+              entreprise: data.entreprise ?? "",
+              poste: data.poste ?? "",
+            },
+            false
+          );
         }
       }
     },
@@ -203,23 +169,14 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
       onClose();
     },
     onError: (error: Error) => {
-      toast.error(
-        `Failed to ${isEditing ? "update" : "create"} user: ${error.message}`
-      );
-      console.error(
-        `Error ${isEditing ? "updating" : "creating"} user:`,
-        error
-      );
+      toast.error(error.message);
     },
   });
 
   const onSubmit = async (data: FormValues) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      console.log("Submitting form data:", data);
       await mutation.mutateAsync(data);
-    } catch (error) {
-      console.error("Form submission error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -332,7 +289,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
                 </FormItem>
               )}
             />
-            {form.watch("role_name") === "FORMATEUR" && (
+            {!isEditing && roleName === "FORMATEUR" && (
               <div className="flex flex-col gap-3">
                 <FormField
                   control={form.control}
@@ -378,7 +335,7 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
                 />
               </div>
             )}
-            {form.watch("role_name") === "PARTICIPANT" && (
+            {!isEditing && roleName === "PARTICIPANT" && (
               <div>
                 <FormField
                   control={form.control}

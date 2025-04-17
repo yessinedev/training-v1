@@ -38,8 +38,6 @@ function PresenceStatusBadge({ status }: { status: PresenceStatus }) {
   return <Badge variant={variants[status]}>{status}</Badge>;
 }
 
-
-
 const ParticipantProfile = ({
   participant,
   isOpen,

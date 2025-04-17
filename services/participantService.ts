@@ -34,5 +34,5 @@ export const deleteParticipant = async (
       Authorization: `Bearer ${token}`,
     },
   };
-  await axiosInstance.delete(`/participants?id=${participantId}`, config);
+  await axiosInstance.delete(`/participants/${participantId}`, config);
 };

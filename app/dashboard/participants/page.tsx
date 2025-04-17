@@ -27,13 +27,10 @@ export default function ParticipantsPage() {
     setIsDialogOpen(true);
   };
 
-
   const handleShowProfile = (participant: Participant) => {
     setSelectedParticipant(participant);
     setShowProfile(true);
   };
-
-
 
   const {
     data: participants,
@@ -54,8 +51,9 @@ export default function ParticipantsPage() {
     },
   });
 
-  const handleDeleteParticipant = useCallback(() => {
+  const handleDeleteParticipant = useCallback(
     async (participantId: string) => {
+      console.log("Deleting participant with ID:", participantId);
       if (window.confirm("Are you sure you want to delete this participant?")) {
         try {
           await deleteParticipantMutation.mutateAsync(participantId);
@@ -63,11 +61,17 @@ export default function ParticipantsPage() {
           console.error("Delete submission error:", error);
         }
       }
-    };
-  }, [deleteParticipantMutation]);
+    },
+    [deleteParticipantMutation]
+  );
 
   const columns = useMemo(
-    () => getParticipantColumns(() => handleDeleteParticipant, handleOpenDialog, handleShowProfile),
+    () =>
+      getParticipantColumns(
+        handleDeleteParticipant,
+        handleOpenDialog,
+        handleShowProfile
+      ),
     [handleDeleteParticipant]
   );
 
@@ -86,7 +90,7 @@ export default function ParticipantsPage() {
           participant={selectedParticipant}
           isOpen={showProfile}
           onOpenChange={setShowProfile}
-          />
+        />
       )}
     </div>
   );
