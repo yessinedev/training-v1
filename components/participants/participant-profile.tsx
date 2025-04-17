@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +18,6 @@ import {
   FileIcon,
 } from "lucide-react";
 import { Badge } from "../ui/badge";
-import { SeanceStatut } from "@prisma/client";
 
 type ParticipantProfileProps = {
   participant: Participant;
@@ -40,19 +38,7 @@ function PresenceStatusBadge({ status }: { status: PresenceStatus }) {
   return <Badge variant={variants[status]}>{status}</Badge>;
 }
 
-function ActionStatusBadge({ status }: { status: SeanceStatut }) {
-  const variants: Record<
-    SeanceStatut,
-    "default" | "destructive" | "secondary" | "outline"
-  > = {
-    EN_ATTENTE: "default",
-    EN_COURS: "secondary",
-    TERMINEE: "outline",
-    ANNULEE: "destructive",
-  };
 
-  return <Badge variant={variants[status]}>{status}</Badge>;
-}
 
 const ParticipantProfile = ({
   participant,
@@ -124,7 +110,6 @@ const ParticipantProfile = ({
                           ).toLocaleDateString()}
                         </div>
                       </div>
-                      {/* <ActionStatusBadge status={action.action.} /> */}
                     </div>
                   ))}
                 </div>

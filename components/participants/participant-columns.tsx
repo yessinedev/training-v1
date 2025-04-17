@@ -1,13 +1,13 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "../ui/badge";
 import { Edit, Eye, Trash } from "lucide-react";
 import { createActionColumn, createGenericColumns } from "../dt/columns";
-import { Participant, User } from "@/types";
+import { Participant } from "@/types";
 import { Checkbox } from "../ui/checkbox";
 
 export const getParticipantColumns = (
   handleDelete: (userId: string) => void,
-  handleEdit?: (participant: Participant) => void
+  handleEdit?: (participant: Participant) => void,
+  handleShowProfile?: (participant: Participant) => void
 ): ColumnDef<Participant>[] => [
   {
     id: "select",
@@ -71,7 +71,7 @@ export const getParticipantColumns = (
     {
       label: "Profile",
       icon: <Eye className="h-4 w-4" />,
-      onClick: (data) => handleEdit && handleEdit(data),
+      onClick: (data) => handleShowProfile && handleShowProfile(data),
       variant: "default",
     },
     {

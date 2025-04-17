@@ -1,10 +1,7 @@
 "use client";
-import { Button } from "@/components/ui/button";
-
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useCallback, useMemo, useState } from "react";
-import { ParticipateManyDialog } from "@/components/participants/ParticipateManyDialog";
 import { useAuthQuery } from "@/hooks/useAuthQuery";
 import {
   deleteParticipant,
@@ -14,11 +11,29 @@ import { useAuthMutation } from "@/hooks/useAuthMutation";
 import { getParticipantColumns } from "@/components/participants/participant-columns";
 import { DataTable } from "@/components/dt/data-table";
 import { ParticipantOverviewCards } from "@/components/participants/participants-overview-cards";
+import { Participant } from "@/types";
+import ParticipantProfile from "@/components/participants/participant-profile";
 
 export default function ParticipantsPage() {
-  const queryClient = useQueryClient();
-  const [checkedParticipants, setCheckedParticipants] = useState<string[]>([]);
+  const [showProfile, setShowProfile] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] =
+    useState<Participant | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const handleOpenDialog = (participant?: Participant) => {
+    setSelectedParticipant(participant ?? null);
+    setIsDialogOpen(true);
+  };
+
+
+  const handleShowProfile = (participant: Participant) => {
+    setSelectedParticipant(participant);
+    setShowProfile(true);
+  };
+
+
 
   const {
     data: participants,
@@ -52,7 +67,7 @@ export default function ParticipantsPage() {
   }, [deleteParticipantMutation]);
 
   const columns = useMemo(
-    () => getParticipantColumns(() => handleDeleteParticipant),
+    () => getParticipantColumns(() => handleDeleteParticipant, handleOpenDialog, handleShowProfile),
     [handleDeleteParticipant]
   );
 
@@ -64,19 +79,14 @@ export default function ParticipantsPage() {
       <div className="flex flex-row items-center justify-start space-y-4 md:flex-col md:items-start md:space-y-1">
         <ParticipantOverviewCards participants={participants} />
         <h2 className="text-2xl font-bold">Gestion des participants</h2>
-        {checkedParticipants.length > 0 && (
-          <Button onClick={() => setIsDialogOpen(true)}>
-            Ajouter Action Formation
-          </Button>
-        )}
       </div>
       <DataTable data={participants} columns={columns} searchColumn="email" />
-      {isDialogOpen && (
-        <ParticipateManyDialog
-          participantsIds={checkedParticipants}
-          isOpen={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
-        />
+      {showProfile && selectedParticipant && (
+        <ParticipantProfile
+          participant={selectedParticipant}
+          isOpen={showProfile}
+          onOpenChange={setShowProfile}
+          />
       )}
     </div>
   );
