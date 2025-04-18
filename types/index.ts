@@ -174,12 +174,36 @@ export type File = {
   action?: Formation;
 };
 
-export type QuestionType = "text" | "choice" | "rating" | "boolean";
+export type QuestionType = 'text' | 'multiple_choice' | 'checkbox' | 'rating' | 'boolean'
 
-export interface Question {
-  id: string;
-  type: QuestionType;
-  text: string;
-  required: boolean;
-  options?: string[];
+export type Survey = {
+  id: string
+  title: string
+  description?: string
+  status: 'draft' | 'published' | 'closed'
+  questions: Question[]
 }
+
+export type Question = {
+  id: string
+  surveyId: string
+  text: string
+  type: QuestionType
+  options?: string[]
+  required: boolean
+}
+
+export type Response = {
+  id: string
+  surveyId: string
+  participantId?: string
+  answers: Answer[]
+}
+
+export type Answer = {
+  id: string
+  questionId: string
+  responseId: string
+  content: any
+}
+
