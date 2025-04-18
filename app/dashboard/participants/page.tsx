@@ -13,12 +13,15 @@ import { DataTable } from "@/components/dt/data-table";
 import { ParticipantOverviewCards } from "@/components/participants/participants-overview-cards";
 import { Participant } from "@/types";
 import ParticipantProfile from "@/components/participants/participant-profile";
+import ParticipantForm from "@/components/participants/participant-form";
+import { Button } from "@/components/ui/button";
 
 export default function ParticipantsPage() {
   const [showProfile, setShowProfile] = useState(false);
   const [selectedParticipant, setSelectedParticipant] =
     useState<Participant | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddParticipant, setIsAddParticipant] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -82,7 +85,10 @@ export default function ParticipantsPage() {
     <div className="space-y-4">
       <div className="flex flex-row items-center justify-start space-y-4 md:flex-col md:items-start md:space-y-1">
         <ParticipantOverviewCards participants={participants} />
-        <h2 className="text-2xl font-bold">Gestion des participants</h2>
+        <div className="flex flex-row items-center justify-between w-full py-4">
+          <h2 className="text-2xl font-bold">Gestion des participants</h2>
+          <Button onClick={() => setIsAddParticipant(true)}>Ajouter un participant</Button>
+        </div>
       </div>
       <DataTable data={participants} columns={columns} searchColumn="email" />
       {showProfile && selectedParticipant && (
@@ -90,6 +96,12 @@ export default function ParticipantsPage() {
           participant={selectedParticipant}
           isOpen={showProfile}
           onOpenChange={setShowProfile}
+        />
+      )}
+      {isAddParticipant && (
+        <ParticipantForm
+          isOpen={isAddParticipant}
+          onOpenChange={setIsAddParticipant}
         />
       )}
     </div>

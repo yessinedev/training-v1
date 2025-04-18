@@ -45,6 +45,7 @@ export type CreateParticipant = {
   entreprise: string;
   poste: string;
 };
+
 export type Participant = {
   user_id: string;
   entreprise?: string;
@@ -59,10 +60,11 @@ export type Participant = {
 export type CreateUserParticipant = {
   nom: string;
   prenom: string;
-  email?: string;
-  telephone?: string;
-  entreprise?: string;
-  poste?: string;
+  email: string;
+  telephone: string;
+  entreprise: string;
+  poste: string;
+  role_id: number;
 };
 
 export type ExcelParticipant = {

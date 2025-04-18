@@ -24,21 +24,22 @@ import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { Role } from "@/types";
+import { createUserParticipant } from "@/services/participantService";
 
 const formSchema = z.object({
   nom: z.string().min(1, "Last name is required").max(100),
   prenom: z.string().min(1, "First name is required").max(100),
-  email: z.string().email().optional().nullable(),
-  telephone: z.string().optional().nullable(),
-  entreprise: z.string().optional().nullable(),
-  poste: z.string().optional().nullable(),
+  email: z.string().email(),
+  telephone: z.string(),
+  entreprise: z.string(),
+  poste: z.string(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 type ParticipantFormProps = {
   isOpen: boolean;
-  formationId: number;
+  formationId?: number;
   onOpenChange: (open: boolean) => void;
 };
 
@@ -83,24 +84,17 @@ const ParticipantForm = ({
   const createParticipantMutation = useMutation({
     mutationFn: async (data: FormValues) => {
       const participantRole = roles?.find((r) => r.role_name === "PARTICIPANT");
-      const userPayload = {
+      const userParticipantPayload = {
         email: data.email,
         nom: data.nom,
         prenom: data.prenom,
         telephone: data.telephone,
-        role_id: participantRole?.role_id,
+        entreprise: data.entreprise,
+        poste: data.poste,
+        role_id: participantRole?.role_id!,
       };
-
-      const res = await axiosInstance.post("/users/create", userPayload);
-      if (res.status === 201) {
-        const response = await axiosInstance.post("/participants/create", {
-          user_id: res.data.user_id,
-          entreprise: data.entreprise || null,
-          poste: data.poste || null,
-        });
-        console.log("Participant created:", response.data);
-        return response.data;
-      }
+      const response = await createUserParticipant(userParticipantPayload);
+      return response.data;
     },
   });
 
