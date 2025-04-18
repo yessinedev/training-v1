@@ -38,11 +38,12 @@ type NavItem = {
 
 // Navigation data for ADMIN
 const adminNav: NavItem[] = [
-  { title: "Tableau de bord", url: "/dashboard", icon: Home, isActive: true },
+  { title: "Tableau de bord", url: "/dashboard", icon: Home, isActive: false },
   {
     title: "Gestion des accès",
     url: "#",
     icon: Users,
+    isActive: true,
     items: [
       { title: "Utilisateurs", url: "/dashboard/utilisateurs", icon: Users },
       { title: "Rôles et permissions", url: "/dashboard/roles", icon: Settings2 },
@@ -54,28 +55,31 @@ const adminNav: NavItem[] = [
     title: "Gestion des formations",
     url: "#",
     icon: BookOpen,
+    isActive: true,
     items: [
       { title: "Catalogue de formations", url: "/dashboard/catalogue", icon: BookOpen },
       { title: "Sessions planifiées", url: "/dashboard/sessions", icon: Calendar },
       { title: "Calendrier des seances", url: "/dashboard/calendrier", icon: Calendar },
     ],
   },
-  {
-    title: "Gestion financière",
-    icon: EuroIcon,
-    url: "#",
-    items: [
-      { title: "Devis", url: "/dashboard/devis", icon: FileText },
-      { title: "Facturation", url: "/dashboard/factures", icon: FileText },
-      { title: "Coûts et budgets", url: "/finance/couts", icon: EuroIcon },
-      { title: "Suivi des paiements", url: "/finance/paiements", icon: EuroIcon },
-      { title: "Rapports financiers", url: "/finance/rapports", icon: BarChart },
-    ],
-  },
+  // {
+  //   title: "Gestion financière",
+  //   icon: EuroIcon,
+  //   url: "#",
+  //   isActive: true,
+  //   items: [
+  //     { title: "Devis", url: "/dashboard/devis", icon: FileText },
+  //     { title: "Facturation", url: "/dashboard/factures", icon: FileText },
+  //     { title: "Coûts et budgets", url: "/finance/couts", icon: EuroIcon },
+  //     { title: "Suivi des paiements", url: "/finance/paiements", icon: EuroIcon },
+  //     { title: "Rapports financiers", url: "/finance/rapports", icon: BarChart },
+  //   ],
+  // },
   {
     title: "Analyses et rapports",
     icon: BarChart,
     url: "#",
+    isActive: true,
     items: [
       { title: "Participation", url: "/dashboard/rapports/participation", icon: BarChart },
       { title: "Progression des formations", url: "/dashboard/rapports/progression", icon: BarChart },
@@ -85,20 +89,11 @@ const adminNav: NavItem[] = [
     title: "Applications",
     url: "#",
     icon: PenTool,
+    isActive: true,
     items: [
       { title: "Questionnaires", url: "/dashboard/questionnaires", icon: PenTool },
       { title: "Évaluations", url: "/dashboard/evaluations", icon: ClipboardList },
       { title: "Certificats", url: "/dashboard/certificats", icon: FileText },
-    ],
-  },
-  {
-    title: "Paramètres",
-    url: "#",
-    icon: Settings2,
-    items: [
-      { title: "Généraux", url: "/dashboard/settings", icon: Settings2 },
-      { title: "Notifications", url: "/dashboard/notifications", icon: Settings2 },
-      { title: "Intégrations", url: "/dashboard/integrations", icon: Settings2 },
     ],
   },
 ];
@@ -154,13 +149,6 @@ const participantNav: NavItem[] = [
   { title: "Mes Attestations", url: "/dashboard/certificats", icon: FileText },
 ];
 
-// const data = {
-//   user: {
-//     name: ",
-//     email: "m@example.com",
-//     avatar: "/avatars/shadcn.jpg",
-//   },
-// };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
@@ -188,7 +176,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader></SidebarHeader>
+      <SidebarHeader>
+      </SidebarHeader>
       <SidebarContent>
         <NavMain items={navItems} />
       </SidebarContent>

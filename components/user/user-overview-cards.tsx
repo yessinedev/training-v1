@@ -30,8 +30,8 @@ export function UserOverviewCards() {
   const mostRecentUser = users?.[users?.length - 1] ?? null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <Card className="hover:shadow-lg transition-shadow">
+    <div className="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <Card className="shadow-md border-b-[7px] border-primary hover:shadow-lg transition-shadow">
         <CardContent className="pt-6">
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-primary/10 rounded-full">
@@ -47,7 +47,7 @@ export function UserOverviewCards() {
         </CardContent>
       </Card>
 
-      <Card className="hover:shadow-lg transition-shadow">
+      <Card className="shadow-md border-b-[7px] border-primary hover:shadow-lg transition-shadow">
         <CardContent className="pt-6">
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full">
@@ -71,7 +71,7 @@ export function UserOverviewCards() {
         </CardContent>
       </Card>
 
-      <Card className="hover:shadow-lg transition-shadow">
+      <Card className="shadow-md border-b-[7px] border-primary hover:shadow-lg transition-shadow">
         <CardContent className="pt-6">
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
@@ -92,7 +92,7 @@ export function UserOverviewCards() {
         </CardContent>
       </Card>
 
-      <Card className="hover:shadow-lg transition-shadow">
+      <Card className="shadow-md border-b-[7px] border-primary hover:shadow-lg transition-shadow">
         <CardContent className="pt-6">
           <div className="flex items-center space-x-4">
             <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-full">

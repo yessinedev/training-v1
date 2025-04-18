@@ -121,11 +121,11 @@ const FormateurForm = ({
       }
   
       if (cvFile) {
-        formData.append("files", cvFile); 
+        formData.append("CV", cvFile); 
       }
   
       if (badgeFile) {
-        formData.append("files", badgeFile);
+        formData.append("BADGE", badgeFile);
       }
   
   

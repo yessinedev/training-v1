@@ -18,6 +18,9 @@ const config: Config = {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+      boxShadow: {
+        'card': '0 2px 8px rgba(0, 0, 0, 0.08)', // subtle shadow
+      },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -30,7 +33,7 @@ const config: Config = {
   				foreground: 'hsl(var(--popover-foreground))'
   			},
   			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
+  				DEFAULT: 'hsl(var(--accent))',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
   			secondary: {
