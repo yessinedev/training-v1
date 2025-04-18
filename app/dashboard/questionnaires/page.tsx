@@ -15,7 +15,7 @@ import { Question, QuestionType } from '@/types';
 
 
 
-export default function EvaluationsPage() {
+export default function SurveyPage() {
   const [title, setTitle] = useState('Nouveau Questionnaire');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [activeTab, setActiveTab] = useState('edit');
