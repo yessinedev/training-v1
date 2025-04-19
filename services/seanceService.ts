@@ -12,18 +12,25 @@ export const fetchSeanceById = async (seanceId: number) => {
 };
 
 export const fetchSeancesByFormationId = async (formationId: number) => {
-    const response = await axiosInstance.get(`/seances/formation/${formationId}`);
-    return response.data;
-};
-    
-
-export const createSeance = async (seance: Omit<Seance, 'seance_id'>) => {
-  const response = await axiosInstance.post("/seances", seance);
+  const response = await axiosInstance.get(`/seances/formation/${formationId}`);
   return response.data;
 };
 
+export const createSeance = async (seance: Omit<Seance, "seance_id">) => {
+  try {
+    const response = await axiosInstance.post("/seances", seance);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating seance:", error);
+    throw error;
+  }
+};
+
 export const updateSeance = async (seance: Seance) => {
-  const response = await axiosInstance.put(`/seances/${seance.seance_id}`, seance);
+  const response = await axiosInstance.put(
+    `/seances/${seance.seance_id}`,
+    seance
+  );
   return response.data;
 };
 

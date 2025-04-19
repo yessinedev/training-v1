@@ -88,7 +88,7 @@ export type Attestation = {
 
 export type ActionFormationParticipant = {
   action_id: number;
-  participant_id: number;
+  participant_id: string;
   date_inscription?: Date;
   statut?: string;
   action: Formation;
@@ -98,7 +98,7 @@ export type ActionFormationParticipant = {
 
 export type ActionFormationFormateur = {
   action_id: number;
-  formateur_id: number;
+  formateur_id: string;
   formateur: Formateur;
 };
 

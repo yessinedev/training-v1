@@ -226,7 +226,7 @@ export default function SurveyEditorPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div className="flex flex-col justify-center gap-2 w-full">
           <Input

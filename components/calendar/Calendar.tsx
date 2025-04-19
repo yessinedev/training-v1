@@ -108,6 +108,7 @@ export function Calendar() {
     const newSeance: Seance = {
       seance_id: 0,
       action_id: selectedFormation?.action_id ?? 0,
+      formateur_id: selectedFormation?.formateurs[0].formateur_id ?? "",
       date: selectedDate,
       heure: heure,
       duree_heures: duration,
