@@ -1,79 +1,82 @@
-"use client"
+"use client";
 
-import React from "react"
-import { Question } from "@/types"
-import { useSortable } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
-import { Card, CardHeader, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { GripVerticalIcon, TrashIcon, PlusIcon, XIcon } from "lucide-react"
+import React from "react";
+import { Question } from "@/types";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { GripVerticalIcon, TrashIcon, PlusIcon, XIcon } from "lucide-react";
+import { parseQuestionOptions } from "@/lib/utils";
 
 interface Props {
-  questions: Question[]
-  onUpdate: (id: string, changes: Partial<Question>) => void
-  onRemove: (id: string) => void
+  questions: Question[];
+  onUpdate: (id: string, changes: Partial<Question>) => void;
+  onRemove: (id: string) => void;
 }
 
-export default function SurveyBuilder({ questions, onUpdate, onRemove }: Props) {
+export default function SurveyBuilder({
+  questions,
+  onUpdate,
+  onRemove,
+}: Props) {
   return (
     <div className="space-y-4">
-      {questions.map(q => (
+      {questions.map((q) => (
         <QuestionEditor
           key={q.id}
           question={q}
-          onChange={changes => onUpdate(q.id, changes)}
+          onChange={(changes) => onUpdate(q.id, changes)}
           onRemove={() => onRemove(q.id)}
         />
       ))}
     </div>
-  )
+  );
 }
 
 interface EditorProps {
-  question: Question
-  onChange: (changes: Partial<Question>) => void
-  onRemove: () => void
+  question: Question;
+  onChange: (changes: Partial<Question>) => void;
+  onRemove: () => void;
 }
 
-export function QuestionEditor({
-  question,
-  onChange,
-  onRemove,
-}: EditorProps) {
+export function QuestionEditor({ question, onChange, onRemove }: EditorProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: question.id })
+    useSortable({ id: question.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-  }
+  };
+
+  
 
   const addOption = () => {
     if (question.options) {
       onChange({
         options: [...question.options, `Option ${question.options.length + 1}`],
-      })
+      });
     }
-  }
+  };
 
   const updateOption = (index: number, value: string) => {
     if (question.options) {
-      const opts = [...question.options]
-      opts[index] = value
-      onChange({ options: opts })
+      const opts = [...question.options];
+      opts[index] = value;
+      onChange({ options: opts });
     }
-  }
+  };
 
   const removeOption = (index: number) => {
     if (question.options && question.options.length > 1) {
       onChange({
         options: question.options.filter((_, i) => i !== index),
-      })
+      });
     }
-  }
+  };
 
   return (
     <Card ref={setNodeRef} style={style}>
@@ -111,7 +114,7 @@ export function QuestionEditor({
       {/* Body: options list */}
       {question.type === "multiple_choice" && question.options && (
         <CardContent className="space-y-2 px-3 pb-3">
-          {question?.options.map((opt, idx) => (
+          {parseQuestionOptions(question).map((opt, idx) => (
             <div key={idx} className="flex items-center space-x-2">
               <Input
                 value={opt}
@@ -141,6 +144,5 @@ export function QuestionEditor({
         </CardContent>
       )}
     </Card>
-  )
+  );
 }
-

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Star } from "lucide-react";
+import { parseQuestionOptions } from "@/lib/utils";
 
 interface SurveyPreviewerProps {
   survey: Survey;
@@ -20,10 +21,8 @@ export default function SurveyPreviewer({ survey }: SurveyPreviewerProps) {
   return (
     <div className="space-y-6">
       {/* Optional progress indicator */}
-      
 
       <Card>
-        
         <CardContent className="space-y-8 px-4 py-6">
           {survey.questions.map((q, i) => (
             <QuestionPreview key={q.id} question={q} />
@@ -38,7 +37,7 @@ interface QuestionPreviewProps {
   question: Question;
 }
 
-function QuestionPreview({ question}: QuestionPreviewProps) {
+function QuestionPreview({ question }: QuestionPreviewProps) {
   return (
     <Card className="border border-border">
       <CardContent className="space-y-4 px-4 py-4">
@@ -58,7 +57,7 @@ function QuestionPreview({ question}: QuestionPreviewProps) {
 
         {question.type === "multiple_choice" && question.options && (
           <RadioGroup className="space-y-3">
-            {question.options.map((opt, idx) => (
+            {parseQuestionOptions(question).map((opt, idx) => (
               <label
                 key={idx}
                 htmlFor={`q-${question.id}-opt-${idx}`}

@@ -1,19 +1,22 @@
-import { useQuery, UseQueryOptions, QueryFunction } from '@tanstack/react-query';
+import { useQuery, UseQueryOptions, QueryFunction, QueryKey } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
 
 type AuthQueryFn<T> = (token: string, roleId?: string) => Promise<T>;
 
 export function useAuthQuery<T>(
-  queryKey: any[],
+  queryKey: QueryKey,
   authQueryFn: AuthQueryFn<T>,
   roleId?: string,
-  options?: UseQueryOptions<T>
+  options?: Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryKey' | 'queryFn'>
 ) {
   const { getToken } = useAuth();
 
   const queryFn: QueryFunction<T> = async () => {
     const token = await getToken({ template: 'my-jwt-template' });
-    return authQueryFn(token!, roleId);
+    if (!token) {
+      throw new Error("Authentication token not available.");
+    }
+    return authQueryFn(token, roleId);
   };
 
   return useQuery<T>({

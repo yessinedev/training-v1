@@ -181,6 +181,7 @@ export type Survey = {
   title: string
   description?: string
   status: 'draft' | 'published' | 'closed'
+  createdBy: string;
   questions: Question[]
 }
 
