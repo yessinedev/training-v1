@@ -31,6 +31,7 @@ import { fetchSurveyById, updateSurvey } from "@/services/surveyService";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { deleteQuestion } from "@/services/questionService";
 
 export default function SurveyEditorPage() {
   const params = useParams();
@@ -81,6 +82,24 @@ export default function SurveyEditorPage() {
       },
     }
   );
+
+  const deleteQuestionMutation = useAuthMutation(deleteQuestion, {
+    onSuccess: (_, questionId) => {
+      toast.success("Question deleted successfully!");
+      setSurvey((s) => {
+        if (!s) return null;
+        return {
+          ...s,
+          questions: s.questions.filter((q) => q.id !== questionId),
+        };
+      });
+    },
+    onError: (error) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to delete question: ${errorMessage}`);
+    },
+  });
 
   const handleSave = () => {
     if (survey) {
@@ -146,15 +165,19 @@ export default function SurveyEditorPage() {
     []
   );
 
-  const removeQuestion = useCallback((id: string) => {
-    setSurvey((s) => {
-      if (!s) return null;
-      return {
-        ...s,
-        questions: s.questions.filter((q) => q.id !== id),
-      };
-    });
-  }, []);
+  const removeQuestion = useCallback(
+    (id: string) => {
+      setSurvey((s) => {
+        if (!s) return null;
+        return {
+          ...s,
+          questions: s.questions.filter((q) => q.id !== id),
+        };
+      });
+      deleteQuestionMutation.mutate(id);
+    },
+    [deleteQuestionMutation]
+  );
 
   const handleDragEnd = useCallback(
     (e: DragEndEvent) => {
