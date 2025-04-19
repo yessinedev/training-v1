@@ -106,6 +106,7 @@ export function Calendar() {
     onSuccess: () => {
       toast.success("Séance mise à jour avec succès");
       setIsModalOpen(false);
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -198,6 +199,38 @@ export function Calendar() {
           dropInfo
         );
         dropInfo.revert();
+      }
+    },
+    [queryClient, updateSeanceMutation, queryKey]
+  );
+
+  const handleEventResize = useCallback(
+    (resizeInfo: EventDropArg) => {
+      const seanceId = Number(resizeInfo.event.id);
+      const currentSessions = queryClient.getQueryData<Seance[]>(queryKey);
+      const seance = currentSessions?.find((s) => s.seance_id === seanceId);
+
+      if (seance && resizeInfo.event.start && resizeInfo.event.end) {
+        const updatedSeance: Seance = {
+          ...seance,
+          heure: resizeInfo.event.start.toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          }),
+          duree_heures:
+            (resizeInfo.event.end.getTime() -
+              resizeInfo.event.start.getTime()) /
+            (1000 * 60 * 60),
+        };
+        console.log("Updated seance:", updatedSeance);
+        updateSeanceMutation.mutate(updatedSeance);
+      } else {
+        console.warn(
+          "Could not find seance or event end date for resize:",
+          resizeInfo
+        );
+        resizeInfo.revert();
       }
     },
     [queryClient, updateSeanceMutation, queryKey]
@@ -302,6 +335,7 @@ export function Calendar() {
             select={handleDateSelect}
             eventClick={handleEventClick}
             eventDrop={handleEventDrop}
+            eventResize={handleEventResize}
             height="100%"
             stickyHeaderDates={true}
             expandRows={true}
