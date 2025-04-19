@@ -14,8 +14,6 @@ import {
 import { useAuthQuery } from "@/hooks/useAuthQuery";
 import {
   fetchSurveys,
-  createSurvey,
-  CreateSurveyPayload,
 } from "@/services/surveyService";
 import { Survey } from "@/types";
 import CreateSurveyDialog from "@/components/evaluations/CreateSurveyDialog";
@@ -50,7 +48,7 @@ const SurveysPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {surveys.map((survey) => (
-            <Card key={survey.id}>
+            <Card key={survey.id} className="shadow-md border-l-[7px] border-primary hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle>{survey.title}</CardTitle>
                 <CardDescription>

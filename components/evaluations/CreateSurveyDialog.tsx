@@ -27,7 +27,6 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthMutation } from "@/hooks/useAuthMutation";
 import { createSurvey, CreateSurveyPayload } from "@/services/surveyService";
-import { Survey } from "@/types";
 import { useUser } from "@clerk/nextjs";
 
 const formSchema = z.object({

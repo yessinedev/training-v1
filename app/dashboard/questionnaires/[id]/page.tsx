@@ -84,8 +84,24 @@ export default function SurveyEditorPage() {
 
   const handleSave = () => {
     if (survey) {
-      // Now mutate with the transformed payload
-      saveSurveyMutation.mutate(survey);
+      const surveyPayload = JSON.parse(JSON.stringify(survey));
+
+      surveyPayload.questions = surveyPayload.questions.map((q: Question) => {
+        if (q.options && Array.isArray(q.options)) {
+          return {
+            ...q,
+            options: JSON.stringify(q.options),
+          };
+        }
+        if (typeof q.options === "string") {
+          return q;
+        }
+        return {
+          ...q,
+          options: undefined,
+        };
+      });
+      saveSurveyMutation.mutate(surveyPayload);
     }
   };
 
