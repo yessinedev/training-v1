@@ -81,7 +81,7 @@ export function UserOverviewCards() {
               <p className="text-sm font-medium text-muted-foreground">
                 Distribution des Rôles
               </p>
-              {Object.entries(roleDistribution).map(([role, count]) => (
+              {Object.entries(roleDistribution!)?.map(([role, count]) => (
                 <h3
                   key={role}
                   className="text-sm font-bold"
