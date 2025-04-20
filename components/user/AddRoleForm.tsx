@@ -80,14 +80,13 @@ const RoleForm = ({ role, isOpen, onClose, onOpenChange }: RoleFormProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
-      toast.success(`Role ${isEditing ? "updated" : "created"} successfully`);
+      toast.success(`Role ${isEditing ? "modifier" : "créer"} avec succés`);
       form.reset();
       onClose();
     },
     onError: (error: Error) => {
-      const message = error.message || "Failed to save role";
+      const message = error.message || "Un erreur s'est produite lors de la sauvgarde du role";
       toast.error(message);
-      console.error("Error saving role:", error);
     },
   });
 

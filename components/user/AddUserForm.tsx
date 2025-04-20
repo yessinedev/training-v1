@@ -36,6 +36,7 @@ import { useAuth } from "@clerk/nextjs";
 import FileInput from "../FileInput";
 import { createOrUpdateFormateur } from "@/services/formateurService";
 import { createOrUpdateParticipant } from "@/services/participantService";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 const formSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
@@ -197,154 +198,26 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
               : "ajouter un nouvel utilisateur et cliquer sur le bouton d'enregistrement"}
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="nom"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nom" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="prenom"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Prenom</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Prenom" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="telephone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Telephone</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Numero de telephone" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="role_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      const selectedRole = roles?.find(
-                        (r) => r.role_id.toString() === value
-                      );
-                      form.setValue("role_name", selectedRole?.role_name || "");
-                    }}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selectionner un role">
-                          {form.watch("role_name") || "Selectionner un role"}
-                        </SelectValue>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {roles?.map((role: Role) => (
-                        <SelectItem
-                          key={role.role_id}
-                          value={role.role_id.toString()}
-                        >
-                          {role.role_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {!isEditing && roleName === "FORMATEUR" && (
-              <div className="flex flex-col gap-3">
+        <Tabs defaultValue="utilisateur" className="w-[400px]">
+          <TabsList>
+            <TabsTrigger value="utilisateur">Utilisateur</TabsTrigger>
+            <TabsTrigger value="formateur">Formateur</TabsTrigger>
+            <TabsTrigger value="participant">Participant</TabsTrigger>
+          </TabsList>
+          <TabsContent value="utilisateur">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
-                  name="cv_file"
-                  render={({ field: { onChange, ...field } }) => (
-                    <FormItem>
-                      <FormControl>
-                        <FileInput
-                          accept=".pdf,.doc,.docx"
-                          label="CV Document"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              onChange(file);
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="badge_file"
-                  render={({ field: { onChange, ...field } }) => (
-                    <FormItem>
-                      <FormControl>
-                        <FileInput
-                          accept="image/*"
-                          label="Badge Photo"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              onChange(file);
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-            {!isEditing && roleName === "PARTICIPANT" && (
-              <div>
-                <FormField
-                  control={form.control}
-                  name="entreprise"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Entreprise</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="Nom d'entreprise" {...field} />
+                        <Input placeholder="Email" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -352,32 +225,177 @@ const UserForm = ({ user, isOpen, onClose, onOpenChange }: UserFormProps) => {
                 />
                 <FormField
                   control={form.control}
-                  name="poste"
+                  name="nom"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Poste</FormLabel>
+                      <FormLabel>Nom</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Poste actuelle dans l'entreprise"
-                          {...field}
-                        />
+                        <Input placeholder="Nom" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-            )}
-            <div className="flex justify-end gap-4 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+                <FormField
+                  control={form.control}
+                  name="prenom"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prenom</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Prenom" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="telephone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telephone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Numero de telephone" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="role_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          const selectedRole = roles?.find(
+                            (r) => r.role_id.toString() === value
+                          );
+                          form.setValue(
+                            "role_name",
+                            selectedRole?.role_name || ""
+                          );
+                        }}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selectionner un role">
+                              {form.watch("role_name") ||
+                                "Selectionner un role"}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {roles?.map((role: Role) => (
+                            <SelectItem
+                              key={role.role_id}
+                              value={role.role_id.toString()}
+                            >
+                              {role.role_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {!isEditing && roleName === "FORMATEUR" && (
+                  <div className="flex flex-col gap-3">
+                    <FormField
+                      control={form.control}
+                      name="cv_file"
+                      render={({ field: { onChange, ...field } }) => (
+                        <FormItem>
+                          <FormControl>
+                            <FileInput
+                              accept=".pdf,.doc,.docx"
+                              label="CV Document"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  onChange(file);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="badge_file"
+                      render={({ field: { onChange, ...field } }) => (
+                        <FormItem>
+                          <FormControl>
+                            <FileInput
+                              accept="image/*"
+                              label="Badge Photo"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  onChange(file);
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+                {!isEditing && roleName === "PARTICIPANT" && (
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="entreprise"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Entreprise</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Nom d'entreprise" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="poste"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Poste</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Poste actuelle dans l'entreprise"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+                <div className="flex justify-end gap-4 pt-4">
+                  <Button type="button" variant="outline" onClick={onClose}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </TabsContent>
+          <TabsContent value="password">Change your password here.</TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
