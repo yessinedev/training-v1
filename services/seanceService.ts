@@ -27,11 +27,16 @@ export const createSeance = async (seance: Omit<Seance, "seance_id">) => {
 };
 
 export const updateSeance = async (seance: Seance) => {
-  const response = await axiosInstance.put(
-    `/seances/${seance.seance_id}`,
-    seance
-  );
-  return response.data;
+  try {
+    const response = await axiosInstance.put(
+      `/seances/${seance.seance_id}`,
+      seance
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating seance:", error);
+    throw error;
+  }
 };
 
 export const deleteSeance = async (seanceId: number) => {

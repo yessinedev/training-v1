@@ -4,7 +4,9 @@ import { useState, useCallback } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
+import interactionPlugin, {
+  EventResizeDoneArg,
+} from "@fullcalendar/interaction";
 import frLocale from "@fullcalendar/core/locales/fr";
 import { EventClickArg, DateSelectArg, EventDropArg } from "@fullcalendar/core";
 import { SeanceModal } from "./SeanceModal";
@@ -205,7 +207,7 @@ export function Calendar() {
   );
 
   const handleEventResize = useCallback(
-    (resizeInfo: EventDropArg) => {
+    (resizeInfo: EventResizeDoneArg) => {
       const seanceId = Number(resizeInfo.event.id);
       const currentSessions = queryClient.getQueryData<Seance[]>(queryKey);
       const seance = currentSessions?.find((s) => s.seance_id === seanceId);

@@ -24,6 +24,9 @@ export type FormUser = Omit<
 
 export type Formateur = {
   user_id: string;
+  tarif_heure?: number;
+  tarif_jour?: number;
+  tarif_seance?: number;
   files: File[];
   user: User;
   seances: Seance[];
@@ -109,6 +112,7 @@ export type Formation = {
   date_fin: Date;
   duree_jours: number;
   duree_heures: number;
+  prix_unitaire?: number;
   lieu: string;
   nb_participants_prevu: number;
   theme_id: number;
@@ -167,6 +171,7 @@ export type File = {
   file_id: number;
   file_path: string;
   type: string;
+  title: string;
   formateur_id?: string;
   action_id?: number;
 
@@ -174,37 +179,41 @@ export type File = {
   action?: Formation;
 };
 
-export type QuestionType = 'text' | 'multiple_choice' | 'checkbox' | 'rating' | 'boolean'
+export type QuestionType =
+  | "text"
+  | "multiple_choice"
+  | "checkbox"
+  | "rating"
+  | "boolean";
 
 export type Survey = {
-  id: string
-  title: string
-  description?: string
-  status: 'draft' | 'published' | 'closed'
+  id: string;
+  title: string;
+  description?: string;
+  status: "draft" | "published" | "closed";
   createdBy: string;
-  questions: Question[]
-}
+  questions: Question[];
+};
 
 export type Question = {
-  id: string
-  surveyId: string
-  text: string
-  type: QuestionType
-  options?: string[]
-  required: boolean
-}
+  id: string;
+  surveyId: string;
+  text: string;
+  type: QuestionType;
+  options?: string[];
+  required: boolean;
+};
 
 export type Response = {
-  id: string
-  surveyId: string
-  participantId?: string
-  answers: Answer[]
-}
+  id: string;
+  surveyId: string;
+  participantId?: string;
+  answers: Answer[];
+};
 
 export type Answer = {
-  id: string
-  questionId: string
-  responseId: string
-  content: any
-}
-
+  id: string;
+  questionId: string;
+  responseId: string;
+  content: any;
+};
