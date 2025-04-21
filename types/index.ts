@@ -22,7 +22,7 @@ export type FormUser = Omit<
   user_id?: number;
 };
 
-export type Formateur = {
+export type Formateur  = {
   user_id: string;
   tarif_heure?: number;
   tarif_jour?: number;

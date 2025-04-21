@@ -16,8 +16,13 @@ export const createOrUpdateFormateur = async (
     const response = await axiosInstance.put("/formateurs", data, config);
     return response.data;
   } else {
-    const response = await axiosInstance.post("/formateurs", data, config);
+    try {
+      const response = await axiosInstance.post("/formateurs", data, config);
     return response.data;
+    } catch (error) {
+      throw error;
+    }
+    
   }
 };
 

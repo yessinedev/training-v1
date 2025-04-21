@@ -12,6 +12,7 @@ import UserForm from "./UserForm";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
+import FormateurForm from "../formateurs/formateur-form";
 
 const AddUsersModal = () => {
   return (
@@ -38,7 +39,9 @@ const AddUsersModal = () => {
           <TabsContent value="utilisateur">
             <UserForm />
           </TabsContent>
-          <TabsContent value="password">Change your password here.</TabsContent>
+          <TabsContent value="formateur">
+            <FormateurForm />
+          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
