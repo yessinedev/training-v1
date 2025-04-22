@@ -25,6 +25,7 @@ import FormateurForm from "./formateur-form";
 import { DataTable } from "../dt/data-table";
 import { getFormateurColumns } from "./formateur-columns";
 import FormateurProfile from "./formateur-profile";
+import FormateurFormDialog from "./FormateurFormDialog";
 
 const FormateursTable = () => {
   const [selectedFormateur, setSelectedFormateur] = useState<Formateur | null>(
@@ -107,10 +108,9 @@ const FormateursTable = () => {
       </Button>
       <DataTable data={formateurs} columns={columns} />
       {isDialogOpen && (
-        <FormateurForm
+        <FormateurFormDialog
           formateur={selectedFormateur || undefined}
           isOpen={isDialogOpen}
-          onClose={handleCloseDialog}
           onOpenChange={setIsDialogOpen}
         />
       )}

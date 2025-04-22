@@ -143,8 +143,8 @@ export function Calendar() {
       const start = new Date(selectInfo.startStr);
       const end = new Date(selectInfo.endStr);
 
-      const selectedDate = new Date(start.toDateString()); // remove time
-      const heure = start.toTimeString().slice(0, 5); // "HH:MM"
+      const selectedDate = new Date(start.toDateString()); 
+      const heure = start.toTimeString().slice(0, 5); 
       const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60); // in hours
 
       const newSeance: Seance = {

@@ -153,9 +153,9 @@ export default function AddParticipantDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Confirmé">Confirmed</SelectItem>
-                      <SelectItem value="En attente">Pending</SelectItem>
-                      <SelectItem value="Liste d'attente">Waitlist</SelectItem>
+                      <SelectItem value="Confirmé">Confirmé</SelectItem>
+                      <SelectItem value="En attente">En attente</SelectItem>
+                      <SelectItem value="Liste d'attente">Liste d'attente</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

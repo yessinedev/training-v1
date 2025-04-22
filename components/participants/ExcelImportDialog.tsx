@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useCallback, useState } from "react";
 import {
   Dialog,
@@ -9,11 +9,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet} from "lucide-react";
+import { FileSpreadsheet } from "lucide-react";
 import { QueryClient, useMutation } from "@tanstack/react-query";
-import { CreateUserParticipant, ExcelParticipant, Participant } from "@/types";
+import { CreateParticipant, ExcelParticipant, Participant, Role } from "@/types";
 import * as XLSX from "xlsx";
 import axiosInstance from "@/lib/axios";
+import { useAuthQuery } from "@/hooks/useAuthQuery";
+import { fetchRoles } from "@/services/roleService";
+import { toast } from "sonner";
 
 type Props = {
   isOpen: boolean;
@@ -25,8 +28,10 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
   const queryClient = new QueryClient();
   const [isLoading, setIsLoading] = useState(false);
 
+  const { data } = useAuthQuery<Role[]>(["roles"], fetchRoles);
+
   const uploadMutation = useMutation({
-    mutationFn: async (data: CreateUserParticipant[]) => {
+    mutationFn: async (data: CreateParticipant[]) => {
       const response = await axiosInstance.post(`/participant/create`, data);
       return response.data;
     },
@@ -61,7 +66,11 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
 
   const handleFileUpload = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
-      console.log("File selected:", event.target.files);
+      const role = data?.find((role) => role.role_name === "PARTICIPANT");
+      if (!role) {
+        toast.error("Le role PARTICIPANT n'existe pas.")
+        return;
+      }
       const file = event.target.files?.[0];
       if (!file) return;
 
@@ -84,7 +93,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
             telephone: String(row["Telephone"] || "").trim(),
             email: String(row["Email"] || "").trim(),
             poste: String(row["Poste"] || "").trim(),
-            role_id: 4
+            role_id: role?.role_id,
           }));
 
           if (processedData.length === 0) {
@@ -96,13 +105,12 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
           );
           if (insertedPaticipants) {
             console.log(insertedPaticipants);
-            const actionParticipants =
-              insertedPaticipants.successful.map(
-                (part: Participant) => ({
-                  participant_id: part.user_id,
-                  statut: "Confirmé",
-                })
-              );
+            const actionParticipants = insertedPaticipants.successful.map(
+              (part: Participant) => ({
+                participant_id: part.user_id,
+                statut: "Confirmé",
+              })
+            );
             await participateMutation.mutateAsync(actionParticipants);
           }
         };

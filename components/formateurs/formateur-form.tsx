@@ -1,15 +1,9 @@
 "use client";
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+
 import {
   Form,
   FormControl,
@@ -18,81 +12,102 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { Formateur, User } from "@/types";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
+import { Formateur, Role } from "@/types";
 import { useFormateurMutation } from "@/hooks/useFormateurMutation";
-import FileInput from "../FileInput";
-import { fetchUsers } from "@/services/userService";
+import { Input } from "../ui/input";
+import { useAuthQuery } from "@/hooks/useAuthQuery";
+import { fetchRoles } from "@/services/roleService";
 
 const formSchema = z.object({
-  user_id: z.string().min(1, "User is required"),
+  nom: z.string().min(1, "Last name is required").max(100),
+  prenom: z.string().min(1, "First name is required").max(100),
+  email: z.string().email(),
+  telephone: z.string(),
+  tarif_heure: z.string().optional(),
+  tarif_jour: z.string().optional(),
+  tarif_seance: z.string().optional(),
 });
 
-type FormValues = {
-  user_id: string;
-};
+type FormValues = z.infer<typeof formSchema>;
+
+type TarifType = "heure" | "jour" | "seance";
 
 type FormateurFormProps = {
   formateur?: Formateur;
-  isOpen: boolean;
-  onClose: () => void;
-  onOpenChange: (open: boolean) => void;
 };
 
-const FormateurForm = ({
-  formateur,
-  isOpen,
-  onClose,
-  onOpenChange,
-}: FormateurFormProps) => {
+const FormateurForm = ({ formateur }: FormateurFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [cvFile, setCvFile] = useState<File | null>(null);
-  const [badgeFile, setBadgeFile] = useState<File | null>(null);
+  const [selectedTarifType, setSelectedTarifType] = useState<TarifType | null>(
+    null
+  );
   const isEditing = !!formateur;
   const queryClient = useQueryClient();
+
+  const formateurId = formateur?.user.user_id;
+
+  const { data: roles = [], isLoading: rolesLoading } = useAuthQuery<Role[]>(
+    ["roles"],
+    fetchRoles
+  );
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      user_id: "",
+      nom: "",
+      prenom: "",
+      email: "",
+      telephone: "",
+      tarif_heure: "",
+      tarif_jour: "",
+      tarif_seance: "",
     },
   });
 
-  const { data: users } = useAuthQuery(["users"], fetchUsers, "3");
-
-  
-
   useEffect(() => {
-    if (isOpen && formateur) {
+    if (formateur) {
+      console.log("Formateur data in useEffect:", formateur);
+      let initialTarifType: TarifType | null = null;
+      if (formateur.tarif_heure) initialTarifType = "heure";
+      else if (formateur.tarif_jour) initialTarifType = "jour";
+      else if (formateur.tarif_seance) initialTarifType = "seance";
+      setSelectedTarifType(initialTarifType);
+
       form.reset({
-        user_id: formateur.user_id.toString(),
+        nom: formateur.user.nom,
+        prenom: formateur.user.prenom,
+        email: formateur.user.email,
+        telephone: formateur.user.telephone,
+        tarif_heure: formateur.tarif_heure?.toString() ?? "",
+        tarif_jour: formateur.tarif_jour?.toString() ?? "",
+        tarif_seance: formateur.tarif_seance?.toString() ?? "",
       });
     } else {
       form.reset({
-        user_id: "",
+        nom: "",
+        prenom: "",
+        email: "",
+        telephone: "",
+        tarif_heure: "",
+        tarif_jour: "",
+        tarif_seance: "",
       });
-      setCvFile(null);
-      setBadgeFile(null);
+      setSelectedTarifType(null);
     }
-  }, [formateur, isOpen, form]);
+  }, [formateur, form]);
 
   const mutation = useFormateurMutation(
     isEditing,
+    formateurId,
     () => {
       queryClient.invalidateQueries({ queryKey: ["formateurs"] });
       toast.success(
         `Formateur ${isEditing ? "updated" : "created"} successfully`
       );
-      onClose();
     },
     (error) => {
       const errorMessage =
@@ -109,109 +124,260 @@ const FormateurForm = ({
     }
   );
 
+  const handleTarifTypeChange = (value: string) => {
+    const newTarifType = value as TarifType;
+    setSelectedTarifType(newTarifType);
+    if (newTarifType !== "heure") form.setValue("tarif_heure", "");
+    if (newTarifType !== "jour") form.setValue("tarif_jour", "");
+    if (newTarifType !== "seance") form.setValue("tarif_seance", "");
+  };
+
   const onSubmit = async (values: FormValues) => {
+    const formateurRole = roles.find((role) => role.role_name === "FORMATEUR");
+    if (!formateurRole && !isEditing) {
+      toast.error("FORMATEUR role not found. Cannot create formateur.");
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const formData = new FormData();
-  
-      if (isEditing) {
-        formData.append("formateur_id", formateur.user_id);
-      } else {
-        formData.append("user_id", values.user_id);
-      }
-  
-      if (cvFile) {
-        formData.append("CV", cvFile); 
-      }
-  
-      if (badgeFile) {
-        formData.append("BADGE", badgeFile);
-      }
-  
-  
-      await mutation.mutateAsync(formData);
+      const payload = {
+        ...values,
+        role_id: formateurRole?.role_id,
+        tarif_heure: values.tarif_heure
+          ? parseFloat(values.tarif_heure)
+          : undefined,
+        tarif_jour: values.tarif_jour
+          ? parseFloat(values.tarif_jour)
+          : undefined,
+        tarif_seance: values.tarif_seance
+          ? parseFloat(values.tarif_seance)
+          : undefined,
+      };
+      console.log(typeof payload);
+      console.log("Form values before mutation:", payload);
+      await mutation.mutateAsync(payload);
     } catch (error) {
-      console.error("Form submission error:", error);
+      console.error("Form submission error caught in component:", error);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
+  const handleCancel = () => {
+    if (formateur) {
+      let initialTarifType: TarifType | null = null;
+      if (formateur.tarif_heure) initialTarifType = "heure";
+      else if (formateur.tarif_jour) initialTarifType = "jour";
+      else if (formateur.tarif_seance) initialTarifType = "seance";
+      setSelectedTarifType(initialTarifType);
+      form.reset({
+        nom: formateur.user.nom,
+        prenom: formateur.user.prenom,
+        email: formateur.user.email,
+        telephone: formateur.user.telephone,
+        tarif_heure: formateur.tarif_heure?.toString() ?? "",
+        tarif_jour: formateur.tarif_jour?.toString() ?? "",
+        tarif_seance: formateur.tarif_seance?.toString() ?? "",
+      });
+    } else {
+      form.reset({
+        nom: "",
+        prenom: "",
+        email: "",
+        telephone: "",
+        tarif_heure: "",
+        tarif_jour: "",
+        tarif_seance: "",
+      });
+      setSelectedTarifType(null);
+    }
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Edit Formateur" : "Add New Formateur"}
-          </DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? "Update the formateur information and click the update button"
-              : "Enter the formateur information and click the save button"}
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {!isEditing && (
-              <FormField
-                control={form.control}
-                name="user_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>User</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select user" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {users?.map((user: User) => (
-                          <SelectItem
-                            key={user.user_id}
-                            value={user.user_id.toString()}
-                          >
-                            {user.prenom} {user.nom} - {user.email}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        
+        <FormField
+          control={form.control}
+          name="prenom"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Prenom</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="saisir le Prenom"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="nom"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Nom</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="saisir le Nom"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="telephone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Telephone"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormItem className="space-y-3">
+          <FormLabel>Type de tarif</FormLabel>
+          <FormControl>
+            <RadioGroup
+              onValueChange={handleTarifTypeChange}
+              value={selectedTarifType ?? ""}
+              aria-checked={selectedTarifType ? true : false}
+              className="flex space-x-4"
+            >
+              <FormItem className="flex items-center space-x-2 space-y-0">
+                <FormControl>
+                  <RadioGroupItem value="heure" />
+                </FormControl>
+                <FormLabel className="font-normal">Hourly</FormLabel>
+              </FormItem>
+              <FormItem className="flex items-center space-x-2 space-y-0">
+                <FormControl>
+                  <RadioGroupItem value="jour" />
+                </FormControl>
+                <FormLabel className="font-normal">Daily</FormLabel>
+              </FormItem>
+              <FormItem className="flex items-center space-x-2 space-y-0">
+                <FormControl>
+                  <RadioGroupItem value="seance" />
+                </FormControl>
+                <FormLabel className="font-normal">Session</FormLabel>
+              </FormItem>
+            </RadioGroup>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+
+        {selectedTarifType === "heure" && (
+          <FormField
+            control={form.control}
+            name="tarif_heure"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tarif / Heure</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Entrer le tarif par heure"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-            <FormItem>
-              <FileInput
-                accept=".pdf,.doc,.docx"
-                label="CV Document"
-                onChange={(e) =>
-                  e.target.files?.[0] && setCvFile(e.target.files[0])
-                }
-              />
-            </FormItem>
-            <FormItem>
-              <FileInput
-                accept="image/*"
-                label="Badge Photo"
-                onChange={(e) =>
-                  e.target.files?.[0] && setBadgeFile(e.target.files[0])
-                }
-              />
-            </FormItem>
-            <div className="flex justify-end gap-4 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          />
+        )}
+        {selectedTarifType === "jour" && (
+          <FormField
+            control={form.control}
+            name="tarif_jour"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Daily Rate (€)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter daily rate"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        {selectedTarifType === "seance" && (
+          <FormField
+            control={form.control}
+            name="tarif_seance"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Session Rate (€)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter session rate"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <div className="flex justify-end gap-4 pt-4">
+          <Button type="button" variant="outline" onClick={handleCancel}>
+            Annuler
+          </Button>
+          <Button
+            type="submit"
+            disabled={isLoading || mutation.isPending || rolesLoading}
+          >
+            {isLoading || mutation.isPending
+              ? "Enregistrement..."
+              : isEditing
+              ? "Modifier"
+              : "Enregistrer"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 

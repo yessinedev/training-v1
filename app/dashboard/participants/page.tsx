@@ -13,8 +13,8 @@ import { DataTable } from "@/components/dt/data-table";
 import { ParticipantOverviewCards } from "@/components/participants/participants-overview-cards";
 import { Participant } from "@/types";
 import ParticipantProfile from "@/components/participants/participant-profile";
-import ParticipantForm from "@/components/participants/participant-form";
 import { Button } from "@/components/ui/button";
+import { ParticipantModal } from "@/components/participants/ParticipantModal";
 
 export default function ParticipantsPage() {
   const [showProfile, setShowProfile] = useState(false);
@@ -87,7 +87,9 @@ export default function ParticipantsPage() {
         <ParticipantOverviewCards participants={participants} />
         <div className="flex flex-row items-center justify-between w-full py-4">
           <h2 className="text-2xl font-bold">Gestion des participants</h2>
-          <Button onClick={() => setIsAddParticipant(true)}>Ajouter un participant</Button>
+          <Button onClick={() => setIsAddParticipant(true)}>
+            Ajouter un participant
+          </Button>
         </div>
       </div>
       <DataTable data={participants} columns={columns} searchColumn="email" />
@@ -99,9 +101,16 @@ export default function ParticipantsPage() {
         />
       )}
       {isAddParticipant && (
-        <ParticipantForm
+        <ParticipantModal
           isOpen={isAddParticipant}
           onOpenChange={setIsAddParticipant}
+        />
+      )}
+      {isDialogOpen && selectedParticipant && (
+        <ParticipantModal
+          isOpen={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          participant={selectedParticipant}
         />
       )}
     </div>

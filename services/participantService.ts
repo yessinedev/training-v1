@@ -1,26 +1,17 @@
 import axiosInstance from "@/lib/axios";
-import { CreateParticipant, CreateUserParticipant } from "@/types";
+import { CreateParticipant } from "@/types";
 
-export const createOrUpdateParticipant = async (
-  token: string,
+export const createParticipant = async (
   data: CreateParticipant,
-  isEditiong: boolean
+  token?: string
 ) => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   };
-
-  if (isEditiong) {
-    await axiosInstance.put("/participants", data, config);
-  } else {
-    await axiosInstance.post("/participants/create", data, config);
-  }
-};
-
-export const createUserParticipant = async (data: CreateUserParticipant) => {
-  return await axiosInstance.post("/participants/create-user-participant", data);
+  const response = await axiosInstance.post("/participants", data, config);
+  return response.data;
 };
 
 export const fetchParticipants = async (token: string): Promise<any> => {
@@ -30,6 +21,24 @@ export const fetchParticipants = async (token: string): Promise<any> => {
     },
   };
   const response = await axiosInstance.get("/participants", config);
+  return response.data;
+};
+
+export const updateParticipant = async (
+  participantId: string,
+  data: CreateParticipant,
+  token?: string
+) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const response = await axiosInstance.put(
+    `/participants/${participantId}`,
+    data,
+    config
+  );
   return response.data;
 };
 
