@@ -13,6 +13,7 @@ import { DialogTrigger } from "@radix-ui/react-dialog";
 import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import FormateurForm from "../formateurs/formateur-form";
+import { ParticipantForm } from "../participants/participant-form";
 
 const AddUsersModal = () => {
   return (
@@ -41,6 +42,9 @@ const AddUsersModal = () => {
           </TabsContent>
           <TabsContent value="formateur">
             <FormateurForm />
+          </TabsContent>
+          <TabsContent value="participant">
+            <ParticipantForm  />
           </TabsContent>
         </Tabs>
       </DialogContent>

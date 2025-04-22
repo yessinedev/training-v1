@@ -18,7 +18,6 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Formateur, Role } from "@/types";
 import { useFormateurMutation } from "@/hooks/useFormateurMutation";
-import FileInput from "../FileInput";
 import { Input } from "../ui/input";
 import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { fetchRoles } from "@/services/roleService";
@@ -43,13 +42,13 @@ type FormateurFormProps = {
 
 const FormateurForm = ({ formateur }: FormateurFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [cvFile, setCvFile] = useState<File | null>(null);
-  const [badgeFile, setBadgeFile] = useState<File | null>(null);
   const [selectedTarifType, setSelectedTarifType] = useState<TarifType | null>(
     null
   );
   const isEditing = !!formateur;
   const queryClient = useQueryClient();
+
+  const formateurId = formateur?.user.user_id;
 
   const { data: roles = [], isLoading: rolesLoading } = useAuthQuery<Role[]>(
     ["roles"],
@@ -71,6 +70,7 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
 
   useEffect(() => {
     if (formateur) {
+      console.log("Formateur data in useEffect:", formateur);
       let initialTarifType: TarifType | null = null;
       if (formateur.tarif_heure) initialTarifType = "heure";
       else if (formateur.tarif_jour) initialTarifType = "jour";
@@ -97,13 +97,12 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
         tarif_seance: "",
       });
       setSelectedTarifType(null);
-      setCvFile(null);
-      setBadgeFile(null);
     }
   }, [formateur, form]);
 
   const mutation = useFormateurMutation(
     isEditing,
+    formateurId,
     () => {
       queryClient.invalidateQueries({ queryKey: ["formateurs"] });
       toast.success(
@@ -142,39 +141,24 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
 
     try {
       setIsLoading(true);
-      const formData = new FormData();
-
-      formData.append("nom", values.nom);
-      formData.append("prenom", values.prenom);
-      formData.append("email", values.email);
-      formData.append("telephone", values.telephone);
-
-      if (!isEditing && formateurRole) {
-        formData.append("role_id", formateurRole.role_id.toString());
-      }
-
-      if (selectedTarifType === "heure" && values.tarif_heure) {
-        formData.append("tarif_heure", values.tarif_heure);
-      } else if (selectedTarifType === "jour" && values.tarif_jour) {
-        formData.append("tarif_jour", values.tarif_jour);
-      } else if (selectedTarifType === "seance" && values.tarif_seance) {
-        formData.append("tarif_seance", values.tarif_seance);
-      }
-
-      if (cvFile) {
-        formData.append("CV", cvFile);
-      }
-      if (badgeFile) {
-        formData.append("BADGE", badgeFile);
-      }
-
-      if (isEditing && formateur?.user.user_id) {
-        formData.append("user_id", formateur.user.user_id.toString());
-      }
-
-      await mutation.mutateAsync(formData);
+      const payload = {
+        ...values,
+        role_id: formateurRole?.role_id,
+        tarif_heure: values.tarif_heure
+          ? parseFloat(values.tarif_heure)
+          : undefined,
+        tarif_jour: values.tarif_jour
+          ? parseFloat(values.tarif_jour)
+          : undefined,
+        tarif_seance: values.tarif_seance
+          ? parseFloat(values.tarif_seance)
+          : undefined,
+      };
+      console.log(typeof payload);
+      console.log("Form values before mutation:", payload);
+      await mutation.mutateAsync(payload);
     } catch (error) {
-      console.error("Form submission error:", error);
+      console.error("Form submission error caught in component:", error);
     } finally {
       setIsLoading(false);
     }
@@ -208,23 +192,21 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
       });
       setSelectedTarifType(null);
     }
-    setCvFile(null);
-    setBadgeFile(null);
   };
-
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        
         <FormField
           control={form.control}
-          name="nom"
+          name="prenom"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Last Name</FormLabel>
+              <FormLabel>Prenom</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Last Name"
+                  placeholder="saisir le Prenom"
                   {...field}
                   value={field.value ?? ""}
                 />
@@ -235,13 +217,13 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
         />
         <FormField
           control={form.control}
-          name="prenom"
+          name="nom"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>First Name</FormLabel>
+              <FormLabel>Nom</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="First Name"
+                  placeholder="saisir le Nom"
                   {...field}
                   value={field.value ?? ""}
                 />
@@ -276,7 +258,7 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
               <FormLabel>Phone</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Phone"
+                  placeholder="Telephone"
                   {...field}
                   value={field.value ?? ""}
                 />
@@ -287,11 +269,12 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
         />
 
         <FormItem className="space-y-3">
-          <FormLabel>Select Tarif Type</FormLabel>
+          <FormLabel>Type de tarif</FormLabel>
           <FormControl>
             <RadioGroup
               onValueChange={handleTarifTypeChange}
               value={selectedTarifType ?? ""}
+              aria-checked={selectedTarifType ? true : false}
               className="flex space-x-4"
             >
               <FormItem className="flex items-center space-x-2 space-y-0">
@@ -323,11 +306,11 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
             name="tarif_heure"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Hourly Rate (€)</FormLabel>
+                <FormLabel>Tarif / Heure</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter hourly rate"
+                    placeholder="Entrer le tarif par heure"
                     {...field}
                     value={field.value ?? ""}
                   />
@@ -378,37 +361,19 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
           />
         )}
 
-        <div className="flex flex-row space-x-4 items-start">
-          <FormItem className="flex-1">
-            <FileInput
-              accept=".pdf,.doc,.docx"
-              label="CV Document"
-              onChange={(e) =>
-                e.target.files?.[0] && setCvFile(e.target.files[0])
-              }
-            />
-          </FormItem>
-          <FormItem className="flex-1">
-            <FileInput
-              accept="image/*"
-              label="Badge Photo"
-              onChange={(e) =>
-                e.target.files?.[0] && setBadgeFile(e.target.files[0])
-              }
-            />
-          </FormItem>
-        </div>
-
         <div className="flex justify-end gap-4 pt-4">
           <Button type="button" variant="outline" onClick={handleCancel}>
-            Cancel
+            Annuler
           </Button>
-          <Button type="submit" disabled={isLoading || mutation.isPending || rolesLoading}>
+          <Button
+            type="submit"
+            disabled={isLoading || mutation.isPending || rolesLoading}
+          >
             {isLoading || mutation.isPending
-              ? "Saving..."
+              ? "Enregistrement..."
               : isEditing
-              ? "Update"
-              : "Save"}
+              ? "Modifier"
+              : "Enregistrer"}
           </Button>
         </div>
       </form>
