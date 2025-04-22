@@ -7,8 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import AssignTrainerDialog from "./assign-trainer-dialog";
 import GenerateAttestationsDialog from "./generate-attestation-dialog";
-import ParticipantForm from "../participants/participant-form";
 import ExcelImportDialog from "../participants/ExcelImportDialog";
+import { ParticipantModal } from "../participants/ParticipantModal";
 
 type FormationActionsProps = {
   formationId: number;
@@ -68,7 +68,7 @@ export default function FormationActions({
         </CardContent>
       </Card>
       {isAddParticipantOpen && (
-        <ParticipantForm
+        <ParticipantModal
           formationId={formationId}
           isOpen={isAddParticipantOpen}
           onOpenChange={setIsAddParticipantOpen}
