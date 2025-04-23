@@ -63,7 +63,7 @@ const ActionFormationFormateursTable = ({ actionId }: Props) => {
         <CardHeader>
           <CardTitle>Trainers</CardTitle>
           <CardDescription>
-            Manage trainers assigned to this session
+            Gérer les formateurs de cette action de formation
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -71,9 +71,9 @@ const ActionFormationFormateursTable = ({ actionId }: Props) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
+                  <TableHead>Prénom et Nom</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
+                  <TableHead>Telephone</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -100,11 +100,11 @@ const ActionFormationFormateursTable = ({ actionId }: Props) => {
                               }
                             >
                               <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Remove trainer</span>
+                              <span className="sr-only">Supprimer formateur</span>
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Remove trainer</p>
+                            <p>Supprimer formateur</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

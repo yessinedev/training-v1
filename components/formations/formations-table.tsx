@@ -142,8 +142,8 @@ const FormationsTable = () => {
                             <TableRow>
                               <TableHead>Type</TableHead>
                               <TableHead>Date</TableHead>
-                              <TableHead>Duration</TableHead>
-                              <TableHead>Location</TableHead>
+                              <TableHead>Durée</TableHead>
+                              <TableHead>Lieu</TableHead>
                               <TableHead>Participants</TableHead>
                               <TableHead>Trainer</TableHead>
                               <TableHead className="text-right">
@@ -181,7 +181,7 @@ const FormationsTable = () => {
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <Users className="h-4 w-4" />
-                                    {formation.nb_participants_prevu}
+                                    {formation.participants.length} / {formation.nb_participants_prevu}
                                   </div>
                                 </TableCell>
                                 <TableCell>
