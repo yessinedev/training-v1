@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -68,10 +68,11 @@ export default function AssignTrainerDialog({
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      console.log(data)
-      const response = await axiosInstance.post(`/formations/${formationId}/formateurs`, {
-        formateur_id: parseInt(data.formateur_id),
-      });
+      console.log(typeof data.formateur_id)
+      const response = await axiosInstance.post(
+        `/formations/${formationId}/formateurs`,
+        {formateurId: data.formateur_id}
+      );
       return response.data;
     },
     onSuccess: () => {
@@ -110,10 +111,7 @@ export default function AssignTrainerDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Trainer</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select trainer" />
@@ -143,10 +141,7 @@ export default function AssignTrainerDialog({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-              >
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Assigning..." : "Assign Trainer"}
               </Button>
             </div>
