@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { persistQueryClient } from "@tanstack/react-query-persist-client";
-import { LoadingSkeleton } from "@/app/dashboard/loading";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
