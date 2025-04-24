@@ -28,7 +28,7 @@ const AddUsersModal = () => {
         <DialogHeader>
           <DialogTitle>Ajouter un utilisateur</DialogTitle>
           <DialogDescription>
-            Remplissez les informations de l'utilisateur.
+            {"Remplissez les informations de l'utilisateur."}
           </DialogDescription>
         </DialogHeader>
         <Tabs defaultValue="utilisateur" className="w-full">

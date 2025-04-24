@@ -63,12 +63,12 @@ const SurveysPage = () => {
               </CardContent>
               <CardFooter className="flex justify-end">
                 <Link
-                  href={`/dashboard/questionnaires/${survey.id}`}
+                  href={`/dashboard/questionnaires/editeur/${survey.id}`}
                   className="flex justify-end"
                     passHref
                 >
                   <Button variant="outline" size="lg">
-                    Voir
+                    Modifier
                   </Button>
                 </Link>
               </CardFooter>
