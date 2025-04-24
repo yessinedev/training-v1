@@ -31,9 +31,9 @@ export default function EditUserModal({ user, isOpen, onOpenChange }: EditUserMo
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Modifier l'utilisateur</DialogTitle>
+          <DialogTitle>{"Modifier l'utilisateur"}</DialogTitle>
           <DialogDescription>
-            Mettre à jour les informations de l'utilisateur.
+            {"Mettre à jour les informations de l'utilisateur."}
           </DialogDescription>
         </DialogHeader>
         <UserForm initialValues={user} />

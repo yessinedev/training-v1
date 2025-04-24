@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -68,10 +68,11 @@ export default function AssignTrainerDialog({
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      console.log(data)
-      const response = await axiosInstance.post(`/formations/${formationId}/formateurs`, {
-        formateur_id: parseInt(data.formateur_id),
-      });
+      console.log(typeof data.formateur_id)
+      const response = await axiosInstance.post(
+        `/formations/${formationId}/formateurs`,
+        {formateurId: data.formateur_id}
+      );
       return response.data;
     },
     onSuccess: () => {
@@ -100,7 +101,7 @@ export default function AssignTrainerDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Assign Trainer</DialogTitle>
+          <DialogTitle>Assigner un Formateur</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -109,14 +110,11 @@ export default function AssignTrainerDialog({
               name="formateur_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Trainer</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+                  <FormLabel>Formateur</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select trainer" />
+                        <SelectValue placeholder="Selectionner un formateur" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -141,13 +139,10 @@ export default function AssignTrainerDialog({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
               >
-                Cancel
+                Annuler
               </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-              >
-                {isLoading ? "Assigning..." : "Assign Trainer"}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "En Cours..." : "Assigner"}
               </Button>
             </div>
           </form>

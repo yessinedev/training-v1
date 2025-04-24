@@ -155,7 +155,7 @@ export default function AddParticipantDialog({
                     <SelectContent>
                       <SelectItem value="Confirmé">Confirmé</SelectItem>
                       <SelectItem value="En attente">En attente</SelectItem>
-                      <SelectItem value="Liste d'attente">Liste d'attente</SelectItem>
+                      <SelectItem value="Liste d'attente">{"Liste d'attente"}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

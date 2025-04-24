@@ -10,8 +10,26 @@ export const createParticipant = async (
       Authorization: `Bearer ${token}`,
     },
   };
-  const response = await axiosInstance.post("/participants", data, config);
+  const response = await axiosInstance.post("/participants/create", data, config);
   return response.data;
+};
+
+export const assignParticipantsToFormation = async (
+  formationId: number,
+  participantIds: string[]
+): Promise<any> => { 
+  const participantsWithStatus = participantIds.map((id) => ({
+    participant_id: id,
+    statut: "Confirmé", 
+  }));
+  try {
+    const response = await axiosInstance.post(
+      `/formations/${formationId}/participants`, participantsWithStatus
+    );
+    return response.data;
+  } catch (error) {
+    throw error; 
+  }
 };
 
 export const fetchParticipants = async (token: string): Promise<any> => {

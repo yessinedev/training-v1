@@ -173,19 +173,8 @@ const FormationForm = ({
         user_id: data.user_id ? parseInt(data.user_id, 10) : undefined,
       };
 
-      if (isNaN(payload.theme_id)) throw new Error("ID de thème invalide.");
-      if (isNaN(payload.duree_heures))
-        throw new Error("Durée en heures invalide.");
-      if (payload.prix_unitaire !== undefined && isNaN(payload.prix_unitaire))
-        throw new Error("Prix unitaire invalide.");
-      if (isNaN(payload.nb_participants_prevu))
-        throw new Error("Nombre de participants invalide.");
-      
-
-      console.log("Payload:", payload);
-
       if (isEditing && formation) {
-        const response = await axiosInstance.put(`/formations`, {
+        const response = await axiosInstance.put(`/formations/${formation.action_id}`, {
           action_id: formation.action_id,
           ...payload,
         });
@@ -277,11 +266,10 @@ const FormationForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="presentielle">
-                          Présentielle
+                        <SelectItem value="Intra">
+                          Intra
                         </SelectItem>
-                        <SelectItem value="distance">À distance</SelectItem>
-                        <SelectItem value="hybride">Hybride</SelectItem>
+                        <SelectItem value="Inter">Inter</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

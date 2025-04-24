@@ -62,7 +62,7 @@ const ActionForParticipants = ({ actionId }: Props) => {
       <CardHeader>
         <CardTitle>Participants</CardTitle>
         <CardDescription>
-          Manage participants and their attestations
+          Gérer les participants de cette action de formation.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -96,15 +96,15 @@ const ActionForParticipants = ({ actionId }: Props) => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {p.attestation ? (
+                    {p.participant?.attestations?.[0] ? (
                       <Badge
                         variant="default"
                         className="bg-green-100 text-green-800"
                       >
-                        Issued
+                        Emis
                       </Badge>
                     ) : (
-                      <Badge variant="outline">Pending</Badge>
+                      <Badge variant="outline">En attente</Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -122,11 +122,11 @@ const ActionForParticipants = ({ actionId }: Props) => {
                             }
                           >
                             <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Remove participant</span>
+                            <span className="sr-only">Supprimer participant</span>
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Remove participant</p>
+                          <p>Supprimer participant</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
