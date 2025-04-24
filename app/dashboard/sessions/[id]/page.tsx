@@ -20,6 +20,7 @@ export default function TrainingSessionPage() {
       console.log(response)
       return response.data;
     },
+    
   });
 
   if (isLoading || !formation) return <div>Loading...</div>;

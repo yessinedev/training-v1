@@ -3,7 +3,6 @@ import * as React from "react";
 import {
   BarChart,
   BookOpen,
-  EuroIcon,
   Home,
   PenTool,
   Settings2,
