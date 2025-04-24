@@ -1,4 +1,3 @@
-// components/TimePicker.tsx
 import React from "react";
 import {
   Select,
@@ -18,7 +17,7 @@ const TimePicker: React.FC<TimePickerProps> = ({ value, onChange }) => {
   const timeOptions = generateTimeOptions();
 
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value}  onValueChange={(val) => onChange(val)}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select a time">
           {value || "Select a time"}

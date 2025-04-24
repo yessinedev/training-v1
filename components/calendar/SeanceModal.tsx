@@ -39,13 +39,20 @@ export function SeanceModal({
   onClose,
 }: SessionModalProps) {
   const [formData, setFormData] = useState<Seance>(seance);
-  const [selectedTime, setSelectedTime] = useState(seance.heure || "08:00");
+  const [selectedTime, setSelectedTime] = useState<string>(seance.heure || "08:00");
 
-console.log(formData)
+  const handleTimeChange = (time: string) => {
+    console.log("selected time: ", time);
+    setSelectedTime(time)
+    setFormData(prev => ({
+      ...prev,
+      heure: time
+    }));
+  }
   // Handle form submission.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({...formData, heure: selectedTime});
   };
 
   return (
@@ -117,7 +124,7 @@ console.log(formData)
             {/* Time Input */}
             <div className="space-y-2">
               <Label htmlFor="heure">Heure Début</Label>
-              <TimePicker value={selectedTime} onChange={setSelectedTime} />
+              <TimePicker value={selectedTime} onChange={handleTimeChange} />
             </div>
           </div>
 

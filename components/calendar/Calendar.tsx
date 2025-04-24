@@ -46,7 +46,6 @@ export function Calendar() {
   );  const {
     data: formations,
     isLoading: formationsLoading,
-    isError: formationsError,
   } = useAuthQuery<Formation[]>(["formations"], fetchFormations);
 
   const {
@@ -171,7 +170,6 @@ export function Calendar() {
       const seance = selectedFormation?.seances?.find(
         (s) => s.seance_id === Number(clickInfo.event.id)
       );
-      console.log("Clicked event:", seance);
       if (!seance) return;
       setSelectedSeance(seance!);
       setIsModalOpen(true);
@@ -246,6 +244,7 @@ export function Calendar() {
         const { seance_id, ...newSeance } = session;
         createSeanceMutation.mutate(newSeance);
       } else {
+        console.log("updating: session: ", session)
         updateSeanceMutation.mutate(session);
       }
     },
