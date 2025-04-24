@@ -16,9 +16,6 @@ const nextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            // Start with a basic policy and adjust as needed for your specific application
-            // This example allows resources from self, inline styles/scripts, and data URIs for images.
-            // For production, aim to remove 'unsafe-inline' and 'unsafe-eval' if possible.
             value:
               "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; object-src 'none';",
           },

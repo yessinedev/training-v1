@@ -11,7 +11,12 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { FileSpreadsheet } from "lucide-react";
 import { QueryClient, useMutation } from "@tanstack/react-query";
-import { CreateParticipant, ExcelParticipant, Participant, Role } from "@/types";
+import {
+  CreateParticipant,
+  ExcelParticipant,
+  Participant,
+  Role,
+} from "@/types";
 import * as XLSX from "xlsx";
 import axiosInstance from "@/lib/axios";
 import { useAuthQuery } from "@/hooks/useAuthQuery";
@@ -68,7 +73,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
     async (event: React.ChangeEvent<HTMLInputElement>) => {
       const role = data?.find((role) => role.role_name === "PARTICIPANT");
       if (!role) {
-        toast.error("Le role PARTICIPANT n'existe pas.")
+        toast.error("Le role PARTICIPANT n'existe pas.");
         return;
       }
       const file = event.target.files?.[0];
@@ -123,7 +128,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
         onOpenChange(false);
       }
     },
-    [uploadMutation, participateMutation, onOpenChange]
+    [uploadMutation, participateMutation, onOpenChange, data]
   );
 
   return (

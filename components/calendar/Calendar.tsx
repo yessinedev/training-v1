@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -40,8 +40,10 @@ export function Calendar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const queryClient = useQueryClient();
-  const queryKey = ["seances", selectedFormation?.action_id];
-  const {
+  const queryKey = useMemo(
+    () => ["seances", selectedFormation?.action_id],
+    [selectedFormation?.action_id]
+  );  const {
     data: formations,
     isLoading: formationsLoading,
     isError: formationsError,
