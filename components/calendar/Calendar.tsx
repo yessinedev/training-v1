@@ -43,10 +43,10 @@ export function Calendar() {
   const queryKey = useMemo(
     () => ["seances", selectedFormation?.action_id],
     [selectedFormation?.action_id]
-  );  const {
-    data: formations,
-    isLoading: formationsLoading,
-  } = useAuthQuery<Formation[]>(["formations"], fetchFormations);
+  );
+  const { data: formations, isLoading: formationsLoading } = useAuthQuery<
+    Formation[]
+  >(["formations"], fetchFormations);
 
   const {
     data: sessions = [],
@@ -144,8 +144,8 @@ export function Calendar() {
       const start = new Date(selectInfo.startStr);
       const end = new Date(selectInfo.endStr);
 
-      const selectedDate = new Date(start.toDateString()); 
-      const heure = start.toTimeString().slice(0, 5); 
+      const selectedDate = new Date(start.toDateString());
+      const heure = start.toTimeString().slice(0, 5);
       const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60); // in hours
 
       const newSeance: Seance = {
@@ -244,7 +244,7 @@ export function Calendar() {
         const { seance_id, ...newSeance } = session;
         createSeanceMutation.mutate(newSeance);
       } else {
-        console.log("updating: session: ", session)
+        console.log("updating: session: ", session);
         updateSeanceMutation.mutate(session);
       }
     },
@@ -315,26 +315,33 @@ export function Calendar() {
             slotMinTime="08:00:00"
             slotMaxTime="19:00:00"
             locale={frLocale}
-            events={sessions?.map((session) => ({
-              id: String(session.seance_id),
-              title: String(session.statut),
-              start: setMinutes(
-                setHours(session.date, parseInt(session.heure)),
-                0
-              ),
-              date: session.date,
-              end: setMinutes(
-                setHours(
-                  session.date,
-                  parseInt(session.heure) + session.duree_heures
-                ),
-                0
-              ),
-              backgroundColor: "#f3f4f6",
-              borderColor: "#d1d5db",
-              textColor: "#1f2937",
-              className: "rounded-lg shadow-sm border-l-4",
-            }))}
+            events={sessions?.map((session) => {
+              const startDate = new Date(session.date);
+              const startHour = parseInt(session.heure.split(":")[0]);
+              const startMinute = parseInt(session.heure.split(":")[1]);
+
+              const startDateTime = setMinutes(
+                setHours(startDate, startHour),
+                startMinute
+              );
+
+              const durationMs = session.duree_heures * 60 * 60 * 1000;
+
+              const endDateTime = new Date(
+                startDateTime.getTime() + durationMs
+              );
+
+              return {
+                id: String(session.seance_id),
+                title: String(session.statut),
+                start: startDateTime,
+                end: endDateTime,
+                backgroundColor: "#f3f4f6",
+                borderColor: "#d1d5db",
+                textColor: "#1f2937",
+                className: "rounded-lg shadow-sm border-l-4",
+              };
+            })}
             select={handleDateSelect}
             eventClick={handleEventClick}
             eventDrop={handleEventDrop}
