@@ -24,8 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAuthMutation } from "@/hooks/useAuthMutation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createSurvey, CreateSurveyPayload } from "@/services/surveyService";
 import { useUser } from "@clerk/nextjs";
 
@@ -57,31 +56,29 @@ const CreateSurveyDialog = ({
     },
   });
 
-  // Reset form when dialog opens/closes
   useEffect(() => {
     if (!isOpen) {
       form.reset();
     }
   }, [isOpen, form]);
 
-  const createSurveyMutation = useAuthMutation(
-    createSurvey,
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["surveys"] });
-        toast.success("Survey created successfully!");
-        onOpenChange(false); // Close dialog on success
-      },
-      onError: (error) => {
-        const errorMessage =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        toast.error(`Failed to create survey: ${errorMessage}`);
-      },
-      onSettled: () => {
-        setIsLoading(false);
-      },
-    }
-  );
+  const createSurveyMutation = useMutation({
+    mutationFn: createSurvey,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["surveys"] });
+      toast.success("Survey created successfully!");
+      onOpenChange(false); // Close dialog on success
+    },
+    onError: (error) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to create survey: ${errorMessage}`);
+    },
+    onSettled: () => {
+      setIsLoading(false);
+    },
+  });
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
@@ -130,7 +127,7 @@ const CreateSurveyDialog = ({
                     <Textarea
                       placeholder="Describe the purpose of this survey..."
                       {...field}
-                      value={field.value ?? ""} // Handle potential null/undefined
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />

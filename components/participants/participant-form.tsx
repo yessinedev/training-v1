@@ -18,9 +18,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { Role, Participant } from "@/types";
 import {
+  assignParticipantsToFormation,
   createParticipant,
   updateParticipant,
 } from "@/services/participantService";
+import { fetchRoles } from "@/services/roleService";
 
 // Schema definition
 const formSchema = z.object({
@@ -92,10 +94,7 @@ export const ParticipantForm = ({
 
   const { data: roles, isLoading: rolesLoading } = useQuery<Role[]>({
     queryKey: ["roles"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/roles");
-      return response.data;
-    },
+    queryFn: fetchRoles,
     enabled: !isEditing,
   });
 
@@ -103,7 +102,7 @@ export const ParticipantForm = ({
     mutationFn: async (data: FormValues): Promise<Participant> => {
       const participantRole = roles?.find((r) => r.role_name === "PARTICIPANT");
       if (!participantRole) {
-        throw new Error("PARTICIPANT role not found.");
+        throw new Error("Le role 'PARTICIPANT' est introuvable.");
       }
       const userParticipantPayload = {
         email: data.email,
@@ -114,7 +113,7 @@ export const ParticipantForm = ({
         poste: data.poste,
         role_id: participantRole.role_id,
       };
-      const response = await createParticipant(userParticipantPayload);
+      const response = await createParticipant([userParticipantPayload]);
       return response.data || response;
     },
   });
@@ -122,7 +121,7 @@ export const ParticipantForm = ({
   const updateParticipantMutation = useMutation({
     mutationFn: async (data: FormValues): Promise<Participant> => {
       if (!participant)
-        throw new Error("Participant data is missing for update.");
+        throw new Error("Le participant à mettre à jour est introuvable.");
       const participantId = participant.user.user_id;
       const userParticipantPayload = {
         email: data.email,
@@ -145,14 +144,7 @@ export const ParticipantForm = ({
     mutationFn: async ({ participantId }: { participantId: string }) => {
       if (!formationId)
         throw new Error("Formation ID is missing for assignment.");
-      const response = await axiosInstance.post(
-        `/formations/${formationId}/participants`,
-        {
-          participant_id: participantId,
-          statut: "Confirmé",
-        }
-      );
-      return response.data;
+      await assignParticipantsToFormation(formationId, [participantId]);
     },
   });
 
@@ -171,11 +163,11 @@ export const ParticipantForm = ({
         submittedParticipant = await createParticipantMutation.mutateAsync(
           data
         );
-        console.log("Created: ", submittedParticipant)
+        console.log("Created: ", submittedParticipant);
       }
 
       if (formationId && submittedParticipant?.user?.user_id) {
-        console.log("Invoked assigning")
+        console.log("Invoked assigning");
         await assignToFormationMutation.mutateAsync({
           participantId: submittedParticipant.user.user_id,
         });

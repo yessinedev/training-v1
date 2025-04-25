@@ -1,7 +1,7 @@
 import axiosInstance from "@/lib/axios";
 import { CreateParticipant, Participant } from "@/types";
 
-export const createParticipant = async (data: CreateParticipant) => {
+export const createParticipant = async (data: CreateParticipant[]) => {
   try {
     const response = await axiosInstance.post("/participants/create", data);
     return response.data;

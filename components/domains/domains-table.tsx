@@ -17,15 +17,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Domain, Theme } from "@/types";
 import { toast } from "sonner";
 import DomainForm from "./domain-form";
 import ThemeForm from "../themes/theme-form";
 import { deleteDomaine, fetchDomaines } from "@/services/domaineService";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
-import { useAuthMutation } from "@/hooks/useAuthMutation";
-import { deleteTheme, fetchThemes } from "@/services/themeService";
+import { fetchThemes } from "@/services/themeService";
 
 const DomainsTable = () => {
   const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
@@ -59,56 +57,39 @@ const DomainsTable = () => {
     data: domains,
     isLoading: domainsLoading,
     isError: domainsError,
-  } = useAuthQuery(["domaines"], fetchDomaines);
+  } = useQuery({
+    queryKey: ["domaines"],
+    queryFn: fetchDomaines,
+  });
 
   const {
     data: themes,
     isLoading: themesLoading,
     isError: themesError,
-  } = useAuthQuery(["themes"], fetchThemes);
-
-  const deleteDomainMutation = useAuthMutation(deleteDomaine, {
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["domaines"] });
-      toast.success("Domain deleted successfully");
-    },
-    onError: (error: unknown) => {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to delete user: ${errorMessage}`);
-      console.error("Error deleting domain:", error);
-    },
+  } = useQuery({
+    queryKey: ["themes"],
+    queryFn: fetchThemes,
   });
 
-  const deleteThemeMutation = useAuthMutation(deleteTheme, {
+  const deleteDomainMutation = useMutation({
+    mutationFn: deleteDomaine,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["themes"] });
-      toast.success("Theme deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["domaines"] });
+      toast.success("Le domaine a été supprimé avec succès");
     },
-    onError: (error: unknown) => {
+    onError: (error: Error) => {
       const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to delete user: ${errorMessage}`);
-      console.error("Error deleting theme:", error);
+        error instanceof Error ? error.message : "Un erreur est survenue";
+      toast.error(errorMessage);
     },
   });
 
   const handleDeleteDomain = async (domainId: number) => {
-    if (window.confirm("Are you sure you want to delete this domain?")) {
+    if (window.confirm("Voulez-vous vraiment supprimer ce domaine ?")) {
       try {
         await deleteDomainMutation.mutateAsync(domainId);
       } catch (error) {
-        console.error("Delete submission error:", error);
-      }
-    }
-  };
-
-  const handleDeleteTheme = async (themeId: number) => {
-    if (window.confirm("Are you sure you want to delete this theme?")) {
-      try {
-        await deleteThemeMutation.mutateAsync(themeId);
-      } catch (error) {
-        console.error("Delete submission error:", error);
+        toast.error("Erreur lors de la suppression du domaine");
       }
     }
   };

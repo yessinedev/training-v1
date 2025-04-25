@@ -1,13 +1,11 @@
 "use client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useCallback, useMemo, useState } from "react";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
 import {
   deleteParticipant,
   fetchParticipants,
 } from "@/services/participantService";
-import { useAuthMutation } from "@/hooks/useAuthMutation";
 import { getParticipantColumns } from "@/components/participants/participant-columns";
 import { DataTable } from "@/components/dt/data-table";
 import { ParticipantOverviewCards } from "@/components/participants/participants-overview-cards";
@@ -39,9 +37,13 @@ export default function ParticipantsPage() {
     data: participants,
     isLoading,
     isError,
-  } = useAuthQuery(["participants"], fetchParticipants);
+  } = useQuery<Participant[]>({
+    queryKey: ["participants"],
+    queryFn: fetchParticipants,
+  });
 
-  const deleteParticipantMutation = useAuthMutation(deleteParticipant, {
+  const deleteParticipantMutation = useMutation({
+    mutationFn: deleteParticipant,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["participants"] });
       toast.success("Participant deleted successfully");
@@ -84,7 +86,7 @@ export default function ParticipantsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-row items-center justify-start space-y-4 md:flex-col md:items-start md:space-y-1">
-        <ParticipantOverviewCards participants={participants} />
+        <ParticipantOverviewCards participants={participants ?? []} />
         <div className="flex flex-row items-center justify-between w-full py-4">
           <h2 className="text-2xl font-bold">Gestion des participants</h2>
           <Button onClick={() => setIsAddParticipant(true)}>
@@ -92,7 +94,7 @@ export default function ParticipantsPage() {
           </Button>
         </div>
       </div>
-      <DataTable data={participants} columns={columns} searchColumn="email" />
+      <DataTable data={participants ?? []} columns={columns} searchColumn="email" />
       {showProfile && selectedParticipant && (
         <ParticipantProfile
           participant={selectedParticipant}

@@ -1,12 +1,13 @@
 import axiosInstance from "@/lib/axios";
 
-export const fetchRoles = async (token?: string) => {
+export const fetchRoles = async () => {
   try {
-    const { data } = await axiosInstance.get("/roles", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const { data } = await axiosInstance.get("/roles");
     return data;
   } catch (error) {
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Un erreur est survenu lors de la récupération des rôles.");
   }
 };

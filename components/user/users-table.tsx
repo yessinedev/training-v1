@@ -1,14 +1,13 @@
 "use client";
 import React, { useCallback, useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import AddUsersModal from "./AddUsersModal";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
-import { useAuthMutation } from "@/hooks/useAuthMutation";
 import { User } from "@/types";
 import { deleteUser, fetchUsers } from "@/services/userService";
 import { getUserColumns } from "./user-columns";
 import { DataTable } from "../dt/data-table";
 import EditUserModal, { EditableUser } from "./EditUserModal";
+import { toast } from "sonner";
 
 const UsersTable = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -19,16 +18,18 @@ const UsersTable = () => {
     data: users,
     isLoading,
     isError,
-  } = useAuthQuery(["users"], fetchUsers);
+  } = useQuery({ queryKey: ["users"], queryFn: () => fetchUsers() });
 
-  const deleteUserMutation = useAuthMutation(deleteUser, {
+  const deleteUserMutation = useMutation({
+    mutationFn: deleteUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (error: unknown) => {
       const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      console.error("Error deleting user:", errorMessage);
+        error instanceof Error ? error.message : "Un erreur est survenu";
+      toast.error(errorMessage);
+
     },
   });
 

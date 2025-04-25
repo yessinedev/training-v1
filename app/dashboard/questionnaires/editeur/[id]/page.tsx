@@ -25,13 +25,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SaveIcon, EyeIcon } from "lucide-react";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
-import { useAuthMutation } from "@/hooks/useAuthMutation";
 import { fetchSurveyById, updateSurvey } from "@/services/surveyService";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { deleteQuestion } from "@/services/questionService";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export default function SurveyEditorPage() {
   const params = useParams();
@@ -46,15 +45,12 @@ export default function SurveyEditorPage() {
     isLoading: isLoadingSurvey,
     isError: isFetchError,
     error: fetchError,
-  } = useAuthQuery<Survey>(
-    ["survey", surveyId],
-    (token) => fetchSurveyById(token, surveyId),
-    undefined,
-    {
-      enabled: !!surveyId,
-      refetchOnWindowFocus: false,
-    }
-  );
+  } = useQuery<Survey>({
+    queryKey: ["survey", surveyId],
+    queryFn: () => fetchSurveyById(surveyId),
+    enabled: !!surveyId,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     if (fetchedSurvey) {
@@ -62,28 +58,29 @@ export default function SurveyEditorPage() {
     }
   }, [fetchedSurvey]);
 
-  const saveSurveyMutation = useAuthMutation<Survey, Partial<Survey>>(
-    (token, surveyData) => updateSurvey(token, surveyId, surveyData),
-    {
-      onMutate: () => {
-        setIsSaving(true);
-      },
-      onSuccess: (updatedData) => {
-        toast.success("Survey saved successfully!");
-        setSurvey(updatedData);
-      },
-      onError: (error) => {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        toast.error(`Failed to save survey: ${errorMessage}`);
-      },
-      onSettled: () => {
-        setIsSaving(false);
-      },
-    }
-  );
+  const saveSurveyMutation = useMutation<Survey, Error, Partial<Survey>>({
+    mutationFn: (surveyData: Partial<Survey>) =>
+      updateSurvey(surveyId, surveyData),
 
-  const deleteQuestionMutation = useAuthMutation(deleteQuestion, {
+    onMutate: () => {
+      setIsSaving(true);
+    },
+    onSuccess: (updatedData) => {
+      toast.success("Le questionnaire a été enregistré avec succès!");
+      setSurvey(updatedData);
+    },
+    onError: (error) => {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      toast.error(errorMessage);
+    },
+    onSettled: () => {
+      setIsSaving(false);
+    },
+  });
+
+  const deleteQuestionMutation = useMutation({
+    mutationFn: deleteQuestion,
     onSuccess: (_, questionId) => {
       toast.success("Question deleted successfully!");
       setSurvey((s) => {
@@ -96,8 +93,8 @@ export default function SurveyEditorPage() {
     },
     onError: (error) => {
       const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred";
-      toast.error(`Failed to delete question: ${errorMessage}`);
+        error instanceof Error ? error.message : "Un erreur est survenue";
+      toast.error(errorMessage);
     },
   });
 

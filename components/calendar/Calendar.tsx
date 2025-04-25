@@ -29,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { formatDate, setHours, setMinutes } from "date-fns";
 
 export function Calendar() {
@@ -44,9 +43,12 @@ export function Calendar() {
     () => ["seances", selectedFormation?.action_id],
     [selectedFormation?.action_id]
   );
-  const { data: formations, isLoading: formationsLoading } = useAuthQuery<
+  const { data: formations, isLoading: formationsLoading } = useQuery<
     Formation[]
-  >(["formations"], fetchFormations);
+  >({
+    queryKey: ["formations"],
+    queryFn: fetchFormations,
+  });
 
   const {
     data: sessions = [],
@@ -70,7 +72,7 @@ export function Calendar() {
       setIsModalOpen(false);
     },
     onError: (error: Error) => {
-      toast.error(`Erreur lors de la création: ${error.message}`);
+      toast.error(error.message);
     },
   });
 

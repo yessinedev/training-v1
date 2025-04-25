@@ -15,11 +15,10 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Formateur, Role } from "@/types";
 import { useFormateurMutation } from "@/hooks/useFormateurMutation";
 import { Input } from "../ui/input";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { fetchRoles } from "@/services/roleService";
 
 const formSchema = z.object({
@@ -50,10 +49,10 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
 
   const formateurId = formateur?.user.user_id;
 
-  const { data: roles = [], isLoading: rolesLoading } = useAuthQuery<Role[]>(
-    ["roles"],
-    fetchRoles
-  );
+  const { data: roles = [], isLoading: rolesLoading } = useQuery<Role[]>({
+    queryKey: ["roles"],
+    queryFn: fetchRoles,
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -197,7 +196,6 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        
         <FormField
           control={form.control}
           name="prenom"

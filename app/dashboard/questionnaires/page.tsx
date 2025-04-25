@@ -11,13 +11,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
-import {
-  fetchSurveys,
-} from "@/services/surveyService";
+import { fetchSurveys } from "@/services/surveyService";
 import { Survey } from "@/types";
 import CreateSurveyDialog from "@/components/evaluations/CreateSurveyDialog";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 
 const SurveysPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -27,7 +25,10 @@ const SurveysPage = () => {
     isLoading,
     isError,
     error,
-  } = useAuthQuery<Survey[]>(["surveys"], fetchSurveys);
+  } = useQuery<Survey[]>({
+    queryKey: ["surveys"],
+    queryFn: fetchSurveys,
+  });
 
   if (isLoading) return <p>Loading surveys...</p>;
   if (isError) return <p>Error fetching surveys: {error?.message}</p>;
@@ -48,7 +49,10 @@ const SurveysPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {surveys.map((survey) => (
-            <Card key={survey.id} className="shadow-md border-l-[7px] border-primary hover:shadow-lg transition-shadow">
+            <Card
+              key={survey.id}
+              className="shadow-md border-l-[7px] border-primary hover:shadow-lg transition-shadow"
+            >
               <CardHeader>
                 <CardTitle>{survey.title}</CardTitle>
                 <CardDescription>
@@ -59,13 +63,12 @@ const SurveysPage = () => {
                 <p className="text-sm text-muted-foreground">
                   Status: {survey.status}
                 </p>
-                {/* Add more details like question count if needed */}
               </CardContent>
               <CardFooter className="flex justify-end">
                 <Link
                   href={`/dashboard/questionnaires/editeur/${survey.id}`}
                   className="flex justify-end"
-                    passHref
+                  passHref
                 >
                   <Button variant="outline" size="lg">
                     Modifier
