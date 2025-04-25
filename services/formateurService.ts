@@ -41,3 +41,14 @@ export const fetchFormateurs = async (): Promise<Formateur[]> => {
     throw new Error("Erreur lors de la récupération des formateurs");
   }
 };
+
+export const deleteFormateur = async (formateurId: string) => {
+  try {
+    await axiosInstance.delete(`/formateurs/${formateurId}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la suppression du formateur");
+  }
+};

@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { Domain, Theme } from "@/types";
+import { fetchDomaines } from "@/services/domaineService";
 
 const formSchema = z.object({
   libelle_theme: z.string()
@@ -64,10 +65,7 @@ const ThemeForm = ({ theme, isOpen, onClose, onOpenChange }: ThemeFormProps) => 
 
   const { data: domains } = useQuery({
     queryKey: ["domaines"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/domaines");
-      return response.data;
-    },
+    queryFn: fetchDomaines,
   });
 
   useEffect(() => {

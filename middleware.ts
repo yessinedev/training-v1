@@ -32,7 +32,6 @@ export default clerkMiddleware(async (auth, request) => {
     if (!role) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
-    console.log("true")
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
@@ -44,7 +43,6 @@ export default clerkMiddleware(async (auth, request) => {
   // Admin route protection
   if (isAdminRoute(request)) {
     if (role !== "ADMIN") {
-      console.log("true")
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
   }
@@ -52,7 +50,6 @@ export default clerkMiddleware(async (auth, request) => {
   // Gestionnaire route protection
   if (isGestionnaireRoute(request)) {
     if (role !== "GESTIONNAIRE") {
-      console.log("false")
       return NextResponse.redirect(new URL("/unauthorized", request.url));
     }
   }

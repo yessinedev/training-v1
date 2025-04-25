@@ -24,9 +24,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
 import { ActionFormationParticipant } from "@/types";
 import { Trash2 } from "lucide-react";
+import {
+  fetchParticipantsByFormationId,
+  removeParticipantFromFormation,
+} from "@/services/formationService";
 
 type Props = {
   actionId: number;
@@ -37,20 +40,14 @@ const ActionForParticipants = ({ actionId }: Props) => {
 
   const { data: participants = [] } = useQuery({
     queryKey: ["formation-participants", actionId],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        `/formations/${actionId}/participants`
-      );
-      return response.data;
-    },
+    queryFn: () => fetchParticipantsByFormationId(actionId),
   });
 
   const removeParticipantMutation = useMutation({
-    mutationFn: async ({ participantId }: { participantId: string }) => {
-      await axiosInstance.delete(
-        `/formations/${actionId}/participants?participantId=${participantId}`
-      );
-    },
+    mutationFn: ({ participantId }: { participantId: string }) =>
+      removeParticipantFromFormation(actionId, {
+        participantId: participantId,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["formation-participants", actionId],
@@ -122,7 +119,9 @@ const ActionForParticipants = ({ actionId }: Props) => {
                             }
                           >
                             <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Supprimer participant</span>
+                            <span className="sr-only">
+                              Supprimer participant
+                            </span>
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>

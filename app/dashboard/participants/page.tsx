@@ -52,19 +52,13 @@ export default function ParticipantsPage() {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
       toast.error(`Failed to delete participant: ${errorMessage}`);
-      console.error("Error deleting participant:", error);
     },
   });
 
   const handleDeleteParticipant = useCallback(
     async (participantId: string) => {
-      console.log("Deleting participant with ID:", participantId);
       if (window.confirm("Are you sure you want to delete this participant?")) {
-        try {
-          await deleteParticipantMutation.mutateAsync(participantId);
-        } catch (error) {
-          console.error("Delete submission error:", error);
-        }
+        await deleteParticipantMutation.mutateAsync(participantId);
       }
     },
     [deleteParticipantMutation]
@@ -94,7 +88,11 @@ export default function ParticipantsPage() {
           </Button>
         </div>
       </div>
-      <DataTable data={participants ?? []} columns={columns} searchColumn="email" />
+      <DataTable
+        data={participants ?? []}
+        columns={columns}
+        searchColumn="email"
+      />
       {showProfile && selectedParticipant && (
         <ParticipantProfile
           participant={selectedParticipant}

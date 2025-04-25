@@ -17,10 +17,10 @@ import {
   Role,
 } from "@/types";
 import * as XLSX from "xlsx";
-import axiosInstance from "@/lib/axios";
 import { fetchRoles } from "@/services/roleService";
 import { toast } from "sonner";
 import { createParticipant } from "@/services/participantService";
+import { createParticipantsForFormation } from "@/services/formationService";
 
 type Props = {
   isOpen: boolean;
@@ -49,14 +49,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
   });
 
   const participateMutation = useMutation({
-    mutationFn: async (data: Participant[]) => {
-      const response = await axiosInstance.post(
-        `/formations/${formationId}/participants`,
-        data
-      );
-      console.log("response", response);
-      return response.data;
-    },
+    mutationFn: (data: Participant[]) => createParticipantsForFormation(formationId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["formation-participants", formationId],

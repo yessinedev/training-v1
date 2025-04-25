@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
+import { createAttestation } from "@/services/attestationService";
 
 type GenerateAttestationsDialogProps = {
   formationId: number;
@@ -33,10 +33,7 @@ export default function GenerateAttestationsDialog({
   );
 
   const mutation = useMutation({
-    mutationFn: async () => {
-      const response = await axiosInstance.post(`/formations/${formationId}/attestations`);
-      return response.data;
-    },
+    mutationFn: () => createAttestation(formationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["formation", formationId] });
       toast.success("Attestations generated successfully");

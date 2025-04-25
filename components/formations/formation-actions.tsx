@@ -4,13 +4,13 @@ import { GraduationCap, UserPlus, Award, Upload, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
 import AssignTrainerDialog from "./assign-trainer-dialog";
 import GenerateAttestationsDialog from "./generate-attestation-dialog";
 import ExcelImportDialog from "../participants/ExcelImportDialog";
 import { ParticipantModal } from "../participants/ParticipantModal";
 import AssignExistingParticipantsDialog from "./AssignExistingParticipantsDialog";
 import { Formation } from "@/types";
+import { fetchFormationById } from "@/services/formationService";
 
 type FormationActionsProps = {
   formationId: number;
@@ -26,13 +26,12 @@ export default function FormationActions({
   const [isGenerateAttestationOpen, setIsGenerateAttestationOpen] =
     useState(false);
 
-  const { data: formation, isLoading: isLoadingFormation } = useQuery<Formation>({
-    queryKey: ["action-formation", formationId],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`/formations/${formationId}`);
-      return response.data;
-    },
-  });
+  const { data: formation, isLoading: isLoadingFormation } =
+    useQuery<Formation>({
+      queryKey: ["action-formation", formationId],
+      queryFn: () => fetchFormationById(formationId),
+      enabled: !!formationId,
+    });
 
   return (
     <>

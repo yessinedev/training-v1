@@ -5,11 +5,10 @@ import { Button } from "@/components/ui/button";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Role } from "@/types";
-import axiosInstance from "@/lib/axios";
 import RoleForm from "../user/AddRoleForm";
-import { useAuth } from "@clerk/nextjs";
 import { DataTable } from "../dt/data-table";
 import { getRolesColumns } from "./role-columns";
+import { deleteRole, fetchRoles } from "@/services/roleService";
 
 const RolesTable = () => {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
@@ -34,26 +33,24 @@ const RolesTable = () => {
     isError,
   } = useQuery({
     queryKey: ["roles"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/roles");
-      return response.data;
-    },
+    queryFn: fetchRoles,
   });
 
   const deleteRoleMutation = useMutation({
-    mutationFn: async (roleId: number) => {
-      await axiosInstance.delete(`/roles?id=${roleId}`);
-    },
+    mutationFn: (roleId: number) => deleteRole(roleId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
     },
   });
 
-  const handleDeleteRole = useCallback((roleId: number) => {
-      if (window.confirm("Are you sure you want to delete this role?")) {
+  const handleDeleteRole = useCallback(
+    (roleId: number) => {
+      if (window.confirm("Etes-vous sûr de vouloir supprimer ce rôle ?")) {
         deleteRoleMutation.mutate(roleId);
       }
-    }, [deleteRoleMutation]);
+    },
+    [deleteRoleMutation]
+  );
 
   const columns = useMemo(
     () => getRolesColumns((role) => handleOpenDialog(role), handleDeleteRole),
@@ -77,7 +74,11 @@ const RolesTable = () => {
         onOpenChange={setIsDialogOpen}
       />
 
-      <DataTable columns={columns ?? []} data={roles} searchColumn="role_name" />
+      <DataTable
+        columns={columns ?? []}
+        data={roles}
+        searchColumn="role_name"
+      />
     </>
   );
 };

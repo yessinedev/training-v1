@@ -2,13 +2,24 @@
 
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import axiosInstance from "@/lib/axios";
 import { Formation } from "@/types";
 import { format } from "date-fns";
-
+import { fetchFormations } from "@/services/formationService";
+import { assignParticipantsToFormation } from "@/services/participantService";
 
 export type ParticipateManyDialogProps = {
   isOpen: boolean;
@@ -23,27 +34,28 @@ export function ParticipateManyDialog({
 }: ParticipateManyDialogProps) {
   const [selectedFormation, setSelectedFormation] = useState<string>("");
 
-  const { data: formations, isLoading, isError } = useQuery<Formation[]>({
+  const {
+    data: formations,
+    isLoading,
+    isError,
+  } = useQuery<Formation[]>({
     queryKey: ["formations"],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`/formations`);
-      console.log(response.data)
-      return response.data;
-    },
-    
+    queryFn: fetchFormations,
   });
 
   const mutation = useMutation({
-    mutationFn: async ({ formationId, participants }: { formationId: string; participants: { participant_id: string; statut: string }[] }) => {
-      const response = await axiosInstance.post(`/formations/${formationId}/participants`, participants)
-      return response.data;
-    },
+    mutationFn: ({
+      formationId,
+      participants,
+    }: {
+      formationId: string;
+      participants: string[];
+    }) => assignParticipantsToFormation(Number(formationId), participants),
     onSuccess: () => {
-      
       onOpenChange(false);
     },
     onError: (error) => {
-      console.log(error)
+      console.log(error);
     },
   });
 
@@ -52,20 +64,15 @@ export function ParticipateManyDialog({
       return;
     }
 
-    const participants = participantsIds.map((id) => ({
-      participant_id: id,
-      statut: "Confirmé", // or any default status you want to set
-    }));
-
     mutation.mutate({
       formationId: selectedFormation,
-      participants,
+      participants: participantsIds,
     });
   };
 
   const formatDate = (isoString: Date): string => {
-      return ` ${format(isoString, "dd/MM/yyyy")} `;
-    };
+    return ` ${format(isoString, "dd/MM/yyyy")} `;
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -83,18 +90,22 @@ export function ParticipateManyDialog({
                 <SelectValue placeholder="Select a formation" />
               </SelectTrigger>
               <SelectContent>
-                {formations && formations.map((formation) => (
-                  <SelectItem key={formation.action_id} value={formation.action_id.toString()}>
-                    {formation.theme?.libelle_theme} {`${formatDate(formation.date_debut)}-${formatDate(formation.date_fin)}`}
-                  </SelectItem>
-                ))}
+                {formations &&
+                  formations.map((formation) => (
+                    <SelectItem
+                      key={formation.action_id}
+                      value={formation.action_id.toString()}
+                    >
+                      {formation.theme?.libelle_theme}{" "}
+                      {`${formatDate(formation.date_debut)}-${formatDate(
+                        formation.date_fin
+                      )}`}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
-          <Button
-            onClick={handleSubmit}
-            disabled={mutation.isPending}
-          >
+          <Button onClick={handleSubmit} disabled={mutation.isPending}>
             {mutation.isPending ? "Adding participants..." : "Add to Formation"}
           </Button>
         </div>

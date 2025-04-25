@@ -30,8 +30,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
-import { Formation, Theme, Formateur } from "@/types";
+import { Formation, Theme, Formateur, FormationPayload } from "@/types";
+import { fetchThemes } from "@/services/themeService";
+import { fetchFormateurs } from "@/services/formateurService";
+import { createFormation, updateFormation } from "@/services/formationService";
 
 const formSchema = z.object({
   type_action: z.string().min(1, "Le type est requis"),
@@ -140,25 +142,20 @@ const FormationForm = ({
 
   const { data: themes, isLoading: themesLoading } = useQuery<Theme[]>({
     queryKey: ["themes"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/themes");
-      return response.data;
-    },
+    queryFn: fetchThemes,
   });
 
   const { data: formateurs, isLoading: formateursLoading } = useQuery<
     Formateur[]
   >({
     queryKey: ["formateurs"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/formateurs");
-      return response.data;
-    },
+    queryFn: fetchFormateurs,
   });
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const payload = {
+      const payload: FormationPayload = {
+        ...(isEditing && formation && { action_id: formation.action_id }), // Conditionally add action_id
         type_action: data.type_action,
         theme_id: parseInt(data.theme_id, 10),
         date_debut: data.date_debut,
@@ -170,18 +167,13 @@ const FormationForm = ({
           : undefined,
         lieu: data.lieu,
         nb_participants_prevu: parseInt(data.nb_participants_prevu, 10),
-        user_id: data.user_id ? parseInt(data.user_id, 10) : undefined,
+        user_id: data.user_id ? data.user_id : undefined,
       };
 
       if (isEditing && formation) {
-        const response = await axiosInstance.put(`/formations/${formation.action_id}`, {
-          action_id: formation.action_id,
-          ...payload,
-        });
-        return response.data;
+        await updateFormation(formation.action_id, payload);
       } else {
-        const response = await axiosInstance.post("/formations", payload);
-        return response.data;
+        await createFormation(payload)
       }
     },
     onSuccess: () => {
@@ -266,9 +258,7 @@ const FormationForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Intra">
-                          Intra
-                        </SelectItem>
+                        <SelectItem value="Intra">Intra</SelectItem>
                         <SelectItem value="Inter">Inter</SelectItem>
                       </SelectContent>
                     </Select>

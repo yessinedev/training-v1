@@ -1,31 +1,17 @@
 "use client";
 
 import React, { useCallback, useMemo, useState } from "react";
-import { Pencil, Trash2, Plus, FileText, Badge } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
 import { Formateur } from "@/types";
 import { toast } from "sonner";
-import FormateurForm from "./formateur-form";
 import { DataTable } from "../dt/data-table";
 import { getFormateurColumns } from "./formateur-columns";
 import FormateurProfile from "./formateur-profile";
 import FormateurFormDialog from "./FormateurFormDialog";
+import { deleteFormateur, fetchFormateurs } from "@/services/formateurService";
 
 const FormateursTable = () => {
   const [selectedFormateur, setSelectedFormateur] = useState<Formateur | null>(
@@ -55,18 +41,13 @@ const FormateursTable = () => {
     data: formateurs,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQuery<Formateur[]>({
     queryKey: ["formateurs"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/formateurs");
-      return response.data;
-    },
+    queryFn: fetchFormateurs,
   });
 
   const deleteFormateurMutation = useMutation({
-    mutationFn: async (formateurId: string) => {
-      await axiosInstance.delete(`/formateurs/${formateurId}`);
-    },
+    mutationFn: (formateurId: string) => deleteFormateur(formateurId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["formateurs"] });
       toast.success("Formateur deleted successfully");
@@ -77,15 +58,18 @@ const FormateursTable = () => {
     },
   });
 
-  const handleDeleteFormateur = useCallback(async (formateurId: string) => {
-    if (window.confirm("Are you sure you want to delete this formateur?")) {
-      try {
-        await deleteFormateurMutation.mutateAsync(formateurId);
-      } catch (error) {
-        console.error("Delete submission error:", error);
+  const handleDeleteFormateur = useCallback(
+    async (formateurId: string) => {
+      if (window.confirm("Are you sure you want to delete this formateur?")) {
+        try {
+          await deleteFormateurMutation.mutateAsync(formateurId);
+        } catch (error) {
+          console.error("Delete submission error:", error);
+        }
       }
-    }
-  }, [deleteFormateurMutation]);
+    },
+    [deleteFormateurMutation]
+  );
 
   const columns = useMemo(
     () =>
@@ -106,7 +90,7 @@ const FormateursTable = () => {
         <Plus className="mr-2 h-4 w-4" />
         Ajouter Formateur
       </Button>
-      <DataTable data={formateurs} columns={columns} />
+      <DataTable data={formateurs ?? []} columns={columns} />
       {isDialogOpen && (
         <FormateurFormDialog
           formateur={selectedFormateur || undefined}

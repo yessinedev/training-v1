@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -27,9 +27,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
 import { Participant } from "@/types";
+import { fetchParticipants } from "@/services/participantService";
+import { updateParticipantStatus } from "@/services/formationService";
 
 const formSchema = z.object({
   participant_id: z.string().min(1, "Participant is required"),
@@ -62,28 +63,23 @@ export default function AddParticipantDialog({
 
   const { data: participants } = useQuery({
     queryKey: ["participants"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/participants");
-      return response.data;
-    },
+    queryFn: fetchParticipants,
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: FormValues) => {
-      const response = await axiosInstance.put(`/formations/${formationId}/participants`, {
-        participant_id: parseInt(data.participant_id),
-        statut: data.statut,
-      });
-      return response.data;
-    },
+    mutationFn: (data: FormValues) =>
+      updateParticipantStatus(
+        { participant_id: data.participant_id, statut: data.statut },
+        formationId
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["formation", formationId] });
-      toast.success("Participant added successfully");
+      toast.success("Participant ajouté avec succès !");
       form.reset();
       onOpenChange(false);
     },
     onError: (error: Error) => {
-      toast.error(`Failed to add participant: ${error.message}`);
+      toast.error(error.message);
     },
   });
 
@@ -112,10 +108,7 @@ export default function AddParticipantDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Participant</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select participant" />
@@ -127,7 +120,8 @@ export default function AddParticipantDialog({
                           key={participant.user_id}
                           value={participant.user_id}
                         >
-                          {participant.user.prenom} {participant.user.nom} - {participant.entreprise}
+                          {participant.user.prenom} {participant.user.nom} -{" "}
+                          {participant.entreprise}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -143,10 +137,7 @@ export default function AddParticipantDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -155,7 +146,9 @@ export default function AddParticipantDialog({
                     <SelectContent>
                       <SelectItem value="Confirmé">Confirmé</SelectItem>
                       <SelectItem value="En attente">En attente</SelectItem>
-                      <SelectItem value="Liste d'attente">{"Liste d'attente"}</SelectItem>
+                      <SelectItem value="Liste d'attente">
+                        {"Liste d'attente"}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -171,10 +164,7 @@ export default function AddParticipantDialog({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-              >
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Adding..." : "Add Participant"}
               </Button>
             </div>

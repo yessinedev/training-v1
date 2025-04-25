@@ -100,6 +100,19 @@ export type ActionFormationFormateur = {
   formateur_id: string;
   formateur: Formateur;
 };
+export type FormationPayload = {
+  action_id?: number; // Optional for creation
+  type_action: string;
+  theme_id: number;
+  date_debut: string;
+  date_fin: string;
+  duree_jours: number;
+  duree_heures: number;
+  prix_unitaire?: number;
+  lieu: string;
+  nb_participants_prevu: number;
+  user_id?: string;
+};
 
 export type Formation = {
   action_id: number;

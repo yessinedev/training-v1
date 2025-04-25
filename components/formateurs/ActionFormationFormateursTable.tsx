@@ -24,33 +24,28 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
 import { ActionFormationFormateur } from "@/types";
 import { Trash2 } from "lucide-react";
+import {
+  fetchFormateursByFormationId,
+  removeFormateurFromFormation,
+} from "@/services/formationService";
 
 type Props = {
   actionId: number;
 };
 
 const ActionFormationFormateursTable = ({ actionId }: Props) => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   const { data: trainers = [] } = useQuery({
     queryKey: ["formation-trainers", actionId],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        `/formations/${actionId}/formateurs`
-      );
-      return response.data;
-    },
+    queryFn: () => fetchFormateursByFormationId(actionId),
   });
 
   const removeTrainerMutation = useMutation({
-    mutationFn: async ({ formateurId }: { formateurId: string }) => {
-      await axiosInstance.delete(
-        `/formations/${actionId}/formateurs?formateurId=${formateurId}`
-      );
-    },
+    mutationFn: (formateurId: string) =>
+      removeFormateurFromFormation(actionId, formateurId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["formation-trainers", actionId],
@@ -94,13 +89,15 @@ const ActionFormationFormateursTable = ({ actionId }: Props) => {
                               size="icon"
                               className="h-8 w-8 text-destructive"
                               onClick={() =>
-                                removeTrainerMutation.mutate({
-                                  formateurId: f.formateur.user_id,
-                                })
+                                removeTrainerMutation.mutate(
+                                  f.formateur.user_id
+                                )
                               }
                             >
                               <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Supprimer formateur</span>
+                              <span className="sr-only">
+                                Supprimer formateur
+                              </span>
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>

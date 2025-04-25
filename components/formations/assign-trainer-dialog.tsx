@@ -27,9 +27,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
 import { toast } from "sonner";
 import { Formateur } from "@/types";
+import { fetchFormateurs } from "@/services/formateurService";
+import { assignFormateurToFormation } from "@/services/formationService";
 
 const formSchema = z.object({
   formateur_id: z.string().min(1, "Trainer is required"),
@@ -60,21 +61,11 @@ export default function AssignTrainerDialog({
 
   const { data: formateurs } = useQuery({
     queryKey: ["formateurs"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/formateurs");
-      return response.data;
-    },
+    queryFn: fetchFormateurs,
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: FormValues) => {
-      console.log(typeof data.formateur_id)
-      const response = await axiosInstance.post(
-        `/formations/${formationId}/formateurs`,
-        {formateurId: data.formateur_id}
-      );
-      return response.data;
-    },
+    mutationFn: (data: FormValues) => assignFormateurToFormation(formationId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["formation", formationId] });
       toast.success("Trainer assigned successfully");
