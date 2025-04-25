@@ -14,7 +14,6 @@ import { getRolesColumns } from "./role-columns";
 const RolesTable = () => {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { getToken } = useAuth();
 
   const queryClient = useQueryClient();
 
@@ -36,26 +35,14 @@ const RolesTable = () => {
   } = useQuery({
     queryKey: ["roles"],
     queryFn: async () => {
-      const token = await getToken({ template: "my-jwt-template" });
-      const response = await axiosInstance.get("/roles", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axiosInstance.get("/roles");
       return response.data;
     },
   });
 
   const deleteRoleMutation = useMutation({
     mutationFn: async (roleId: number) => {
-      const token = await getToken({ template: "my-jwt-template" });
-      await axiosInstance.delete(`/roles?id=${roleId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      await axiosInstance.delete(`/roles?id=${roleId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
@@ -90,7 +77,7 @@ const RolesTable = () => {
         onOpenChange={setIsDialogOpen}
       />
 
-      <DataTable columns={columns} data={roles} searchColumn="role_name" />
+      <DataTable columns={columns ?? []} data={roles} searchColumn="role_name" />
     </>
   );
 };

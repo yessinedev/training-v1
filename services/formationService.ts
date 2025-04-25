@@ -1,21 +1,24 @@
 import axiosInstance from "@/lib/axios";
 
-export const fetchFormations = async (token: string) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  const response = await axiosInstance.get("/formations", config);
-  console.log(response.data)
-  return response.data;
+export const fetchFormations = async () => {
+  try {
+    const response = await axiosInstance.get("/formations");
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récuperation des formations");
+  }
 };
 
-export const deleteFormation = async (token: string, formationId: number) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  await axiosInstance.delete(`/formations/${formationId}`, config);
+export const deleteFormation = async (formationId: number) => {
+  try {
+    await axiosInstance.delete(`/formations/${formationId}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la suppression de la formation");
+  }
 };

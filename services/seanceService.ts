@@ -1,19 +1,42 @@
 import axiosInstance from "@/lib/axios";
 import { Seance } from "@/types";
 
-export const fetchSeances = async () => {
-  const response = await axiosInstance.get("/seances");
-  return response.data;
+export const fetchSeances = async (): Promise<Seance[]> => {
+  try {
+    const response = await axiosInstance.get("/seances");
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération des séances");
+  }
 };
 
-export const fetchSeanceById = async (seanceId: number) => {
-  const response = await axiosInstance.get(`/seances/${seanceId}`);
-  return response.data;
+export const fetchSeanceById = async (seanceId: number): Promise<Seance> => {
+  try {
+    const response = await axiosInstance.get(`/seances/${seanceId}`);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération de la séance");
+  }
 };
 
 export const fetchSeancesByFormationId = async (formationId: number) => {
-  const response = await axiosInstance.get(`/seances/formation/${formationId}`);
-  return response.data;
+  try {
+    const response = await axiosInstance.get(
+      `/seances/formation/${formationId}`
+    );
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération des séances par formation");
+  }
 };
 
 export const createSeance = async (seance: Omit<Seance, "seance_id">) => {
@@ -21,8 +44,10 @@ export const createSeance = async (seance: Omit<Seance, "seance_id">) => {
     const response = await axiosInstance.post("/seances", seance);
     return response.data;
   } catch (error) {
-    console.error("Error creating seance:", error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la création de la séance");
   }
 };
 
@@ -34,12 +59,21 @@ export const updateSeance = async (seance: Seance) => {
     );
     return response.data;
   } catch (error) {
-    console.error("Error updating seance:", error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la mise à jour de la séance");
   }
 };
 
 export const deleteSeance = async (seanceId: number) => {
-  const response = await axiosInstance.delete(`/seances/${seanceId}`);
-  return response.data;
+  try {
+    const response = await axiosInstance.delete(`/seances/${seanceId}`);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la suppression de la séance");
+  }
 };

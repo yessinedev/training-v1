@@ -1,20 +1,25 @@
 import axiosInstance from "@/lib/axios";
+import { Theme } from "@/types";
 
-export const fetchThemes = async (token: string) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  const response = await axiosInstance.get("/themes", config);
-  return response.data;
+export const fetchThemes = async (): Promise<Theme[]> => {
+  try {
+    const response = await axiosInstance.get("/themes");
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération des thèmes");
+  }
 };
 
-export const deleteTheme = async (token: string, themeId: number) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  await axiosInstance.delete(`/themes?id=${themeId}`, config);
+export const deleteTheme = async (themeId: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/themes/${themeId}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la suppression du thème");
+  }
 };

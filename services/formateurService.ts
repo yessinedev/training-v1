@@ -2,40 +2,42 @@ import axiosInstance from "@/lib/axios";
 import { Formateur } from "@/types";
 
 export const createOrUpdateFormateur = async (
-  token: string,
   data: Partial<Formateur>,
   isEditing: boolean,
   formateurId?: string
-): Promise<Formateur> => { 
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-console.log("Formateur data:", data);
+): Promise<Formateur> => {
   try {
     if (isEditing) {
       if (formateurId === undefined) {
         throw new Error("Formateur ID is required for editing.");
       }
-      const response = await axiosInstance.put(`/formateurs/${formateurId}`, data, config);
-      return response.data as Formateur; // Cast to specific type
+      const response = await axiosInstance.put(
+        `/formateurs/${formateurId}`,
+        data
+      );
+      return response.data as Formateur;
     } else {
-      const response = await axiosInstance.post("/formateurs", data, config);
-      return response.data as Formateur; // Cast to specific type
+      const response = await axiosInstance.post("/formateurs", data);
+      return response.data as Formateur;
     }
   } catch (error) {
-    console.error("Error in createOrUpdateFormateur:", error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error(
+      "Erreur lors de la création ou de la mise à jour du formateur"
+    );
   }
 };
 
-export const fetchFormateurs = async (token: string): Promise<Formateur[]> => { // Use specific type
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  const response = await axiosInstance.get("/formateurs", config);
-  return response.data as Formateur[]; // Cast to specific type
-}
+export const fetchFormateurs = async (): Promise<Formateur[]> => {
+  try {
+    const response = await axiosInstance.get("/formateurs");
+    return response.data as Formateur[];
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération des formateurs");
+  }
+};
