@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,12 +30,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
 import { Domain, Theme } from "@/types";
 import { fetchDomaines } from "@/services/domaineService";
+import {
+  createTheme,
+  ThemePayload,
+  updateTheme,
+} from "@/services/themeService";
 
 const formSchema = z.object({
-  libelle_theme: z.string()
+  libelle_theme: z
+    .string()
     .min(1, "Theme name is required")
     .max(100, "Theme name must be less than 100 characters"),
   domaine_id: z.string().min(1, "Domain is required"),
@@ -50,7 +55,12 @@ type ThemeFormProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const ThemeForm = ({ theme, isOpen, onClose, onOpenChange }: ThemeFormProps) => {
+const ThemeForm = ({
+  theme,
+  isOpen,
+  onClose,
+  onOpenChange,
+}: ThemeFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const isEditing = !!theme;
   const queryClient = useQueryClient();
@@ -79,30 +89,26 @@ const ThemeForm = ({ theme, isOpen, onClose, onOpenChange }: ThemeFormProps) => 
 
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const payload = {
+      const payload: ThemePayload = {
         ...data,
         domaine_id: parseInt(data.domaine_id),
       };
 
       if (isEditing && theme) {
-        const response = await axiosInstance.put(`/themes`, {
-          theme_id: theme.theme_id,
-          ...payload,
-        });
-        return response.data;
+        await updateTheme(theme.theme_id, payload);
       } else {
-        const response = await axiosInstance.post("/themes", payload);
-        return response.data;
+        await createTheme(payload);
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["themes"] });
-      toast.success(`Theme ${isEditing ? "updated" : "created"} successfully`);
+      toast.success(`Theme ${isEditing ? "Modifier" : "Créer"} avec succès`);
       onClose();
     },
     onError: (error: Error) => {
-      toast.error(`Failed to ${isEditing ? "update" : "create"} theme: ${error.message}`);
-      console.error(`Error ${isEditing ? "updating" : "creating"} theme:`, error);
+      toast.error(
+        `Erreur lors de la ${isEditing ? "modification" : "création"} du theme: ${error.message}`
+      );
     },
   });
 
@@ -110,8 +116,6 @@ const ThemeForm = ({ theme, isOpen, onClose, onOpenChange }: ThemeFormProps) => 
     try {
       setIsLoading(true);
       await mutation.mutateAsync(data);
-    } catch (error) {
-      console.error("Form submission error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -121,11 +125,13 @@ const ThemeForm = ({ theme, isOpen, onClose, onOpenChange }: ThemeFormProps) => 
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Theme" : "Add New Theme"}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Modifier Théme" : "Créer Théme"}
+          </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the theme information and click the update button"
-              : "Enter the theme information and click the save button"}
+              ? "Mettre à jour les informations du thème et cliquer sur le bouton de mise à jour"
+              : "Créer un nouveau thème en remplissant le formulaire et en cliquant sur le bouton Enregistrer"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -135,9 +141,9 @@ const ThemeForm = ({ theme, isOpen, onClose, onOpenChange }: ThemeFormProps) => 
               name="libelle_theme"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Theme Name</FormLabel>
+                  <FormLabel>Libelle Theme</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter theme name" {...field} />
+                    <Input placeholder="Entrer le libelle de theme" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -149,14 +155,11 @@ const ThemeForm = ({ theme, isOpen, onClose, onOpenChange }: ThemeFormProps) => 
               name="domaine_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Domain</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
+                  <FormLabel>Domaine</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select domain" />
+                        <SelectValue placeholder="Selectionner un domaine" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -176,18 +179,11 @@ const ThemeForm = ({ theme, isOpen, onClose, onOpenChange }: ThemeFormProps) => 
             />
 
             <div className="flex justify-end gap-4 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-              >
-                Cancel
+              <Button type="button" variant="outline" onClick={onClose}>
+                Annuler
               </Button>
-              <Button 
-                type="submit"
-                disabled={isLoading}
-              >
-                {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Création..." : isEditing ? "Modifer" : "Enregistrer"}
               </Button>
             </div>
           </form>
