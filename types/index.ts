@@ -22,7 +22,7 @@ export type FormUser = Omit<
   user_id?: number;
 };
 
-export type Formateur  = {
+export type Formateur = {
   user_id: string;
   tarif_heure?: number;
   tarif_jour?: number;
@@ -43,7 +43,6 @@ export type Theme = {
   domaine_id: number;
   domaine?: Domain;
 };
-
 
 export type Participant = {
   user_id: string;
@@ -191,7 +190,7 @@ export type File = {
 export type QuestionType =
   | "text"
   | "multiple_choice"
-  | "checkbox"
+  | "single_choice"
   | "rating"
   | "boolean";
 

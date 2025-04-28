@@ -12,27 +12,44 @@ import { parseQuestionOptions } from "@/lib/utils";
 
 interface SurveyPreviewerProps {
   survey: Survey;
+  onAnswerChange?: (questionId: string, value: any) => void;
+  answers?: Record<string, any>;
 }
 
-export default function SurveyPreviewer({ survey }: SurveyPreviewerProps) {
+export default function SurveyPreviewer({ 
+  survey,
+  onAnswerChange,
+  answers = {}
+}: SurveyPreviewerProps) {
   return (
     <div className="space-y-6">
-      <Card>
-        <CardContent className="space-y-8 px-4 py-6">
-          {survey.questions.map((q, i) => (
-            <QuestionPreview key={q.id} question={q} />
-          ))}
-        </CardContent>
-      </Card>
+      {survey.questions.map((q) => (
+        <QuestionPreview 
+          key={q.id} 
+          question={q}
+          value={answers[q.id]}
+          onChange={onAnswerChange ? (value) => onAnswerChange(q.id, value) : undefined}
+        />
+      ))}
     </div>
   );
 }
 
 interface QuestionPreviewProps {
   question: Question;
+  value?: any;
+  onChange?: (value: any) => void;
 }
 
-function QuestionPreview({ question }: QuestionPreviewProps) {
+function QuestionPreview({ question, value, onChange }: QuestionPreviewProps) {
+  // ... existing code ...
+
+  const handleChange = (newValue: any) => {
+    if (onChange) {
+      onChange(newValue);
+    }
+  };
+
   return (
     <Card className="border border-border">
       <CardContent className="space-y-4 px-4 py-4">
@@ -47,11 +64,18 @@ function QuestionPreview({ question }: QuestionPreviewProps) {
           <Textarea
             placeholder="Enter your response..."
             className="w-full resize-none"
+            value={value || ""}
+            onChange={(e) => handleChange(e.target.value)}
+            disabled={!onChange}
           />
         )}
 
         {question.type === "multiple_choice" && question.options && (
-          <RadioGroup className="space-y-3">
+          <RadioGroup 
+            value={value} 
+            onValueChange={handleChange}
+            disabled={!onChange}
+          >
             {parseQuestionOptions(question).map((opt, idx) => (
               <label
                 key={idx}
@@ -73,11 +97,12 @@ function QuestionPreview({ question }: QuestionPreviewProps) {
             {[1, 2, 3, 4, 5].map((star) => (
               <Button
                 key={star}
-                variant="outline"
+                variant={value === star ? "default" : "outline"}
                 className="flex items-center justify-center h-10 w-10 p-0"
-                aria-label={`Rate ${star} stars`}
+                onClick={() => handleChange(star)}
+                disabled={!onChange}
               >
-                <Star className="h-5 w-5 text-muted-foreground hover:text-accent" />
+                <Star className={`h-5 w-5 ${value === star ? "fill-current" : ""}`} />
               </Button>
             ))}
           </div>
@@ -91,7 +116,12 @@ function QuestionPreview({ question }: QuestionPreviewProps) {
                 htmlFor={`${label.toLowerCase()}-${question.id}`}
                 className="flex items-center space-x-2"
               >
-                <Switch id={`${label.toLowerCase()}-${question.id}`} />
+                <Switch
+                  id={`${label.toLowerCase()}-${question.id}`}
+                  checked={value === (label === "Yes")}
+                  onCheckedChange={() => handleChange(label === "Yes")}
+                  disabled={!onChange}
+                />
                 <span>{label}</span>
               </label>
             ))}

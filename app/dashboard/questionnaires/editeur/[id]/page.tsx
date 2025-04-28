@@ -323,6 +323,7 @@ export default function SurveyEditorPage() {
                 [
                   "text",
                   "multiple_choice",
+                  "single_choice",
                   "rating",
                   "boolean",
                 ] as QuestionType[]
@@ -337,7 +338,9 @@ export default function SurveyEditorPage() {
                     {type === "text"
                       ? "T"
                       : type === "multiple_choice"
-                      ? "🔘"
+                      ? "☑"
+                      : type === "single_choice"
+                      ? "⚪"
                       : type === "rating"
                       ? "⭐"
                       : "✓"}
