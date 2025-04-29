@@ -217,6 +217,19 @@ export type Response = {
   surveyId: string;
   participantId?: string;
   answers: Answer[];
+  participant?: Participant;
+  createdAt: Date;
+};
+
+export type CreateResponse = {
+  surveyId: string;
+  answers: CreateAnswer[];
+  participantId?: string;
+};
+
+export type CreateAnswer = {
+  questionId: string;
+  content: any;
 };
 
 export type Answer = {

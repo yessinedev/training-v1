@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, BarChart2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,6 +16,7 @@ import { Survey } from "@/types";
 import CreateSurveyDialog from "@/components/evaluations/CreateSurveyDialog";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 
 const SurveysPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -54,24 +55,38 @@ const SurveysPage = () => {
               className="shadow-md border-l-[7px] border-primary hover:shadow-lg transition-shadow"
             >
               <CardHeader>
-                <CardTitle>{survey.title}</CardTitle>
+                <div className="flex justify-between items-start">
+                  <CardTitle>{survey.title}</CardTitle>
+                  <Badge variant={survey.status === "published" ? "default" : "outline"}>
+                    {survey.status.charAt(0).toUpperCase() + survey.status.slice(1)}
+                  </Badge>
+                </div>
                 <CardDescription>
                   {survey.description || "No description"}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              {/* <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Status: {survey.status}
+                  Created: {new Date(survey.).toLocaleDateString()}
                 </p>
-              </CardContent>
-              <CardFooter className="flex justify-end">
+              </CardContent> */}
+              <CardFooter className="flex justify-between">
                 <Link
-                  href={`/dashboard/questionnaires/editeur/${survey.id}`}
-                  className="flex justify-end"
+                  href={`/dashboard/questionnaires/responses/${survey.id}`}
+                  className="flex items-center"
                   passHref
                 >
-                  <Button variant="outline" size="lg">
-                    Modifier
+                  <Button variant="outline" size="sm">
+                    <BarChart2 className="mr-2 h-4 w-4" /> Responses
+                  </Button>
+                </Link>
+                <Link
+                  href={`/dashboard/questionnaires/editeur/${survey.id}`}
+                  className="flex items-center"
+                  passHref
+                >
+                  <Button variant="outline" size="sm">
+                    <Edit className="mr-2 h-4 w-4" /> Modifier
                   </Button>
                 </Link>
               </CardFooter>

@@ -3,17 +3,20 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Survey } from "@/types";
+import { CreateResponse, Survey } from "@/types";
 import { fetchSurveyById } from "@/services/surveyService";
 import SurveyPreviewer from "@/components/evaluations/SurveyPreviewer";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { createResponse } from "@/services/responseService";
+import { useUser } from "@clerk/nextjs";
 
 export default function SurveyResponsePage() {
   const params = useParams();
   const surveyId = params.id as string;
+  const { user } = useUser();
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [answers, setAnswers] = useState<Record<string, any>>({});
 
@@ -23,49 +26,39 @@ export default function SurveyResponsePage() {
   });
 
   const submitResponseMutation = useMutation({
-    mutationFn: async (responseData: any) => {
-      // TODO: Implement the API call to submit response
-      const response = await fetch(`/api/surveys/${surveyId}/responses`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(responseData),
-      });
-      if (!response.ok) throw new Error("Failed to submit response");
-      return response.json();
-    },
+    mutationFn: (responseData: CreateResponse) => createResponse(responseData),
     onSuccess: () => {
       toast.success("Response submitted successfully!");
       setAnswers({});
     },
     onError: (error: Error) => {
+      console.error("Error submitting response:", error);
       toast.error(`Failed to submit response: ${error.message}`);
     },
   });
 
   const handleAnswerChange = (questionId: string, value: any) => {
-    setAnswers(prev => ({
+    setAnswers((prev) => ({
       ...prev,
-      [questionId]: value
+      [questionId]: value,
     }));
   };
 
   const handleSubmit = () => {
-    const requiredQuestions = survey?.questions.filter(q => q.required) || [];
-    const missingRequired = requiredQuestions.filter(q => !answers[q.id]);
+    const requiredQuestions = survey?.questions.filter((q) => q.required) || [];
+    const missingRequired = requiredQuestions.filter((q) => !answers[q.id]);
 
     if (missingRequired.length > 0) {
       toast.error("Please answer all required questions");
       return;
     }
 
-    const responseData = {
-      surveyId,
-      participantId: isAnonymous ? null : "current-user-id", // Replace with actual user ID
+    const responseData: CreateResponse = {
+      surveyId: surveyId,
+      participantId: isAnonymous ? undefined : user?.id,
       answers: Object.entries(answers).map(([questionId, content]) => ({
         questionId,
-        content,
+        content: typeof content === 'object' ? content : { value: content },
       })),
     };
 
@@ -94,18 +87,20 @@ export default function SurveyResponsePage() {
             <label htmlFor="anonymous-mode">Submit anonymously</label>
           </div>
 
-          <SurveyPreviewer 
-            survey={survey} 
+          <SurveyPreviewer
+            survey={survey}
             onAnswerChange={handleAnswerChange}
             answers={answers}
           />
 
           <div className="mt-6 flex justify-end">
-            <Button 
+            <Button
               onClick={handleSubmit}
               disabled={submitResponseMutation.isPending}
             >
-              {submitResponseMutation.isPending ? "Submitting..." : "Submit Response"}
+              {submitResponseMutation.isPending
+                ? "Submitting..."
+                : "Submit Response"}
             </Button>
           </div>
         </CardContent>
