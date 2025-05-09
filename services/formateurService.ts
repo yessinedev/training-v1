@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import { Formateur } from "@/types";
+import { ActionFormationFormateur, Formateur } from "@/types";
 
 export const createOrUpdateFormateur = async (
   data: Partial<Formateur>,
@@ -42,6 +42,21 @@ export const fetchFormateurs = async (): Promise<Formateur[]> => {
   }
 };
 
+export const fetchFormateurById = async (
+  formateurId: string
+): Promise<Formateur> => {
+  try {
+    const response = await axiosInstance.get(`/formateurs/${formateurId}`);
+    console.log("response", response.data);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération du formateur");
+  }
+};
+
 export const deleteFormateur = async (formateurId: string) => {
   try {
     await axiosInstance.delete(`/formateurs/${formateurId}`);
@@ -50,5 +65,19 @@ export const deleteFormateur = async (formateurId: string) => {
       throw new Error(error.message);
     }
     throw new Error("Erreur lors de la suppression du formateur");
+  }
+};
+
+export const fetchFormationsByFormateurId = async (
+  formateurId: string
+): Promise<ActionFormationFormateur[]> => {
+  try {
+    const response = await axiosInstance.get(`aff/formateur/${formateurId}`);
+    return response.data as ActionFormationFormateur[];
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération du formateur");
   }
 };

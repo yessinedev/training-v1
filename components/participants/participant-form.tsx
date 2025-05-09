@@ -112,7 +112,9 @@ export const ParticipantForm = ({
         poste: data.poste,
         role_id: participantRole.role_id,
       };
-      const response = await createParticipant([userParticipantPayload]);
+      console.log("User Payload: ", userParticipantPayload);
+      const response = await createParticipant(userParticipantPayload);
+      console.log("Created: ", response);
       return response.data || response;
     },
   });

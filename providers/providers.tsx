@@ -11,8 +11,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 1000 * 60 * 5,
-            gcTime: 1000 * 60 * 10,
+            // Time until data is considered stale (1 minute)
+            staleTime: 1000 * 60,
+            // Time until inactive/unused data is garbage collected (10 minutes) 
+            gcTime: 1000 * 60 * 5,
             refetchOnWindowFocus: false,
           },
         },
@@ -21,27 +23,28 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   const [isHydrated, setIsHydrated] = useState(false);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-      const persister = createSyncStoragePersister({
-        storage: window.localStorage,
-      });
+  // useEffect(() => {
+  //   if (typeof window === "undefined") return;
+  //     const persister = createSyncStoragePersister({
+  //       storage: window.localStorage,
+  //     });
 
-      const [unsubscribe] = persistQueryClient({
-        queryClient,
-        persister,
-      });
+  //     const [unsubscribe] = persistQueryClient({
+  //       queryClient,
+  //       persister,
+  //     });
     
 
-    setIsHydrated(true);
-    return () => {
-      unsubscribe?.();
-    };
-  }, [queryClient]);
+  //   setIsHydrated(true);
+  //   return () => {
+  //     unsubscribe?.();
+  //   };
+  // }, [queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {isHydrated ? children : <LoadingSkeleton />}
+      {/* {isHydrated ? children : <LoadingSkeleton />} */}
+      {children}
     </QueryClientProvider>
   );
 }

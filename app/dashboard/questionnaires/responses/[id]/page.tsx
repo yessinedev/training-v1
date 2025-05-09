@@ -88,15 +88,15 @@ export default function SurveyResponsesPage() {
 
       // For multiple choice questions, count occurrences of each option
       if (question.type === "multiple_choice" && question.options) {
-        const counts = question.options.reduce<Record<string, number>>(
-          (acc, opt) => {
-            acc[opt] = questionResponses.filter(
-              (r) => r.content.value === opt
-            ).length;
-            return acc;
-          },
-          {}
-        );
+        const options: string[] = Array.isArray(question.options)
+          ? question.options
+          : JSON.parse(question.options);
+        const counts = options.reduce<Record<string, number>>((acc, opt) => {
+          acc[opt] = questionResponses.filter(
+            (r) => r.content.value === opt
+          ).length;
+          return acc;
+        }, {});
 
         return {
           question: question.text,

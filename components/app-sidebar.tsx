@@ -26,7 +26,6 @@ import { useUser } from "@clerk/nextjs";
 
 import { LucideIcon } from "lucide-react";
 
-// Define types for navigation items
 type NavItem = {
   title: string;
   url: string;
@@ -36,7 +35,7 @@ type NavItem = {
 };
 
 // Navigation data for ADMIN
-const adminNav: NavItem[] = [
+const navItems: NavItem[] = [
   { title: "Tableau de bord", url: "/dashboard", icon: Home, isActive: false },
   {
     title: "Gestion des accès",
@@ -129,108 +128,8 @@ const adminNav: NavItem[] = [
   },
 ];
 
-// Navigation data for GESTIONNAIRE
-const gestionnaireNav: NavItem[] = [
-  { title: "Tableau de bord", url: "/dashboard", icon: Home, isActive: true },
-  {
-    title: "Gestion des formations",
-    url: "#",
-    icon: BookOpen,
-    items: [
-      {
-        title: "Catalogue de formations",
-        url: "/dashboard/catalogue",
-        icon: BookOpen,
-      },
-      {
-        title: "Sessions planifiées",
-        url: "/dashboard/sessions",
-        icon: Calendar,
-      },
-      {
-        title: "Calendrier des seances",
-        url: "/dashboard/calendrier",
-        icon: Calendar,
-      },
-    ],
-  },
-  {
-    title: "Analyses et rapports",
-    icon: BarChart,
-    url: "#",
-    items: [
-      {
-        title: "Participation",
-        url: "/dashboard/rapports/participation",
-        icon: BarChart,
-      },
-      {
-        title: "Progression des formations",
-        url: "/dashboard/rapports/progression",
-        icon: BarChart,
-      },
-    ],
-  },
-  {
-    title: "Paramètres",
-    url: "#",
-    icon: Settings2,
-    items: [
-      { title: "Généraux", url: "/dashboard/settings", icon: Settings2 },
-      {
-        title: "Notifications",
-        url: "/dashboard/notifications",
-        icon: Settings2,
-      },
-    ],
-  },
-];
-
-// Navigation data for FORMATEUR
-const formateurNav: NavItem[] = [
-  { title: "Tableau de bord", url: "/dashboard", icon: Home, isActive: true },
-  { title: "Mes Sessions", url: "/dashboard/sessions", icon: Calendar },
-  { title: "Calendrier", url: "/dashboard/calendrier", icon: Calendar },
-  { title: "Mes Participants", url: "/dashboard/participants", icon: Users },
-  { title: "Évaluations", url: "/dashboard/evaluations", icon: PenTool },
-];
-
-// Navigation data for PARTICIPANT
-const participantNav: NavItem[] = [
-  { title: "Tableau de bord", url: "/dashboard", icon: Home, isActive: true },
-  { title: "Mes Formations", url: "/dashboard/catalogue", icon: BookOpen },
-  { title: "Mon Calendrier", url: "/dashboard/calendrier", icon: Calendar },
-  {
-    title: "Mes Évaluations",
-    url: "/dashboard/evaluations",
-    icon: ClipboardList,
-  },
-  { title: "Mes Attestations", url: "/dashboard/certificats", icon: FileText },
-];
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
-
-  const role = (
-    user?.publicMetadata as { role: { role_name: string; role_id: number } }
-  )?.role.role_name;
-
-  const getNavItemsByRole = (roleName?: string): NavItem[] => {
-    switch (roleName) {
-      case "ADMIN":
-        return adminNav;
-      case "GESTIONNAIRE":
-        return gestionnaireNav;
-      case "FORMATEUR":
-        return formateurNav;
-      case "PARTICIPANT":
-        return participantNav;
-      default:
-        return []; 
-    }
-  };
-
-  const navItems = getNavItemsByRole(role);
 
   return (
     <Sidebar collapsible="icon" {...props}>

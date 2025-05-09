@@ -31,6 +31,7 @@ export const createUser = async (userData: Omit<User, "user_id" | "role">) => {
     return response.data;
   } catch (error) {
     if (error instanceof Error) {
+      console.error(error);
       throw new Error(error.message);
     }
     throw new Error("Erreur lors de la création de l'utilisateur");

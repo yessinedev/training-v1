@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Star } from "lucide-react";
 import { parseQuestionOptions } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface SurveyPreviewerProps {
   survey: Survey;
@@ -42,12 +43,22 @@ interface QuestionPreviewProps {
 }
 
 function QuestionPreview({ question, value, onChange }: QuestionPreviewProps) {
-  // ... existing code ...
-
+ 
   const handleChange = (newValue: any) => {
     if (onChange) {
       onChange(newValue);
     }
+  };
+
+  // Helper for multiple_choice (checkbox group)
+  const handleCheckboxChange = (option: string, checked: boolean) => {
+    let newValue: string[] = Array.isArray(value) ? [...value] : [];
+    if (checked) {
+      if (!newValue.includes(option)) newValue.push(option);
+    } else {
+      newValue = newValue.filter((v) => v !== option);
+    }
+    handleChange(newValue);
   };
 
   return (
@@ -70,7 +81,7 @@ function QuestionPreview({ question, value, onChange }: QuestionPreviewProps) {
           />
         )}
 
-        {question.type === "multiple_choice" && question.options && (
+        {question.type === "single_choice" && question.options && (
           <RadioGroup 
             value={value} 
             onValueChange={handleChange}
@@ -90,6 +101,28 @@ function QuestionPreview({ question, value, onChange }: QuestionPreviewProps) {
               </label>
             ))}
           </RadioGroup>
+        )}
+
+        {question.type === "multiple_choice" && question.options && (
+          <div className="space-y-2">
+            {parseQuestionOptions(question).map((opt, idx) => (
+              <label
+                key={idx}
+                htmlFor={`q-${question.id}-opt-${idx}`}
+                className="flex items-center space-x-3 p-3 border rounded hover:bg-accent/10 cursor-pointer"
+              >
+                <Checkbox
+                  id={`q-${question.id}-opt-${idx}`}
+                  checked={Array.isArray(value) ? value.includes(opt) : false}
+                  onCheckedChange={(checked) =>
+                    handleCheckboxChange(opt, !!checked)
+                  }
+                  disabled={!onChange}
+                />
+                <span>{opt}</span>
+              </label>
+            ))}
+          </div>
         )}
 
         {question.type === "rating" && (

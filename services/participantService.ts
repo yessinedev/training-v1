@@ -1,11 +1,14 @@
 import axiosInstance from "@/lib/axios";
 import { CreateParticipant, Participant } from "@/types";
 
-export const createParticipant = async (data: CreateParticipant[]) => {
+export const createParticipant = async (data: CreateParticipant[] | CreateParticipant) => {
+  const payload = Array.isArray(data) ? data : data;
   try {
-    const response = await axiosInstance.post("/participants/create", data);
+    const response = await axiosInstance.post("/participants/create", payload);
     return response.data;
   } catch (error) {
+    console.error("API 400 response:", error);
+
     if (error instanceof Error) {
       throw new Error(error.message);
     }
@@ -44,6 +47,20 @@ export const fetchParticipants = async (): Promise<Participant[]> => {
       throw new Error(error.message);
     }
     throw new Error("Erreur lors de la récupération des participants");
+  }
+};
+
+export const fetchParticipantById = async (
+  participantId: string
+): Promise<Participant> => {
+  try {
+    const response = await axiosInstance.get(`/participants/${participantId}`);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération du participant");
   }
 };
 

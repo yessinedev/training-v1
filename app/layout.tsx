@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
+import Providers from "@/providers/providers";
+import { AxiosProvider } from "@/providers/axiosProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,11 +20,14 @@ export default async function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="fr">
         <body className={inter.className}>
-        
-          {children}
-          <Toaster />
+          <Providers>
+            <AxiosProvider>
+              {children}
+              <Toaster />
+            </AxiosProvider>
+          </Providers>
         </body>
       </html>
     </ClerkProvider>

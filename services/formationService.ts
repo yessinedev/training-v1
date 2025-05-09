@@ -69,7 +69,7 @@ export const deleteFormation = async (formationId: number) => {
 export const fetchFormateursByFormationId = async (actionId: number) => {
   try {
     const response = await axiosInstance.get(
-      `/formations/${actionId}/formateurs`
+      `/aff/formation/${actionId}/formateurs`
     );
     return response.data;
   } catch (error) {
@@ -88,7 +88,7 @@ export const assignFormateurToFormation = async (
 ) => {
   try {
     const response = await axiosInstance.post(
-      `/formations/${formationId}/formateurs`,
+      `/aff/${formationId}`,
       { formateurId: data.formateur_id }
     );
     return response.data;
@@ -106,7 +106,7 @@ export const removeFormateurFromFormation = async (
 ) => {
   try {
     await axiosInstance.delete(
-      `/formations/${actionId}/formateurs?formateurId=${formateurId}`
+      `/aff/${actionId}?formateurId=${formateurId}`
     );
   } catch (error) {
     if (error instanceof Error) {
@@ -118,7 +118,10 @@ export const removeFormateurFromFormation = async (
   }
 };
 
-export const createParticipantsForFormation = async (formationId: number, data: Participant[]) => {
+export const createParticipantsForFormation = async (
+  formationId: number,
+  data: Participant[]
+) => {
   try {
     const response = await axiosInstance.post(
       `/formations/${formationId}/participants`,

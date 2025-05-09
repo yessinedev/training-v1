@@ -62,3 +62,11 @@ export function parseQuestionOptions(question: Question | undefined | null): str
 
   return []; // Default to empty array if options are not a string or array
 }
+
+export function formatDate(date: Date): string {
+  return new Date(date).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })
+}

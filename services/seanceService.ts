@@ -39,6 +39,20 @@ export const fetchSeancesByFormationId = async (formationId: number) => {
   }
 };
 
+export const fetchSeancesByFormateurId = async (formateurId: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `/seances/formateur/${formateurId}`
+    );
+    return response.data;
+  }catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération des séances par formateur");
+  }
+}
+
 export const createSeance = async (seance: Omit<Seance, "seance_id">) => {
   try {
     const response = await axiosInstance.post("/seances", seance);

@@ -41,7 +41,7 @@ export type Theme = {
   theme_id: number;
   libelle_theme: string;
   domaine_id: number;
-  domaine?: Domain;
+  domaine: Domain;
 };
 
 export type Participant = {
@@ -98,6 +98,7 @@ export type ActionFormationFormateur = {
   action_id: number;
   formateur_id: string;
   formateur: Formateur;
+  action: Formation;
 };
 export type FormationPayload = {
   action_id?: number; // Optional for creation
@@ -124,11 +125,12 @@ export type Formation = {
   lieu: string;
   nb_participants_prevu: number;
   theme_id: number;
-  theme?: Theme;
+  theme: Theme;
   formateurs: ActionFormationFormateur[];
   participants: ActionFormationParticipant[];
   seances?: Seance[];
   attestations?: Attestation[];
+  files?: File[];
 };
 
 export type FormFormation = Omit<Formation, "action_id" | "formateurs"> & {
@@ -171,9 +173,24 @@ export type Presence = {
   formateur_id?: string;
 
   participant?: Participant;
-  seance?: Seance;
+  seance: Seance;
   formateur?: Formateur;
 };
+
+export type CreatePresenceDto = {
+  status?: PresenceStatus;
+  participant_id: string;
+  seance_id: number;
+  formateur_id?: string;
+}
+
+export type UpdatePresenceDto = {
+  status?: PresenceStatus;
+  participant_id?: string;
+  seance_id?: number;
+  formateur_id?: string;
+}
+
 
 export type File = {
   file_id: number;

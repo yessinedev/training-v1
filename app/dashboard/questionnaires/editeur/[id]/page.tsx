@@ -128,6 +128,7 @@ export default function SurveyEditorPage() {
       if (!survey) return;
       setSurvey((s) => {
         if (!s) return null;
+        console.log("type: ", type);
         return {
           ...s,
           questions: [
@@ -138,11 +139,12 @@ export default function SurveyEditorPage() {
               text: "",
               type,
               required: false,
-              options: type === "multiple_choice" ? ["Option 1"] : undefined,
+              options: (type === "multiple_choice" || type === "single_choice") ? ["Option 1"] : undefined,
             },
           ],
         };
       });
+      console.log("survey: ", survey.questions);
     },
     [survey]
   );
@@ -171,9 +173,8 @@ export default function SurveyEditorPage() {
           questions: s.questions.filter((q) => q.id !== id),
         };
       });
-      deleteQuestionMutation.mutate(id);
     },
-    [deleteQuestionMutation]
+    []
   );
 
   const handleDragEnd = useCallback(

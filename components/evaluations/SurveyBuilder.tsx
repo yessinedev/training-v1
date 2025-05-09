@@ -52,12 +52,12 @@ export function QuestionEditor({ question, onChange, onRemove }: EditorProps) {
     transition,
   };
 
-  
-
   const addOption = () => {
     if (question.options) {
+      const quetionOptions = parseQuestionOptions(question);
+
       onChange({
-        options: [...question.options, `Option ${question.options.length + 1}`],
+        options: [...quetionOptions, `Option ${quetionOptions.length + 1}`],
       });
     }
   };
@@ -112,37 +112,39 @@ export function QuestionEditor({ question, onChange, onRemove }: EditorProps) {
       </CardHeader>
 
       {/* Body: options list */}
-      {question.type === "multiple_choice" && question.options && (
-        <CardContent className="space-y-2 px-3 pb-3">
-          {parseQuestionOptions(question).map((opt, idx) => (
-            <div key={idx} className="flex items-center space-x-2">
-              <Input
-                value={opt}
-                onChange={(e) => updateOption(idx, e.target.value)}
-                placeholder={`Option ${idx + 1}`}
-              />
-              {question.options && question.options.length > 1 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeOption(idx)}
-                >
-                  <XIcon className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          ))}
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full mt-2"
-            onClick={addOption}
-          >
-            <PlusIcon className="h-4 w-4 mr-1" />
-            Add Option
-          </Button>
-        </CardContent>
-      )}
+      {(question.type === "multiple_choice" ||
+        question.type === "single_choice") &&
+        question.options && (
+          <CardContent className="space-y-2 px-3 pb-3">
+            {parseQuestionOptions(question).map((opt, idx) => (
+              <div key={idx} className="flex items-center space-x-2">
+                <Input
+                  value={opt}
+                  onChange={(e) => updateOption(idx, e.target.value)}
+                  placeholder={`Option ${idx + 1}`}
+                />
+                {question.options && question.options.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeOption(idx)}
+                  >
+                    <XIcon className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full mt-2"
+              onClick={addOption}
+            >
+              <PlusIcon className="h-4 w-4 mr-1" />
+              Add Option
+            </Button>
+          </CardContent>
+        )}
     </Card>
   );
 }
