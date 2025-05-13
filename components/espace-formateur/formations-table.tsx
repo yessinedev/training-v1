@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { getMockFormationsFormateur } from "@/lib/mock-data"
 import { Calendar, Clock, MapPin } from "lucide-react"
 import Link from "next/link"
 import { useFormateur } from "@/hooks/useFormateur"

@@ -124,6 +124,7 @@ export type Formation = {
   prix_unitaire?: number;
   lieu: string;
   nb_participants_prevu: number;
+  nb_seances?: number;
   theme_id: number;
   theme: Theme;
   formateurs: ActionFormationFormateur[];
@@ -195,7 +196,7 @@ export type UpdatePresenceDto = {
 export type File = {
   file_id: number;
   file_path: string;
-  type: string;
+  type: FileType;
   title: string;
   formateur_id?: string;
   action_id?: number;
@@ -203,6 +204,12 @@ export type File = {
   formateur?: Formateur;
   action?: Formation;
 };
+
+export enum FileType {
+  FORMATION = "FORMATION",
+  CV = "CV",
+  BADGE = "BADGE",
+}
 
 export type QuestionType =
   | "text"

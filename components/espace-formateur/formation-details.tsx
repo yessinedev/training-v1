@@ -1,11 +1,11 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
-import type { ActionFormation } from "@/lib/types"
+import { Formation } from "@/types"
 import { Calendar, Clock, MapPin, Users } from "lucide-react"
 
 interface FormationDetailsProps {
-  formation: ActionFormation
+  formation: Formation
 }
 
 export function FormationDetails({ formation }: FormationDetailsProps) {
@@ -21,7 +21,7 @@ export function FormationDetails({ formation }: FormationDetailsProps) {
                 <dd className="mt-1">{formation.theme.libelle_theme}</dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-muted-foreground">Type d'action</dt>
+                <dt className="text-sm font-medium text-muted-foreground">{"Type d'action"}</dt>
                 <dd className="mt-1">{formation.type_action}</dd>
               </div>
               <div className="flex items-center gap-2">

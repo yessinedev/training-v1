@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { getMockSeancesFormateur } from "@/lib/mock-data"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { fetchSeancesByFormateurId } from "@/services/seanceService"
@@ -123,7 +122,7 @@ export function SessionsCalendar({ formateurId }: { formateurId: string }) {
           </Button>
         </div>
         <Button variant="outline" onClick={goToCurrentMonth}>
-          Aujourd'hui
+          {"Aujourd'hui"}
         </Button>
       </div>
 

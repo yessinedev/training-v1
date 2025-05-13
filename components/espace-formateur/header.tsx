@@ -13,11 +13,13 @@ import { ModeToggle } from "./mode-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell, LogOut, User } from "lucide-react";
 import Link from "next/link";
-import { getMockFormateur } from "@/lib/mock-data";
 import { SignOutButton } from "@clerk/nextjs";
+import { useFormateur } from "@/hooks/useFormateur";
 
 export function Header() {
-  const formateur = getMockFormateur();
+  const {formateur} = useFormateur()
+
+  if(!formateur) return null
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

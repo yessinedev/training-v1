@@ -2,7 +2,6 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getMockSeancesFormateur } from "@/lib/mock-data";
 import { fetchFormationsByFormateurId } from "@/services/formateurService";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock } from "lucide-react";

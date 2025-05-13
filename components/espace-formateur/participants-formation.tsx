@@ -12,7 +12,6 @@ interface ParticipantsFormationProps {
 
 export function ParticipantsFormation({ formation }: ParticipantsFormationProps) {
   const participants = formation.participants
-console.log(participants)
   return (
     <div className="rounded-md border">
       <Table>
@@ -21,7 +20,7 @@ console.log(participants)
             <TableHead>Participant</TableHead>
             <TableHead>Entreprise</TableHead>
             <TableHead>Poste</TableHead>
-            <TableHead>Date d'inscription</TableHead>
+            <TableHead>{"Date d'inscription"}</TableHead>
             <TableHead>Statut</TableHead>
           </TableRow>
         </TableHeader>

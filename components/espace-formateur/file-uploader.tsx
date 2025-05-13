@@ -7,12 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { FileType } from "@/lib/types"
-import { getMockFormationsFormateur } from "@/lib/mock-data"
 import { Upload } from "lucide-react"
+import { ActionFormationFormateur, FileType } from "@/types"
 
 interface FileUploaderProps {
-  type: FileType | "FORMATION"
+  type: FileType
   withFormationSelect?: boolean
   actionId?: number
 }
@@ -22,7 +21,7 @@ export function FileUploader({ type, withFormationSelect = false, actionId }: Fi
   const [title, setTitle] = useState("")
   const [selectedFormation, setSelectedFormation] = useState<string>(actionId ? actionId.toString() : "")
 
-  const formations = getMockFormationsFormateur()
+  const formations : ActionFormationFormateur[] = []
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -65,9 +64,6 @@ export function FileUploader({ type, withFormationSelect = false, actionId }: Fi
     case "BADGE":
       typeLabel = "Badge"
       break
-    case "FEUILLE_EMARGEMENT":
-      typeLabel = "Feuille d'émargement"
-      break
     case "FORMATION":
       typeLabel = "Matériel de formation"
       break
@@ -100,7 +96,7 @@ export function FileUploader({ type, withFormationSelect = false, actionId }: Fi
             <SelectContent>
               {formations.map((formation) => (
                 <SelectItem key={formation.action_id} value={formation.action_id.toString()}>
-                  {formation.theme.libelle_theme}
+                  {formation.action.theme.libelle_theme}
                 </SelectItem>
               ))}
             </SelectContent>

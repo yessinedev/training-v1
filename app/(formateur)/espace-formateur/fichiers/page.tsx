@@ -3,6 +3,7 @@ import { FichiersList } from "@/components/espace-formateur/fichiers-list"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { FileIcon, UserIcon } from "lucide-react"
+import { FileType } from "@/types"
 
 export default function FichiersPage() {
   return (
@@ -27,21 +28,11 @@ export default function FichiersPage() {
           <Card>
             <CardHeader>
               <CardTitle>Documents personnels</CardTitle>
-              <CardDescription>CV, badge et feuilles d'émargement</CardDescription>
+              <CardDescription>{"CV, badge et feuilles d'émargement"}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <FileUploader type="CV" />
-              <FichiersList type="CV" />
-
-              <div className="border-t pt-6">
-                <FileUploader type="BADGE" />
-                <FichiersList type="BADGE" />
-              </div>
-
-              <div className="border-t pt-6">
-                <FileUploader type="FEUILLE_EMARGEMENT" />
-                <FichiersList type="FEUILLE_EMARGEMENT" />
-              </div>
+              <FileUploader type={FileType.CV} />
+              <FichiersList type={FileType.CV} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -53,8 +44,8 @@ export default function FichiersPage() {
               <CardDescription>Documents et ressources pour vos formations</CardDescription>
             </CardHeader>
             <CardContent>
-              <FileUploader type="FORMATION" withFormationSelect />
-              <FichiersList type="FORMATION" />
+              <FileUploader type={FileType.FORMATION} withFormationSelect />
+              <FichiersList type={FileType.FORMATION} />
             </CardContent>
           </Card>
         </TabsContent>

@@ -34,7 +34,7 @@ export function ParticipantDashboard({
       <header className="sticky top-0 z-10 border-b bg-white dark:bg-gray-950 dark:border-gray-800">
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold">Formation Portal</h1>
+            <h1 className="text-xl font-bold">Portail de formation</h1>
           </div>
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="relative">
@@ -72,10 +72,10 @@ export function ParticipantDashboard({
       <main className="container px-4 py-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold tracking-tight">
-            Welcome, {participant.user.prenom}!
+            Bienvenue, {participant.user.prenom} !
           </h2>
           <p className="text-muted-foreground">
-            Here's an overview of your training activities and progress.
+            Voici un aperçu de vos activités et de votre progression en formation.
           </p>
         </div>
 
@@ -90,9 +90,9 @@ export function ParticipantDashboard({
           >
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="formations">Formations</TabsTrigger>
-              <TabsTrigger value="schedule">Schedule</TabsTrigger>
-              <TabsTrigger value="certificates">Certificates</TabsTrigger>
-              <TabsTrigger value="attendance">Attendance</TabsTrigger>
+              <TabsTrigger value="schedule">Planning</TabsTrigger>
+              <TabsTrigger value="certificates">Certificats</TabsTrigger>
+              <TabsTrigger value="attendance">Présence</TabsTrigger>
             </TabsList>
           </Tabs>
         )}

@@ -2,27 +2,26 @@
 
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import type { FileType } from "@/lib/types"
-import { getMockFichiers } from "@/lib/mock-data"
 import { Calendar, Download, FileText } from "lucide-react"
+import { File, FileType } from "@/types"
 
 interface FichiersListProps {
-  type: FileType | "FORMATION"
+  type: FileType
 }
 
 export function FichiersList({ type }: FichiersListProps) {
-  const files = getMockFichiers().filter((file) =>
-    type === "FORMATION" ? file.action_id !== null : file.type === type,
-  )
+  // const files = getMockFichiers().filter((file) =>
+  //   type === "FORMATION" ? file.action_id !== null : file.type === type,
+  // )
 
+  const files : File[] = []
   return (
     <div className="rounded-md border mt-4">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Nom du fichier</TableHead>
-            <TableHead>Date d'ajout</TableHead>
+            <TableHead>{"Date d'ajout"}</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -55,14 +54,14 @@ export function FichiersList({ type }: FichiersListProps) {
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                       <span>
-                        {file.validated_at ? new Date(file.validated_at).toLocaleDateString("fr-FR") : "Non définie"}
+                        {/* {file.validated_at ? new Date(file.validated_at).toLocaleDateString("fr-FR") : "Non définie"} */}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={file.validated ? "default" : "outline"}>
+                    {/* <Badge variant={file.validated ? "default" : "outline"}>
                       {file.validated ? "Validé" : "En attente"}
-                    </Badge>
+                    </Badge> */}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button size="sm" variant="outline">

@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Download, FileText, Upload } from "lucide-react"
 import { FileUploader } from "./file-uploader"
-import { Formation } from "@/types"
+import { FileType, Formation } from "@/types"
 
 interface FichiersFormationProps {
   formation: Formation
@@ -21,7 +21,7 @@ export function FichiersFormation({ formation }: FichiersFormationProps) {
           <Upload className="h-5 w-5 text-muted-foreground" />
           <h3 className="font-medium">Ajouter un fichier</h3>
         </div>
-        <FileUploader type="FORMATION" actionId={formation.action_id} />
+        <FileUploader type={FileType.FORMATION} actionId={formation.action_id} />
       </div>
 
       <div className="rounded-md border">
@@ -30,7 +30,7 @@ export function FichiersFormation({ formation }: FichiersFormationProps) {
             <TableRow>
               <TableHead>Nom du fichier</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead>Date d'ajout</TableHead>
+              <TableHead>{"Date d'ajout"}</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>

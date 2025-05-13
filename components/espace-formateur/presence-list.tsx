@@ -41,7 +41,6 @@ export function PresenceList({ sessionId, formationId }: PresenceListProps) {
     enabled: !!formationId,
   });
 
-  console.log(actions);
 
   // Fetch presences for this session
   const { data: presences = [], isLoading: isLoadingPresences } = useQuery<

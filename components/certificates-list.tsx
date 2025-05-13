@@ -11,12 +11,12 @@ interface CertificatesListProps {
 export function CertificatesList({ participant }: CertificatesListProps) {
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-semibold">Your Certificates</h3>
+      <h3 className="text-xl font-semibold">Vos certificats</h3>
 
       {participant?.attestations?.length === 0 ? (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">You haven't received any certificates yet.</p>
+            <p className="text-center text-muted-foreground">{"Vous n'avez pas encore reçu de certificats."}</p>
           </CardContent>
         </Card>
       ) : (
@@ -30,15 +30,15 @@ export function CertificatesList({ participant }: CertificatesListProps) {
               <CardContent>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Issued on:</span>
+                    <span className="text-muted-foreground">Délivré le :</span>
                     <span>{attestation.date_emission ? formatDate(attestation.date_emission) : "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Duration:</span>
-                    <span>{attestation?.action?.duree_heures} hours</span>
+                    <span className="text-muted-foreground">Durée :</span>
+                    <span>{attestation?.action?.duree_heures} heures</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Location:</span>
+                    <span className="text-muted-foreground">Lieu :</span>
                     <span>{attestation?.action?.lieu}</span>
                   </div>
                 </div>
@@ -46,11 +46,11 @@ export function CertificatesList({ participant }: CertificatesListProps) {
               <CardFooter className="flex justify-between pt-3">
                 <Button variant="outline" size="sm">
                   <QrCode className="mr-2 h-4 w-4" />
-                  View QR
+                  Voir QR
                 </Button>
                 <Button size="sm">
                   <Download className="mr-2 h-4 w-4" />
-                  Download
+                  Télécharger
                 </Button>
               </CardFooter>
             </Card>
