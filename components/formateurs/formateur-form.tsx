@@ -253,7 +253,7 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
           name="telephone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone</FormLabel>
+              <FormLabel>Telephone</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Telephone"
@@ -279,19 +279,19 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
                 <FormControl>
                   <RadioGroupItem value="heure" />
                 </FormControl>
-                <FormLabel className="font-normal">Hourly</FormLabel>
+                <FormLabel className="font-normal">Heure</FormLabel>
               </FormItem>
               <FormItem className="flex items-center space-x-2 space-y-0">
                 <FormControl>
                   <RadioGroupItem value="jour" />
                 </FormControl>
-                <FormLabel className="font-normal">Daily</FormLabel>
+                <FormLabel className="font-normal">Jour</FormLabel>
               </FormItem>
               <FormItem className="flex items-center space-x-2 space-y-0">
                 <FormControl>
                   <RadioGroupItem value="seance" />
                 </FormControl>
-                <FormLabel className="font-normal">Session</FormLabel>
+                <FormLabel className="font-normal">Séance</FormLabel>
               </FormItem>
             </RadioGroup>
           </FormControl>
@@ -324,11 +324,11 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
             name="tarif_jour"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Daily Rate (€)</FormLabel>
+                <FormLabel>{"Tarif d'une jounée (DT)"}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter daily rate"
+                    placeholder="Entrer le tarif d'une journée"
                     {...field}
                     value={field.value ?? ""}
                   />
@@ -344,11 +344,11 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
             name="tarif_seance"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Session Rate (€)</FormLabel>
+                <FormLabel>{"Tarif d'une seance (DT)"}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter session rate"
+                    placeholder="Entrer le tarif d'une séance"
                     {...field}
                     value={field.value ?? ""}
                   />

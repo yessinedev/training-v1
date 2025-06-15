@@ -66,7 +66,7 @@ const UsersTable = () => {
     <div className="">
       <AddUsersModal />
 
-      <DataTable data={users} columns={columns} searchColumn="email" />
+      <DataTable data={users ?? []} columns={columns} searchColumn="email" />
       {isDialogOpen && selectedUser && (
         <EditUserModal
           user={selectedUser as unknown as EditableUser}

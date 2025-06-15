@@ -93,12 +93,12 @@ const navItems: NavItem[] = [
     isActive: true,
     items: [
       {
-        title: "Participation",
-        url: "/dashboard/rapports/participation",
+        title: "Demande & Revenus",
+        url: "/dashboard/analytiques/demande",
       },
       {
-        title: "Progression des formations",
-        url: "/dashboard/rapports/progression",
+        title: "Performance",
+        url: "/dashboard/analytiques/performance",
       },
     ],
   },

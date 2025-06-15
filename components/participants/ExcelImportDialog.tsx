@@ -32,7 +32,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
   const queryClient = new QueryClient();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data } = useQuery<Role[]>({
+  const { data: roles } = useQuery<Role[]>({
     queryKey: ["roles"],
     queryFn: fetchRoles,
   });
@@ -40,7 +40,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
   const uploadMutation = useMutation({
     mutationFn: createParticipant,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["participants"] });
+      queryClient.invalidateQueries({ queryKey: ["formation", formationId] });
     },
     onError: (error) => {
       console.error("Upload error:", error);
@@ -63,7 +63,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
 
   const handleFileUpload = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const role = data?.find((role) => role.role_name === "PARTICIPANT");
+      const role = roles?.find((role) => role.role_name === "PARTICIPANT");
       if (!role) {
         toast.error("Le role PARTICIPANT n'existe pas.");
         return;
@@ -96,7 +96,6 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
           if (processedData.length === 0) {
             throw new Error("No valid data found in the file");
           }
-
           const insertedPaticipants = await uploadMutation.mutateAsync(
             processedData
           );
@@ -111,14 +110,16 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
           }
         };
         reader.readAsBinaryString(file);
+        toast.success("Les participants ont été créés avec succès");
       } catch (error) {
         toast.error("Un erreur s'est produite lors de la création des participants");
       } finally {
+        
         setIsLoading(false);
         onOpenChange(false);
       }
     },
-    [uploadMutation, participateMutation, onOpenChange, data]
+    [uploadMutation, participateMutation, onOpenChange, roles]
   );
 
   return (

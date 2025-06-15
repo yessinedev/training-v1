@@ -8,7 +8,7 @@ export default function FormateurLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen flex flex-col container mx-auto">
+    <div className="min-h-screen flex flex-col">
       <Header />
       <NavBar />
       <main className="flex-1 px-4 py-6">{children}</main>

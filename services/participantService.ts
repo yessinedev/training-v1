@@ -3,6 +3,7 @@ import { CreateParticipant, Participant } from "@/types";
 
 export const createParticipant = async (data: CreateParticipant[] | CreateParticipant) => {
   const payload = Array.isArray(data) ? data : data;
+  console.log("payload: ", payload)
   try {
     const response = await axiosInstance.post("/participants/create", payload);
     return response.data;

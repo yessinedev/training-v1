@@ -1,5 +1,5 @@
 import axiosInstance from "@/lib/axios";
-import { Survey } from "@/types";
+import { Survey, UpdateSurvey } from "@/types";
 
 export const fetchSurveys = async (): Promise<Survey[]> => {
   try {
@@ -48,8 +48,9 @@ export const fetchSurveyById = async (surveyId: string): Promise<Survey> => {
 
 export const updateSurvey = async (
   surveyId: string,
-  surveyData: Partial<Survey>
+  surveyData: UpdateSurvey
 ): Promise<Survey> => {
+  console.log("Updating survey with ID:", surveyId, "and data:", surveyData);
   try {
     const response = await axiosInstance.put(
       `/surveys/${surveyId}`,
@@ -57,6 +58,7 @@ export const updateSurvey = async (
     );
     return response.data;
   } catch (error) {
+    console.error("Error during survey update:", error);
     if (error instanceof Error) {
       throw new Error(error.message);
     }

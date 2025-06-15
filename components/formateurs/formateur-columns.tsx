@@ -1,5 +1,4 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "../ui/badge";
 import { Edit, Eye, Trash } from "lucide-react";
 import { createActionColumn, createGenericColumns } from "../dt/columns";
 import { Formateur, User } from "@/types";

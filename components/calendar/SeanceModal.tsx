@@ -89,6 +89,34 @@ export function SeanceModal({
             </Select>
           </div>
 
+          {/* Trainer Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="formateur">Formateur</Label>
+            <Select
+              value={formData.formateur_id || ""}
+              onValueChange={(value) =>
+                setFormData({
+                  ...formData,
+                  formateur_id: value,
+                })
+              }
+            >
+              <SelectTrigger id="formateur">
+                <SelectValue placeholder="Sélectionnez un formateur" />
+              </SelectTrigger>
+              <SelectContent>
+                {formation?.formateurs.map((formateurAssignment) => (
+                  <SelectItem 
+                    key={formateurAssignment.formateur_id} 
+                    value={formateurAssignment.formateur_id}
+                  >
+                    {formateurAssignment.formateur.user.nom} {formateurAssignment.formateur.user.prenom}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Date and Hour Selections */}
           <div className="grid grid-cols-2 gap-4">
             {/* Date Input */}

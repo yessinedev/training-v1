@@ -34,7 +34,7 @@ export function ParticipantDashboard({
       <header className="sticky top-0 z-10 border-b bg-white dark:bg-gray-950 dark:border-gray-800">
         <div className="container flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold">Portail de formation</h1>
+            <h1 className="text-xl font-bold">Portail de particpant</h1>
           </div>
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="relative">

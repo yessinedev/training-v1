@@ -64,7 +64,7 @@ export function parseQuestionOptions(question: Question | undefined | null): str
 }
 
 export function formatDate(date: Date): string {
-  return new Date(date).toLocaleDateString("en-US", {
+  return new Date(date).toLocaleDateString("fr-FR", {
     day: "numeric",
     month: "short",
     year: "numeric",

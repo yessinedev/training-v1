@@ -39,7 +39,7 @@ export default function SessionPage({
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/espae-formateur/sessions">
+          <Link href="/espace-formateur/sessions">
             <ChevronLeft className="h-4 w-4" />
             Retour
           </Link>

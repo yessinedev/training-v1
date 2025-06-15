@@ -84,7 +84,7 @@ export default function SurveyResponsePage() {
               onCheckedChange={setIsAnonymous}
               id="anonymous-mode"
             />
-            <label htmlFor="anonymous-mode">Submit anonymously</label>
+            <label htmlFor="anonymous-mode">Soumettre anonymement</label>
           </div>
 
           <SurveyPreviewer

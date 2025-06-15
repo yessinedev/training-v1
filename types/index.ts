@@ -127,6 +127,8 @@ export type Formation = {
   nb_seances?: number;
   theme_id: number;
   theme: Theme;
+  surveyId?: string;
+  survey?: Survey;
   formateurs: ActionFormationFormateur[];
   participants: ActionFormationParticipant[];
   seances?: Seance[];
@@ -162,7 +164,6 @@ export type Seance = {
 export enum PresenceStatus {
   PRESENT = "PRESENT",
   ABSENT = "ABSENT",
-  RETARD = "RETARD",
 }
 
 export type Presence = {
@@ -222,10 +223,23 @@ export type Survey = {
   id: string;
   title: string;
   description?: string;
-  status: "draft" | "published" | "closed";
+  status: "brouillon" | "publié" | "archivé";
   createdBy: string;
   questions: Question[];
+  formations?: Formation[];
+  createdAt?: Date;
 };
+
+export type UpdateSurvey = {
+  id: string;
+  title: string;
+  description?: string;
+  status: "brouillon" | "publié" | "archivé";
+  createdBy: string;
+  questions: Question[];
+  action_ids?: number[];
+  createdAt?: Date;
+}
 
 export type Question = {
   id: string;

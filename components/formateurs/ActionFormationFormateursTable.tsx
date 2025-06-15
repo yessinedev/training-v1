@@ -56,7 +56,7 @@ const ActionFormationFormateursTable = ({ actionId }: Props) => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Trainers</CardTitle>
+          <CardTitle>Formateurs</CardTitle>
           <CardDescription>
             Gérer les formateurs de cette action de formation
           </CardDescription>

@@ -126,7 +126,7 @@ const ThemeForm = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Modifier Théme" : "Créer Théme"}
+            {isEditing ? "Modifier Thème" : "Créer Thème"}
           </DialogTitle>
           <DialogDescription>
             {isEditing

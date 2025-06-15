@@ -141,7 +141,7 @@ export function QuestionEditor({ question, onChange, onRemove }: EditorProps) {
               onClick={addOption}
             >
               <PlusIcon className="h-4 w-4 mr-1" />
-              Add Option
+              Ajouter une option
             </Button>
           </CardContent>
         )}

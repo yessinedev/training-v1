@@ -289,7 +289,7 @@ export function Calendar() {
           </SelectContent>
         </Select>
       </div>
-      <div className="calendar-container h-full">
+      <div className="calendar-container h-full px-4">
         {sessionsLoading ? (
           <p>Loading sessions...</p>
         ) : sessionsError ? (
@@ -332,15 +332,45 @@ export function Calendar() {
               const endDateTime = new Date(
                 startDateTime.getTime() + durationMs
               );
+              
+              // Define colors based on session status
+              let backgroundColor, borderColor, textColor;
+              
+              switch (session.statut) {
+                case SeanceStatut.EN_ATTENTE:
+                  backgroundColor = "#f3f4f6"; // Light gray background
+                  borderColor = "#d1d5db";     // Gray border
+                  textColor = "#1f2937";       // Dark text
+                  break;
+                case SeanceStatut.EN_COURS:
+                  backgroundColor = "#dbeafe"; // Light blue background
+                  borderColor = "#3b82f6";     // Blue border
+                  textColor = "#1e40af";       // Dark blue text
+                  break;
+                case SeanceStatut.TERMINEE:
+                  backgroundColor = "#d1fae5"; // Light green background
+                  borderColor = "#10b981";     // Green border
+                  textColor = "#065f46";       // Dark green text
+                  break;
+                case SeanceStatut.ANNULEE:
+                  backgroundColor = "#fee2e2"; // Light red background
+                  borderColor = "#ef4444";     // Red border
+                  textColor = "#b91c1c";       // Dark red text
+                  break;
+                default:
+                  backgroundColor = "#f3f4f6"; // Default light gray
+                  borderColor = "#d1d5db";     // Default gray border
+                  textColor = "#1f2937";       // Default dark text
+              }
 
               return {
                 id: String(session.seance_id),
                 title: String(session.statut),
                 start: startDateTime,
                 end: endDateTime,
-                backgroundColor: "#f3f4f6",
-                borderColor: "#d1d5db",
-                textColor: "#1f2937",
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
+                textColor: textColor,
                 className: "rounded-lg shadow-sm border-l-4",
               };
             })}

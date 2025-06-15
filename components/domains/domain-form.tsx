@@ -95,11 +95,11 @@ const DomainForm = ({ domain, isOpen, onClose, onOpenChange }: DomainFormProps) 
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Domain" : "Add New Domain"}</DialogTitle>
+          <DialogTitle>{isEditing ? "Modifer un Domaine" : "Ajouter un nouveau domaine"}</DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the domain information and click the update button"
-              : "Enter the domain information and click the save button"}
+              ? "Modifier le domaine pour mettre à jour les informations"
+              : "Ajouter un nouveau domaine pour commencer à gérer les thèmes"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -109,9 +109,9 @@ const DomainForm = ({ domain, isOpen, onClose, onOpenChange }: DomainFormProps) 
               name="libelle_domaine"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Domain Name</FormLabel>
+                  <FormLabel>Libellé Domaine</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter domain name" {...field} />
+                    <Input placeholder="Entrer le libellé du domaine" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -124,13 +124,13 @@ const DomainForm = ({ domain, isOpen, onClose, onOpenChange }: DomainFormProps) 
                 variant="outline"
                 onClick={onClose}
               >
-                Cancel
+                Annuler
               </Button>
               <Button 
                 type="submit"
                 disabled={isLoading}
               >
-                {isLoading ? "Saving..." : isEditing ? "Update" : "Save"}
+                {isLoading ? "Creation..." : isEditing ? "Modifier" : "Enregistrer"}
               </Button>
             </div>
           </form>

@@ -416,7 +416,7 @@ const FormationForm = ({
                 name="prix_unitaire"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prix Unitaire (€)</FormLabel>
+                    <FormLabel>Prix Unitaire (DT)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"

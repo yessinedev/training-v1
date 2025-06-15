@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, BarChart2, Edit } from "lucide-react";
+import { Plus, BarChart2, Edit, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,12 +14,16 @@ import {
 import { fetchSurveys } from "@/services/surveyService";
 import { Survey } from "@/types";
 import CreateSurveyDialog from "@/components/evaluations/CreateSurveyDialog";
+import AttachFormationsDialog from "@/components/evaluations/AttachFormationsDialog";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils";
 
 const SurveysPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAttachDialogOpen, setIsAttachDialogOpen] = useState(false);
+  const [selectedSurvey, setSelectedSurvey] = useState<Survey | null>(null);
 
   const {
     data: surveys = [],
@@ -30,6 +34,11 @@ const SurveysPage = () => {
     queryKey: ["surveys"],
     queryFn: fetchSurveys,
   });
+
+  const handleOpenAttachDialog = (survey: Survey) => {
+    setSelectedSurvey(survey);
+    setIsAttachDialogOpen(true);
+  };
 
   if (isLoading) return <p>Loading surveys...</p>;
   if (isError) return <p>Error fetching surveys: {error?.message}</p>;
@@ -52,32 +61,38 @@ const SurveysPage = () => {
           {surveys.map((survey) => (
             <Card
               key={survey.id}
-              className="shadow-md border-l-[7px] border-primary hover:shadow-lg transition-shadow"
+              className="shadow-md border-l-[7px] border-primary hover:shadow-lg transition-shadow "
             >
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle>{survey.title}</CardTitle>
-                  <Badge variant={survey.status === "published" ? "default" : "outline"}>
+                  <Badge variant={survey.status === "publié" ? "default" : "outline"}>
                     {survey.status.charAt(0).toUpperCase() + survey.status.slice(1)}
                   </Badge>
                 </div>
                 <CardDescription>
-                  {survey.description || "No description"}
+                  {survey.description || ""}
                 </CardDescription>
               </CardHeader>
-              {/* <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Created: {new Date(survey.).toLocaleDateString()}
-                </p>
-              </CardContent> */}
-              <CardFooter className="flex justify-between">
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Créer le: {formatDate(new Date(survey.createdAt!))}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Formations attachées:</span>{" "}
+                    {survey.formations?.length || 0}
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-wrap gap-1">
                 <Link
                   href={`/dashboard/questionnaires/responses/${survey.id}`}
                   className="flex items-center"
                   passHref
                 >
                   <Button variant="outline" size="sm">
-                    <BarChart2 className="mr-2 h-4 w-4" /> Responses
+                    <BarChart2 className="h-4 w-4" /> Réponses
                   </Button>
                 </Link>
                 <Link
@@ -86,9 +101,16 @@ const SurveysPage = () => {
                   passHref
                 >
                   <Button variant="outline" size="sm">
-                    <Edit className="mr-2 h-4 w-4" /> Modifier
+                    <Edit className="h-4 w-4" /> Modifier
                   </Button>
                 </Link>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleOpenAttachDialog(survey)}
+                >
+                  <Link2 className="h-4 w-4" /> Attacher
+                </Button>
               </CardFooter>
             </Card>
           ))}
@@ -99,6 +121,14 @@ const SurveysPage = () => {
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
       />
+      
+      {selectedSurvey && (
+        <AttachFormationsDialog
+          isOpen={isAttachDialogOpen}
+          onOpenChange={setIsAttachDialogOpen}
+          survey={selectedSurvey}
+        />
+      )}
     </div>
   );
 };

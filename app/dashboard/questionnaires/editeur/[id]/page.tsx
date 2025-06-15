@@ -16,7 +16,7 @@ import {
   arrayMove,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Survey, Question, QuestionType } from "@/types";
+import { Survey, Question, QuestionType, UpdateSurvey } from "@/types";
 import SurveyBuilder from "@/components/evaluations/SurveyBuilder";
 import SurveyPreviewer from "@/components/evaluations/SurveyPreviewer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -58,8 +58,8 @@ export default function SurveyEditorPage() {
     }
   }, [fetchedSurvey]);
 
-  const saveSurveyMutation = useMutation<Survey, Error, Partial<Survey>>({
-    mutationFn: (surveyData: Partial<Survey>) =>
+  const saveSurveyMutation = useMutation<Survey, Error, UpdateSurvey>({
+    mutationFn: (surveyData: UpdateSurvey) =>
       updateSurvey(surveyId, surveyData),
 
     onMutate: () => {
@@ -233,7 +233,7 @@ export default function SurveyEditorPage() {
               setSurvey((s) => (s ? { ...s, title: e.target.value } : null))
             }
             className="text-4xl font-bold bg-transparent shadow-md border-b-[3px] border-primary hover:shadow-lg px-2 max-w-md focus-visible:ring-0 focus-visible:ring-offset-0"
-            placeholder="Survey Title"
+            placeholder="Titre du questionnaires"
           />
           <Textarea
             value={survey.description}
@@ -243,13 +243,13 @@ export default function SurveyEditorPage() {
               )
             }
             className="max-w-2xl bg-transparent shadow-md border-b-[3px] border-primary hover:shadow-lg px-2 focus-visible:ring-0 focus-visible:ring-offset-0"
-            placeholder="Survey Description"
+            placeholder="Description du questionnaires"
           />
         </div>
 
         <Button onClick={handleSave} disabled={isSaving}>
           <SaveIcon className="h-4 w-4 mr-2" />{" "}
-          {isSaving ? "Saving..." : "Save"}
+          {isSaving ? "Enregistrement..." : "Enregistrer"}
         </Button>
       </div>
 
@@ -269,7 +269,7 @@ export default function SurveyEditorPage() {
             <TabsContent value="editeur">
               <Card>
                 <CardHeader>
-                  <CardTitle>Edit Questions</CardTitle>
+                  <CardTitle>Modifier les questions</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -317,7 +317,7 @@ export default function SurveyEditorPage() {
         <aside>
           <Card>
             <CardHeader>
-              <CardTitle>Add a Question</CardTitle>
+              <CardTitle>Ajouter un question</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               {(

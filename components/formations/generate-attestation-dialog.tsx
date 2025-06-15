@@ -36,7 +36,7 @@ export default function GenerateAttestationsDialog({
     mutationFn: () => createAttestation(formationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["formation", formationId] });
-      toast.success("Attestations generated successfully");
+      toast.success("Attestations générer avec succès");
       onOpenChange(false);
     },
     onError: (error: Error) => {
@@ -59,20 +59,20 @@ export default function GenerateAttestationsDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Generate Attestations</DialogTitle>
+          <DialogTitle>Générer les attestations</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <p className="text-sm text-muted-foreground">
-            Generate attestations for all confirmed participants who have completed
-            the training session.
+            Générer les attestations pour tous les participants confirmés qui ont
+            terminé la session de formation.
           </p>
           <div className="rounded-lg border p-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium">Summary</p>
+              <p className="text-sm font-medium">Résumé</p>
               <ul className="text-sm text-muted-foreground">
-                <li>Total participants: {participants.length}</li>
+                <li>Prticipants totale: {participants.length}</li>
                 <li>
-                  Pending attestations: {pendingAttestations.length}
+                  Attestations en attente: {pendingAttestations.length}
                 </li>
               </ul>
             </div>
@@ -83,13 +83,13 @@ export default function GenerateAttestationsDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            Annuler
           </Button>
           <Button
             onClick={handleGenerate}
             disabled={isLoading || pendingAttestations.length === 0}
           >
-            {isLoading ? "Generating..." : "Generate"}
+            {isLoading ? "En Cours..." : "Générer"}
           </Button>
         </div>
       </DialogContent>

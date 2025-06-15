@@ -73,7 +73,7 @@ function QuestionPreview({ question, value, onChange }: QuestionPreviewProps) {
 
         {question.type === "text" && (
           <Textarea
-            placeholder="Enter your response..."
+            placeholder="Entrer votre reponse..."
             className="w-full resize-none"
             value={value || ""}
             onChange={(e) => handleChange(e.target.value)}

@@ -102,11 +102,11 @@ const DomainsTable = () => {
       <div className="flex justify-end gap-2 mb-4">
         <Button variant="outline" onClick={() => handleOpenThemeDialog()}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Theme
+          Ajouter un thème
         </Button>
         <Button onClick={() => handleOpenDomainDialog()}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Domain
+          Ajouter un domaine
         </Button>
       </div>
 
@@ -128,8 +128,8 @@ const DomainsTable = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Domain</TableHead>
-              <TableHead>Themes</TableHead>
+              <TableHead>Domaine</TableHead>
+              <TableHead>Thèmes</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -177,11 +177,11 @@ const DomainsTable = () => {
                               onClick={() => handleOpenDomainDialog(domain)}
                             >
                               <Pencil className="h-4 w-4" />
-                              <span className="sr-only">Edit domain</span>
+                              <span className="sr-only">Modifier domaine</span>
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Edit domain</p>
+                            <p>Modifier domaine</p>
                           </TooltipContent>
                         </Tooltip>
                         <Tooltip>
@@ -196,11 +196,11 @@ const DomainsTable = () => {
                               disabled={deleteDomainMutation.isPending}
                             >
                               <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete domain</span>
+                              <span className="sr-only">Supprimer domaine</span>
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Delete domain</p>
+                            <p>Supprimer domaine</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>

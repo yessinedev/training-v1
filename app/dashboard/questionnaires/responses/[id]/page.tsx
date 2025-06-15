@@ -44,30 +44,30 @@ import {
 export default function SurveyResponsesPage() {
   const params = useParams();
   const surveyId = params.id as string;
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("overview"); 
 
   const { data: survey, isLoading: surveyLoading } = useQuery({
-    queryKey: ["survey", surveyId],
+    queryKey: ["survey", surveyId], 
     queryFn: () => fetchSurveyById(surveyId),
   });
 
   const { data: responses = [], isLoading: responsesLoading } = useQuery({
-    queryKey: ["responses", surveyId],
-    queryFn: () => fetchResponsesBySurveyId(surveyId),
-    enabled: !!surveyId,
+    queryKey: ["responses", surveyId], 
+    queryFn: () => fetchResponsesBySurveyId(surveyId), // Fonction pour récupérer les réponses par ID de sondage
+    enabled: !!surveyId, // Activé seulement si surveyId existe
   });
 
-  const isLoading = surveyLoading || responsesLoading;
+  const isLoading = surveyLoading || responsesLoading; // Indicateur de chargement global
 
-  // Analytics calculations
-  const totalResponses = responses.length;
-  const anonymousResponses = responses.filter((r) => !r.participantId).length;
+  // Calculs analytiques
+  const totalResponses = responses.length; // Nombre total de réponses
+  const anonymousResponses = responses.filter((r) => !r.participantId).length; // Nombre de réponses anonymes
   const completionRate =
     totalResponses > 0
-      ? Math.round((totalResponses / (survey?.questions?.length || 1)) * 100)
+      ? Math.round((totalResponses / (survey?.questions?.length || 1)) * 100) // Taux de complétion en pourcentage
       : 0;
 
-  // Colors for charts
+  // Couleurs pour les graphiques
   const COLORS = [
     "#0088FE",
     "#00C49F",
@@ -77,16 +77,16 @@ export default function SurveyResponsesPage() {
     "#82ca9d",
   ];
 
-  // Prepare chart data
+  // Préparation des données pour les graphiques
   const prepareQuestionData = () => {
-    if (!survey || !responses.length) return [];
+    if (!survey || !responses.length) return []; // Retourne un tableau vide si pas de sondage ou de réponses
 
     return survey.questions.map((question) => {
       const questionResponses = responses.flatMap((r) =>
         r.answers.filter((a) => a.questionId === question.id)
       );
 
-      // For multiple choice questions, count occurrences of each option
+      // Pour les questions à choix multiples, compter les occurrences de chaque option
       if (question.type === "multiple_choice" && question.options) {
         const options: string[] = Array.isArray(question.options)
           ? question.options
@@ -107,9 +107,9 @@ export default function SurveyResponsesPage() {
         };
       }
 
-      // For rating questions, calculate average
+      // Pour les questions d'évaluation, calculer la moyenne
       if (question.type === "rating") {
-        const ratings = questionResponses.map((r) => r.content.value);
+        const ratings = questionResponses.map((r) => r.content.value as number);
         const average = ratings.length
           ? ratings.reduce((sum, val) => sum + val, 0) / ratings.length
           : 0;
@@ -118,13 +118,13 @@ export default function SurveyResponsesPage() {
           question: question.text,
           average: parseFloat(average.toFixed(1)),
           data: [1, 2, 3, 4, 5].map((rating) => ({
-            name: `${rating} Star${rating !== 1 ? "s" : ""}`,
+            name: `${rating} Étoile${rating !== 1 ? "s" : ""}`, // Nom de l'option (ex: "5 Étoiles")
             value: ratings.filter((r) => r === rating).length,
           })),
         };
       }
 
-      // For boolean questions
+      // Pour les questions booléennes
       if (question.type === "boolean") {
         const yesCount = questionResponses.filter(
           (r) => r.content.value === true
@@ -136,30 +136,30 @@ export default function SurveyResponsesPage() {
         return {
           question: question.text,
           data: [
-            { name: "Yes", value: yesCount },
-            { name: "No", value: noCount },
+            { name: "Oui", value: yesCount }, // Nombre de "Oui"
+            { name: "Non", value: noCount }, // Nombre de "Non"
           ],
         };
       }
 
-      // For text questions, just return the count
+      // Pour les questions textuelles, retourner simplement le nombre de réponses
       return {
         question: question.text,
         responseCount: questionResponses.length,
-        responses: questionResponses.map((r) => r.content.value),
+        responses: questionResponses.map((r) => r.content.value as string),
       };
     });
   };
 
-  const questionData = prepareQuestionData();
+  const questionData = prepareQuestionData(); // Données préparées pour les questions
 
-  // Response trend data (by date)
+  // Données de tendance des réponses (par date)
   const responseTrend = (() => {
-    if (!responses.length) return [];
+    if (!responses.length) return []; // Retourne un tableau vide si pas de réponses
 
     const dateMap: Record<string, number> = {};
     responses.forEach((response) => {
-      const date = new Date(response.createdAt).toLocaleDateString();
+      const date = new Date(response.createdAt).toLocaleDateString(); // Formatte la date
       dateMap[date] = (dateMap[date] || 0) + 1;
     });
 
@@ -184,7 +184,7 @@ export default function SurveyResponsesPage() {
   }
 
   if (!survey) {
-    return <div className="container mx-auto py-8">Survey not found</div>;
+    return <div className="container mx-auto py-8">Sondage non trouvé</div>; // Message si sondage non trouvé
   }
 
   return (
@@ -194,32 +194,32 @@ export default function SurveyResponsesPage() {
           <h1 className="text-3xl font-bold">{survey.title}</h1>
           <p className="text-muted-foreground">{survey.description}</p>
         </div>
-        <Badge variant={survey.status === "published" ? "default" : "outline"}>
-          {survey.status.charAt(0).toUpperCase() + survey.status.slice(1)}
+        <Badge variant={survey.status === "publié" ? "default" : "outline"}>
+          {survey.status.charAt(0).toUpperCase() + survey.status.slice(1)} 
         </Badge>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-3 md:w-[400px]">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="overview">Aperçu</TabsTrigger> 
           <TabsTrigger value="questions">Questions</TabsTrigger>
-          <TabsTrigger value="responses">Responses</TabsTrigger>
+          <TabsTrigger value="responses">Réponses</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          {/* Stats Cards */}
+        <TabsContent value="overview" className="space-y-6"> 
+          {/* Cartes de statistiques */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Total Responses
+                  Réponses Totales
                 </CardTitle>
                 <UsersIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{totalResponses}</div>
                 <p className="text-xs text-muted-foreground">
-                  {anonymousResponses} anonymous
+                  {anonymousResponses} anonymes
                 </p>
               </CardContent>
             </Card>
@@ -227,7 +227,7 @@ export default function SurveyResponsesPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Completion Rate
+                  Taux de Complétion
                 </CardTitle>
                 <BarChart3Icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
@@ -241,8 +241,8 @@ export default function SurveyResponsesPage() {
                   )}
                   <p className="text-xs text-muted-foreground">
                     {completionRate > 50
-                      ? "Good completion rate"
-                      : "Low completion rate"}
+                      ? "Bon taux de complétion"
+                      : "Faible taux de complétion"}
                   </p>
                 </div>
               </CardContent>
@@ -258,17 +258,17 @@ export default function SurveyResponsesPage() {
                   {survey.questions.length}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {survey.questions.filter((q) => q.required).length} required
+                  {survey.questions.filter((q) => q.required).length} requises
                 </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Response Trend Chart */}
+          {/* Graphique de tendance des réponses */}
           <Card>
             <CardHeader>
-              <CardTitle>Response Trend</CardTitle>
-              <CardDescription>Number of responses over time</CardDescription>
+              <CardTitle>Tendance des Réponses</CardTitle>
+              <CardDescription>Nombre de réponses au fil du temps</CardDescription>
             </CardHeader>
             <CardContent className="h-[300px]">
               {responseTrend.length > 0 ? (
@@ -286,7 +286,7 @@ export default function SurveyResponsesPage() {
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip
-                      formatter={(value) => [`${value} responses`, "Count"]}
+                      formatter={(value) => [`${value} réponses`, "Nombre"]}
                     />
                     <Legend />
                     <Line
@@ -300,7 +300,7 @@ export default function SurveyResponsesPage() {
               ) : (
                 <div className="flex h-full items-center justify-center">
                   <p className="text-muted-foreground">
-                    No response data available
+                    Aucune donnée de réponse disponible
                   </p>
                 </div>
               )}
@@ -309,186 +309,190 @@ export default function SurveyResponsesPage() {
         </TabsContent>
 
         <TabsContent value="questions" className="space-y-6">
-          {questionData.map((qData, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle className="text-lg">{qData.question}</CardTitle>
-                <CardDescription>
-                  {qData.responseCount
-                    ? `${qData.responseCount} responses`
-                    : ""}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {qData.data ? (
-                  <div className="h-[300px]">
-                    {qData.data.length > 0 ? (
-                      qData.data.length <= 3 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <PieChart>
-                            <Pie
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {questionData.map((qData, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle className="text-lg">{qData.question}</CardTitle>
+                  <CardDescription>
+                    {qData.responseCount
+                      ? `${qData.responseCount} réponses`
+                      : ""}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {qData.data ? (
+                    <div className="h-[300px]">
+                      {qData.data.length > 0 ? (
+                        qData.data.length <= 3 ? (
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={qData.data}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                label={({ name, percent }) =>
+                                  `${name}: ${(percent * 100).toFixed(0)}%`
+                                }
+                                outerRadius={80}
+                                fill="#8884d8"
+                                dataKey="value"
+                              >
+                                {qData.data.map((entry, cellIndex) => (
+                                  <Cell
+                                    key={`cell-${cellIndex}`}
+                                    fill={COLORS[cellIndex % COLORS.length]}
+                                  />
+                                ))}
+                              </Pie>
+                              <Tooltip
+                                formatter={(value) => [
+                                  `${value} réponses`,
+                                  "Nombre",
+                                ]}
+                              />
+                              <Legend />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        ) : (
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
                               data={qData.data}
-                              cx="50%"
-                              cy="50%"
-                              labelLine={true}
-                              label={({ name, percent }) =>
-                                `${name}: ${(percent * 100).toFixed(0)}%`
-                              }
-                              outerRadius={80}
-                              fill="#8884d8"
-                              dataKey="value"
+                              margin={{
+                                top: 5,
+                                right: 30,
+                                left: 20,
+                                bottom: 5,
+                              }}
+                              
                             >
-                              {qData.data.map((entry, index) => (
-                                <Cell
-                                  key={`cell-${index}`}
-                                  fill={COLORS[index % COLORS.length]}
-                                />
-                              ))}
-                            </Pie>
-                            <Tooltip
-                              formatter={(value) => [
-                                `${value} responses`,
-                                "Count",
-                              ]}
-                            />
-                            <Legend />
-                          </PieChart>
-                        </ResponsiveContainer>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" />
+                              <YAxis />
+                              <Tooltip
+                                formatter={(value) => [
+                                  `${value} réponses`,
+                                  "Nombre",
+                                ]}
+                              />
+                              <Legend />
+                              <Bar dataKey="value" fill="#8884d8" radius={8} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        )
                       ) : (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart
-                            data={qData.data}
-                            margin={{
-                              top: 5,
-                              right: 30,
-                              left: 20,
-                              bottom: 5,
-                            }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip
-                              formatter={(value) => [
-                                `${value} responses`,
-                                "Count",
-                              ]}
-                            />
-                            <Legend />
-                            <Bar dataKey="value" fill="#8884d8" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      )
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <p className="text-muted-foreground">
-                          No data available
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : qData.responses ? (
-                  <ScrollArea className="h-[200px] rounded-md border p-4">
-                    {qData.responses.map((response, idx) => (
-                      <div
-                        key={idx}
-                        className="mb-2 pb-2 border-b last:border-0"
-                      >
-                        <p className="text-sm">{response}</p>
-                      </div>
-                    ))}
-                  </ScrollArea>
-                ) : (
-                  <div className="flex h-[200px] items-center justify-center">
-                    <p className="text-muted-foreground">
-                      No responses for this question
-                    </p>
-                  </div>
-                )}
+                        <div className="flex h-full items-center justify-center">
+                          <p className="text-muted-foreground">
+                            Aucune donnée disponible
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : qData.responses ? (
+                    <ScrollArea className="h-[200px] rounded-md border p-4">
+                      {qData.responses.map((response, idx) => (
+                        <div
+                          key={idx}
+                          className="mb-2 pb-2 border-b last:border-0"
+                        >
+                          <p className="text-sm">{response}</p>
+                        </div>
+                      ))}
+                    </ScrollArea>
+                  ) : (
+                    <div className="flex h-[200px] items-center justify-center">
+                      <p className="text-muted-foreground">
+                        Aucune réponse pour cette question
+                      </p>
+                    </div>
+                  )}
 
-                {qData.average !== undefined && (
-                  <div className="mt-4 flex items-center">
-                    <span className="text-lg font-bold mr-2">
-                      {qData.average}
-                    </span>
-                    <span className="text-muted-foreground">
-                      average rating
-                    </span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  {qData.average !== undefined && (
+                    <div className="mt-4 flex items-center">
+                      <span className="text-lg font-bold mr-2">
+                        {qData.average}
+                      </span>
+                      <span className="text-muted-foreground">
+                        note moyenne
+                      </span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
         <TabsContent value="responses" className="space-y-6">
           {responses.length > 0 ? (
-            responses.map((response) => (
-              <Card key={response.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      {response.participantId ? (
-                        <Avatar className="h-8 w-8 mr-2">
-                          <AvatarFallback>
-                            {response.participant?.user.prenom?.charAt(0) ||
-                              "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                      ) : (
-                        <Badge variant="outline" className="mr-2">
-                          Anonymous
-                        </Badge>
-                      )}
-                      <div>
-                        <CardTitle className="text-sm">
-                          {response.participant?.user.prenom ||
-                            "Anonymous User"}
-                        </CardTitle>
-                        <CardDescription>
-                          {formatDistanceToNow(new Date(response.createdAt), {
-                            addSuffix: true,
-                          })}
-                        </CardDescription>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {responses.map((response) => (
+                <Card key={response.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        {response.participantId ? (
+                          <Avatar className="h-8 w-8 mr-2">
+                            <AvatarFallback>
+                              {response.participant?.user.prenom?.charAt(0) ||
+                                "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                        ) : (
+                          <Badge variant="outline" className="mr-2">
+                            Anonyme
+                          </Badge>
+                        )}
+                        <div>
+                          <CardTitle className="text-sm">
+                            {response.participant?.user.prenom ||
+                              "Utilisateur anonyme"}
+                          </CardTitle>
+                          <CardDescription>
+                            {formatDistanceToNow(new Date(response.createdAt), {
+                              addSuffix: true,
+                            })}
+                          </CardDescription>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {response.answers.map((answer) => {
-                      const question = survey.questions.find(
-                        (q) => q.id === answer.questionId
-                      );
-                      return (
-                        <div
-                          key={answer.id}
-                          className="border-b pb-2 last:border-0"
-                        >
-                          <p className="text-sm font-medium">
-                            {question?.text}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {typeof answer.content.value === "boolean"
-                              ? answer.content.value
-                                ? "Yes"
-                                : "No"
-                              : answer.content.value}
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {response.answers.map((answer) => {
+                        const question = survey.questions.find(
+                          (q) => q.id === answer.questionId
+                        );
+                        return (
+                          <div
+                            key={answer.id}
+                            className="border-b pb-2 last:border-0"
+                          >
+                            <p className="text-sm font-medium">
+                              {question?.text}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {typeof answer.content.value === "boolean"
+                                ? answer.content.value
+                                  ? "Oui"
+                                  : "Non"
+                                : answer.content.value}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           ) : (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-10">
-                <p className="text-muted-foreground mb-2">No responses yet</p>
+                <p className="text-muted-foreground mb-2">Aucune réponse pour le moment</p>
                 <p className="text-sm text-muted-foreground">
-                  Responses will appear here once participants complete the
-                  survey
+                  Les réponses apparaîtront ici une fois que les participants auront complété le sondage
                 </p>
               </CardContent>
             </Card>

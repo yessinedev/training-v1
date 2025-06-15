@@ -94,9 +94,9 @@ const CreateSurveyDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Survey</DialogTitle>
+          <DialogTitle>Créer un nouveau questionnaire</DialogTitle>
           <DialogDescription>
-            Enter a title and optional description for your new survey.
+            Saisissez un titre et une description facultative pour votre nouveau questionnaire.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -109,9 +109,9 @@ const CreateSurveyDialog = ({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Titre</FormLabel>
                   <FormControl>
-                    <Input placeholder="Survey Title" {...field} />
+                    <Input placeholder="Titre du questionnaire" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,10 +122,10 @@ const CreateSurveyDialog = ({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>Description (Optionnel)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the purpose of this survey..."
+                      placeholder="Décrivez l'objectif de ce questionnaire..."
                       {...field}
                       value={field.value ?? ""}
                     />
@@ -141,10 +141,10 @@ const CreateSurveyDialog = ({
                 onClick={() => onOpenChange(false)}
                 disabled={isLoading}
               >
-                Cancel
+                Annuler
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Survey"}
+                {isLoading ? "Creation..." : "Créer"}
               </Button>
             </DialogFooter>
           </form>

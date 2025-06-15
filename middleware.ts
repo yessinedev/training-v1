@@ -5,7 +5,6 @@ export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
   const { sessionClaims } = await auth();
   const role = sessionClaims?.metadata?.role?.role_name;
-console.log(sessionClaims)
   // Public route fallback (should be excluded from matcher ideally)
   if (!role) {
     console.log("no role")
