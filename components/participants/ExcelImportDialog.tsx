@@ -40,7 +40,7 @@ const ExcelImportDialog = ({ isOpen, formationId, onOpenChange }: Props) => {
   const uploadMutation = useMutation({
     mutationFn: createParticipant,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["formation", formationId] });
+      queryClient.invalidateQueries({ queryKey: ["formation-participants", formationId] });
     },
     onError: (error) => {
       console.error("Upload error:", error);

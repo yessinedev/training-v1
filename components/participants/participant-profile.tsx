@@ -32,7 +32,6 @@ function PresenceStatusBadge({ status }: { status: PresenceStatus }) {
   > = {
     PRESENT: "default",
     ABSENT: "destructive",
-    RETARD: "secondary",
   };
 
   return <Badge variant={variants[status]}>{status}</Badge>;

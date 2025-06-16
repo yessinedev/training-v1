@@ -23,28 +23,28 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   const [isHydrated, setIsHydrated] = useState(false);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-      const persister = createSyncStoragePersister({
-        storage: window.localStorage,
-      });
+  // useEffect(() => {
+  //   if (typeof window === "undefined") return;
+  //     const persister = createSyncStoragePersister({
+  //       storage: window.localStorage,
+  //     });
 
-      const [unsubscribe] = persistQueryClient({
-        queryClient,
-        persister,
-      });
+  //     const [unsubscribe] = persistQueryClient({
+  //       queryClient,
+  //       persister,
+  //     });
     
 
-    setIsHydrated(true);
-    return () => {
-      unsubscribe?.();
-    };
-  }, [queryClient]);
+  //   setIsHydrated(true);
+  //   return () => {
+  //     unsubscribe?.();
+  //   };
+  // }, [queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {isHydrated ? children : <LoadingSkeleton />}
-      {/* {children} */}
+      {/* {isHydrated ? children : <LoadingSkeleton />} */}
+      {children}
     </QueryClientProvider>
   );
 }

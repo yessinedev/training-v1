@@ -6,12 +6,12 @@ export default clerkMiddleware(async (auth, request) => {
   const { sessionClaims } = await auth();
   const role = sessionClaims?.metadata?.role?.role_name;
   // Public route fallback (should be excluded from matcher ideally)
-  if (!role) {
-    console.log("no role")
+  if (!role && !pathname.startsWith("/sign-in")) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
   if (pathname === "/") {
+    console.log("role", role);
     if (role === "ADMIN" || role === "GESTIONNAIRE") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
@@ -22,7 +22,10 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   // Role-based route protection
-  if (pathname.startsWith("/dashboard") && !["ADMIN", "GESTIONNAIRE"].includes(role)) {
+  if (
+    pathname.startsWith("/dashboard") &&
+    !["ADMIN", "GESTIONNAIRE"].includes(role!)
+  ) {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
   if (pathname.startsWith("/espace-participant") && role !== "PARTICIPANT") {
@@ -41,5 +44,6 @@ export const config = {
     "/dashboard/:path*", // ADMIN & GESTIONNAIRE
     "/espace-participant/:path*", // PARTICIPANT
     "/espace-formateur/:path*", // FORMATEUR
+    "/((?!_next/static|_next/image|favicon.ico|image1.png|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.svg|.*\\.webp|.*\\.ico|.*\\.ttf|.*\\.woff|.*\\.woff2).*)",
   ],
 };

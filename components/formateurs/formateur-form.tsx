@@ -103,7 +103,7 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
     isEditing,
     formateurId,
     () => {
-      queryClient.invalidateQueries({ queryKey: ["formateurs"] });
+      queryClient.invalidateQueries({ queryKey: ["formateurs", "users"] });
       toast.success(
         `Formateur ${isEditing ? "updated" : "created"} successfully`
       );
