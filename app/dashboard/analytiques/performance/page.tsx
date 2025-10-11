@@ -234,18 +234,23 @@ export default function PerformancePage() {
                     <TableRow>
                       <TableHead>Participant</TableHead>
                       <TableHead className="text-right">
-                        {" "}
-                        Nombre d'Absences
+                        {" Nombre dAbsences"}
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {frequentAbsentees.filter((absentee) => absentee.absences > 0).map((absentee) => (
-                      <TableRow key={absentee.participant_id}>
-                        <TableCell className="font-medium">{absentee.name}</TableCell>
-                        <TableCell className="text-right">{absentee.absences}</TableCell>
-                      </TableRow>
-                    ))}
+                    {frequentAbsentees
+                      .filter((absentee) => absentee.absences > 0)
+                      .map((absentee) => (
+                        <TableRow key={absentee.participant_id}>
+                          <TableCell className="font-medium">
+                            {absentee.name}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {absentee.absences}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               )}
