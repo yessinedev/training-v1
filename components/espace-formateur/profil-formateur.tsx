@@ -25,16 +25,7 @@ export function ProfilFormateur({ formateur }: ProfilFormateurProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Simuler la mise à jour du profil
-    console.log("Profil à mettre à jour:", {
-      nom,
-      prenom,
-      email,
-      telephone,
-      tarifHeure,
-      tarifJour,
-      tarifSeance,
-    })
+    
   }
 
   return (

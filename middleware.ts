@@ -11,7 +11,6 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   if (pathname === "/") {
-    console.log("role", role);
     if (role === "ADMIN" || role === "GESTIONNAIRE") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }

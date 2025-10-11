@@ -64,10 +64,6 @@ export default function UserForm({ initialValues }: UserFormProps) {
         role_id: parseInt(values.role_id, 10),
       };
       if (initialValues) {
-        console.log("updating user", {
-          ...values,
-          role_id: parseInt(values.role_id),
-        });
         await updateUser(initialValues.user_id, {
           ...values,
           role_id: parseInt(values.role_id),

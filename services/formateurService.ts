@@ -47,7 +47,6 @@ export const fetchFormateurById = async (
 ): Promise<Formateur> => {
   try {
     const response = await axiosInstance.get(`/formateurs/${formateurId}`);
-    console.log("response", response.data);
     return response.data;
   } catch (error) {
     if (error instanceof Error) {

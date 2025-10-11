@@ -9,7 +9,6 @@ interface SessionScheduleProps {
 
 export function SessionSchedule({ participant }: SessionScheduleProps) {
   // Get all sessions from all formations the participant is enrolled in
-  console.log("participant", participant)
   const sessions = participant?.actions?.flatMap((action) =>
     action?.action?.seances?.map((seance) => ({
       ...seance,
@@ -18,7 +17,6 @@ export function SessionSchedule({ participant }: SessionScheduleProps) {
     })),
   )
 
-  console.log(sessions)
 
   // Sort sessions by date
   const sortedSessions = (sessions?.filter((s): s is NonNullable<typeof s> => s !== undefined) || []).sort((a, b) => {

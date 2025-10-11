@@ -47,7 +47,7 @@ const AttestationsTable = ({ actionId }: Props) => {
 
   const generateQR = async (id: string) => {
     try {
-      const qrData = `https://training-v1.vercel.app/verify/${id}`;
+      const qrData = `https://training.etudionet.life/verify/${id}`;
 
       const url = await QRCode.toDataURL(qrData, {
         width: 200,
@@ -56,7 +56,6 @@ const AttestationsTable = ({ actionId }: Props) => {
       });
       return url;
     } catch (err) {
-      console.error("QR Code generation error:", err);
       return "";
     }
   };
@@ -80,7 +79,6 @@ const AttestationsTable = ({ actionId }: Props) => {
           ))}
         </Document>
       ).toBlob();
-      console.log("blob", blob);
       // Download combined PDF
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");

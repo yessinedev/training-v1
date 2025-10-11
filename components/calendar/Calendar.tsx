@@ -142,7 +142,6 @@ export function Calendar() {
   const handleDateSelect = useCallback(
     (selectInfo: DateSelectArg) => {
       setModalMode("create");
-      console.log("Selected date:", selectInfo);
       const start = new Date(selectInfo.startStr);
       const end = new Date(selectInfo.endStr);
 
@@ -227,7 +226,6 @@ export function Calendar() {
               resizeInfo.event.start.getTime()) /
             (1000 * 60 * 60),
         };
-        console.log("Updated seance:", updatedSeance);
         updateSeanceMutation.mutate(updatedSeance);
       } else {
         console.warn(
@@ -246,7 +244,6 @@ export function Calendar() {
         const { seance_id, ...newSeance } = session;
         createSeanceMutation.mutate(newSeance);
       } else {
-        console.log("updating: session: ", session);
         updateSeanceMutation.mutate(session);
       }
     },

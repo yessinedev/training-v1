@@ -32,7 +32,6 @@ export default function SurveyResponsePage() {
       setAnswers({});
     },
     onError: (error: Error) => {
-      console.error("Error submitting response:", error);
       toast.error(`Failed to submit response: ${error.message}`);
     },
   });

@@ -76,7 +76,6 @@ const DomainForm = ({ domain, isOpen, onClose, onOpenChange }: DomainFormProps) 
     },
     onError: (error: Error) => {
       toast.error(`Failed to ${isEditing ? "update" : "create"} domain: ${error.message}`);
-      console.error(`Error ${isEditing ? "updating" : "creating"} domain:`, error);
     },
   });
 

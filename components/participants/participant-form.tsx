@@ -112,9 +112,7 @@ export const ParticipantForm = ({
         poste: data.poste,
         role_id: participantRole.role_id,
       };
-      console.log("User Payload: ", userParticipantPayload);
       const response = await createParticipant(userParticipantPayload);
-      console.log("Created: ", response);
       return response.data || response;
     },
   });
@@ -164,11 +162,9 @@ export const ParticipantForm = ({
         submittedParticipant = await createParticipantMutation.mutateAsync(
           data
         );
-        console.log("Created: ", submittedParticipant);
       }
 
       if (formationId && submittedParticipant?.user?.user_id) {
-        console.log("Invoked assigning");
         await assignToFormationMutation.mutateAsync({
           participantId: submittedParticipant.user.user_id,
         });

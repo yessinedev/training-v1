@@ -84,7 +84,6 @@ export const getParticipantColumns = (
       label: "Delete",
       icon: <Trash className="h-4 w-4" />,
       onClick: (data) => {
-        console.log("Delete participant:", data);
         handleDelete(data.user_id)},
       variant: "destructive",
     },

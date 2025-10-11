@@ -128,7 +128,6 @@ export default function SurveyEditorPage() {
       if (!survey) return;
       setSurvey((s) => {
         if (!s) return null;
-        console.log("type: ", type);
         return {
           ...s,
           questions: [
@@ -144,7 +143,6 @@ export default function SurveyEditorPage() {
           ],
         };
       });
-      console.log("survey: ", survey.questions);
     },
     [survey]
   );

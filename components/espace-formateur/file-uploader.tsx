@@ -34,14 +34,6 @@ export function FileUploader({ type, withFormationSelect = false, actionId }: Fi
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Simuler l'envoi du fichier
-    console.log("Fichier à envoyer:", {
-      file,
-      title,
-      type,
-      formationId: selectedFormation,
-    })
-
     // Réinitialiser le formulaire
     setFile(null)
     setTitle("")

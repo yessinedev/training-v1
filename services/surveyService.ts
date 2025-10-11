@@ -22,7 +22,6 @@ export type CreateSurveyPayload = {
 export const createSurvey = async (
   payload: CreateSurveyPayload
 ): Promise<Survey> => {
-  console.log("Creating survey with payload:", payload);
   try {
     const response = await axiosInstance.post("/surveys", payload);
     return response.data;
@@ -50,7 +49,6 @@ export const updateSurvey = async (
   surveyId: string,
   surveyData: UpdateSurvey
 ): Promise<Survey> => {
-  console.log("Updating survey with ID:", surveyId, "and data:", surveyData);
   try {
     const response = await axiosInstance.put(
       `/surveys/${surveyId}`,

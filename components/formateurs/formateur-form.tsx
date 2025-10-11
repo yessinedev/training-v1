@@ -69,7 +69,6 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
 
   useEffect(() => {
     if (formateur) {
-      console.log("Formateur data in useEffect:", formateur);
       let initialTarifType: TarifType | null = null;
       if (formateur.tarif_heure) initialTarifType = "heure";
       else if (formateur.tarif_jour) initialTarifType = "jour";
@@ -153,8 +152,7 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
           ? parseFloat(values.tarif_seance)
           : undefined,
       };
-      console.log(typeof payload);
-      console.log("Form values before mutation:", payload);
+      
       await mutation.mutateAsync(payload);
     } catch (error) {
       console.error("Form submission error caught in component:", error);

@@ -4,13 +4,11 @@ import { CreateResponse, Response } from "@/types";
 export const createResponse = async (
   payload: CreateResponse
 ): Promise<Response> => {
-    console.log(payload)
   try {
     const response = await axiosInstance.post("/responses", payload);
     return response.data;
   } catch (error) {
     if (error instanceof Error) {
-        console.log(error)
       throw new Error(error.message);
     }
     throw new Error("Error while creating the response");

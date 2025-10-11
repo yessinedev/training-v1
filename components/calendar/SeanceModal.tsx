@@ -42,7 +42,6 @@ export function SeanceModal({
   const [selectedTime, setSelectedTime] = useState<string>(seance.heure || "08:00");
 
   const handleTimeChange = (time: string) => {
-    console.log("selected time: ", time);
     setSelectedTime(time)
     setFormData(prev => ({
       ...prev,

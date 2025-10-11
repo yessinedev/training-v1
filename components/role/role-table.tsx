@@ -17,7 +17,6 @@ const RolesTable = () => {
   const queryClient = useQueryClient();
 
   const handleOpenDialog = (role?: Role) => {
-    console.log("selectedRole");
     setSelectedRole(role ?? null);
     setIsDialogOpen(true);
   };

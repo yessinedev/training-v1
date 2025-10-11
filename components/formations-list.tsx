@@ -9,7 +9,6 @@ interface FormationsListProps {
 }
 
 export function FormationsList({ participant }: FormationsListProps) {
-  console.log(participant)
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold">Your Formations</h3>

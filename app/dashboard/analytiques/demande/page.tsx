@@ -45,7 +45,6 @@ const fetchRevenueByMonth = async () => {
 };
 const fetchRevenueByFormateur = async () => {
   const { data } = await axiosInstance.get("analytics/revenue/formateurs");
-  console.log(data)
   return data;
 };
 

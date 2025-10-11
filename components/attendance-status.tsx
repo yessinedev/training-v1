@@ -9,7 +9,6 @@ interface AttendanceStatusProps {
 }
 
 export function AttendanceStatus({ participant }: AttendanceStatusProps) {
-  console.log("Rendering AttendanceStatus for participant:", participant)
   // Group presences by action/formation
   const presencesByFormation = (participant.presences ?? []).reduce(
     (acc, presence) => {

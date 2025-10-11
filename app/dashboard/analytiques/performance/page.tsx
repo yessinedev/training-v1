@@ -87,7 +87,6 @@ export default function PerformancePage() {
     CertificationEfficiency[]
   > => {
     const { data } = await axios.get("/analytics/certification/efficiency");
-    console.log(data);
     return data;
   };
 

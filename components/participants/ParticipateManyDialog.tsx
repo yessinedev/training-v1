@@ -55,7 +55,6 @@ export function ParticipateManyDialog({
       onOpenChange(false);
     },
     onError: (error) => {
-      console.log(error);
     },
   });
 
