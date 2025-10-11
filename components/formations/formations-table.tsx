@@ -27,18 +27,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Domain, Formation, Theme } from "@/types";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FolderTree, BookOpen } from "lucide-react";
 import FormationForm from "./formation-form";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { deleteFormation, fetchFormations } from "@/services/formationService";
 import { fetchDomaines } from "@/services/domaineService";
 import { fetchThemes } from "@/services/themeService";
-import { useAuthMutation } from "@/hooks/useAuthMutation";
 
 const FormationsTable = () => {
   const [selectedFormation, setSelectedFormation] = useState<Formation | null>(
@@ -62,31 +60,34 @@ const FormationsTable = () => {
     data: formations,
     isLoading,
     isError,
-  } = useAuthQuery(["formations"], fetchFormations);
+  } = useQuery({
+    queryKey:["formations"], 
+    queryFn: fetchFormations});
 
-  const { data: domaines } = useAuthQuery(["domaines"], fetchDomaines);
+  const { data: domaines } = useQuery({queryKey:["domaines"], queryFn: fetchDomaines});
 
-  const { data: themes } = useAuthQuery(["themes"], fetchThemes);
+  const { data: themes } = useQuery({queryKey: ["themes"], queryFn: fetchThemes});
 
-  const deleteFormationMutation = useAuthMutation(deleteFormation, {
+  const deleteFormationMutation = useMutation({mutationFn: deleteFormation, 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["formations"] });
-      toast.success("Formation deleted successfully");
+      toast.success("La formation a été supprimée avec succès!");
     },
-    onError: (error: unknown) => {
+    onError: (error: Error) => {
       const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      toast.error(`Failed to delete user: ${errorMessage}`);
-      console.error("Error deleting formation:", error);
+        error instanceof Error ? error.message : "Une erreur inconnue s'est produite";
+      toast.error(errorMessage);
     },
   });
 
   const handleDeleteFormation = async (formationId: number) => {
-    if (window.confirm("Are you sure you want to delete this formation?")) {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cette formation ?")) {
       try {
         await deleteFormationMutation.mutateAsync(formationId);
       } catch (error) {
-        console.error("Delete submission error:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Une erreur inconnue s'est produite";
+        toast.error(errorMessage);
       }
     }
   };

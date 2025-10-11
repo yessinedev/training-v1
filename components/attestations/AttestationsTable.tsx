@@ -25,11 +25,11 @@ import { Button } from "@/components/ui/button";
 import { DownloadCloud, FileText, Trash2 } from "lucide-react";
 import { Attestation} from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
 import { PreviewModal } from "./PreviewModal";
 import { Document, pdf } from "@react-pdf/renderer";
 import AttestationPDF from "./AttestationPDF";
 import QRCode from "qrcode";
+import { fetchAttestations } from "@/services/attestationService";
 
 type Props = {
   actionId: number;
@@ -42,12 +42,7 @@ const AttestationsTable = ({ actionId }: Props) => {
 
   const { data: certifications = [] } = useQuery({
     queryKey: ["formation-certifications", actionId],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        `/formations/${actionId}/attestations`
-      );
-      return response.data;
-    },
+    queryFn: () => fetchAttestations(actionId)
   });
 
   const generateQR = async (id: string) => {

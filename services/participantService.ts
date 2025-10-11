@@ -1,73 +1,95 @@
 import axiosInstance from "@/lib/axios";
-import { CreateParticipant } from "@/types";
+import { CreateParticipant, Participant } from "@/types";
 
-export const createParticipant = async (
-  data: CreateParticipant,
-  token?: string
-) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  const response = await axiosInstance.post("/participants/create", data, config);
-  return response.data;
+export const createParticipant = async (data: CreateParticipant[] | CreateParticipant) => {
+  const payload = Array.isArray(data) ? data : data;
+  console.log("payload: ", payload)
+  try {
+    const response = await axiosInstance.post("/participants/create", payload);
+    return response.data;
+  } catch (error) {
+    console.error("API 400 response:", error);
+
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la création du participant");
+  }
 };
 
 export const assignParticipantsToFormation = async (
   formationId: number,
   participantIds: string[]
-): Promise<any> => { 
+): Promise<any> => {
   const participantsWithStatus = participantIds.map((id) => ({
     participant_id: id,
-    statut: "Confirmé", 
+    statut: "Confirmé",
   }));
   try {
     const response = await axiosInstance.post(
-      `/formations/${formationId}/participants`, participantsWithStatus
+      `/formations/${formationId}/participants`,
+      participantsWithStatus
     );
     return response.data;
   } catch (error) {
-    throw error; 
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de l'ajout des participants à la formation");
   }
 };
 
-export const fetchParticipants = async (token: string): Promise<any> => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  const response = await axiosInstance.get("/participants", config);
-  return response.data;
+export const fetchParticipants = async (): Promise<Participant[]> => {
+  try {
+    const response = await axiosInstance.get("/participants");
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération des participants");
+  }
+};
+
+export const fetchParticipantById = async (
+  participantId: string
+): Promise<Participant> => {
+  try {
+    const response = await axiosInstance.get(`/participants/${participantId}`);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération du participant");
+  }
 };
 
 export const updateParticipant = async (
   participantId: string,
-  data: CreateParticipant,
-  token?: string
+  data: CreateParticipant
 ) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  const response = await axiosInstance.put(
-    `/participants/${participantId}`,
-    data,
-    config
-  );
-  return response.data;
+  try {
+    const response = await axiosInstance.put(
+      `/participants/${participantId}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la mise à jour du participant");
+  }
 };
 
-export const deleteParticipant = async (
-  token: string,
-  participantId: string
-) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-  await axiosInstance.delete(`/participants/${participantId}`, config);
+export const deleteParticipant = async (participantId: string) => {
+  try {
+    await axiosInstance.delete(`/participants/${participantId}`);
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la suppression du participant");
+  }
 };

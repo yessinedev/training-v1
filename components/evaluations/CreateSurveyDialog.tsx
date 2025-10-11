@@ -24,8 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAuthMutation } from "@/hooks/useAuthMutation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createSurvey, CreateSurveyPayload } from "@/services/surveyService";
 import { useUser } from "@clerk/nextjs";
 
@@ -57,31 +56,29 @@ const CreateSurveyDialog = ({
     },
   });
 
-  // Reset form when dialog opens/closes
   useEffect(() => {
     if (!isOpen) {
       form.reset();
     }
   }, [isOpen, form]);
 
-  const createSurveyMutation = useAuthMutation(
-    createSurvey,
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["surveys"] });
-        toast.success("Survey created successfully!");
-        onOpenChange(false); // Close dialog on success
-      },
-      onError: (error) => {
-        const errorMessage =
-          error instanceof Error ? error.message : "An unknown error occurred";
-        toast.error(`Failed to create survey: ${errorMessage}`);
-      },
-      onSettled: () => {
-        setIsLoading(false);
-      },
-    }
-  );
+  const createSurveyMutation = useMutation({
+    mutationFn: createSurvey,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["surveys"] });
+      toast.success("Survey created successfully!");
+      onOpenChange(false); // Close dialog on success
+    },
+    onError: (error) => {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to create survey: ${errorMessage}`);
+    },
+    onSettled: () => {
+      setIsLoading(false);
+    },
+  });
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
@@ -97,9 +94,9 @@ const CreateSurveyDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Survey</DialogTitle>
+          <DialogTitle>Créer un nouveau questionnaire</DialogTitle>
           <DialogDescription>
-            Enter a title and optional description for your new survey.
+            Saisissez un titre et une description facultative pour votre nouveau questionnaire.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -112,9 +109,9 @@ const CreateSurveyDialog = ({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Titre</FormLabel>
                   <FormControl>
-                    <Input placeholder="Survey Title" {...field} />
+                    <Input placeholder="Titre du questionnaire" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -125,12 +122,12 @@ const CreateSurveyDialog = ({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>Description (Optionnel)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe the purpose of this survey..."
+                      placeholder="Décrivez l'objectif de ce questionnaire..."
                       {...field}
-                      value={field.value ?? ""} // Handle potential null/undefined
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -144,10 +141,10 @@ const CreateSurveyDialog = ({
                 onClick={() => onOpenChange(false)}
                 disabled={isLoading}
               >
-                Cancel
+                Annuler
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Survey"}
+                {isLoading ? "Creation..." : "Créer"}
               </Button>
             </DialogFooter>
           </form>

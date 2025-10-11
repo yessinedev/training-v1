@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axiosInstance from "@/lib/axios";
+import { createRole, updateRole } from "@/services/roleService";
 
 const formSchema = z.object({
   role_name: z
@@ -59,7 +59,7 @@ const RoleForm = ({ role, isOpen, onClose, onOpenChange }: RoleFormProps) => {
   useEffect(() => {
     if (role) {
       form.reset({ role_name: role.role_name });
-    }else{
+    } else {
       form.reset({ role_name: "" });
     }
   }, [role, form]);
@@ -69,14 +69,9 @@ const RoleForm = ({ role, isOpen, onClose, onOpenChange }: RoleFormProps) => {
   const mutation = useMutation({
     mutationFn: async (data: FormValues) => {
       if (isEditing && role) {
-        const response = await axiosInstance.put(`/roles`, {
-          role_id: role.role_id,
-          ...data,
-        });
-        return response.data;
+        await updateRole(role.role_id, data);
       }
-      const response = await axiosInstance.post("/roles", data);
-      return response.data;
+      await createRole(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
@@ -85,7 +80,9 @@ const RoleForm = ({ role, isOpen, onClose, onOpenChange }: RoleFormProps) => {
       onClose();
     },
     onError: (error: Error) => {
-      const message = error.message || "Un erreur s'est produite lors de la sauvgarde du role";
+      const message =
+        error.message ||
+        "Un erreur s'est produite lors de la sauvgarde du role";
       toast.error(message);
     },
   });
@@ -107,10 +104,10 @@ const RoleForm = ({ role, isOpen, onClose, onOpenChange }: RoleFormProps) => {
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Role" : "Add New Role"}</DialogTitle>
           <DialogDescription>
-          {isEditing
-            ? "Update the role name and click the update button"
-            : "Enter the role name and click the save button"}
-        </DialogDescription>
+            {isEditing
+              ? "Update the role name and click the update button"
+              : "Enter the role name and click the save button"}
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

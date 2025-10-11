@@ -15,11 +15,10 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Formateur, Role } from "@/types";
 import { useFormateurMutation } from "@/hooks/useFormateurMutation";
 import { Input } from "../ui/input";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { fetchRoles } from "@/services/roleService";
 
 const formSchema = z.object({
@@ -50,10 +49,10 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
 
   const formateurId = formateur?.user.user_id;
 
-  const { data: roles = [], isLoading: rolesLoading } = useAuthQuery<Role[]>(
-    ["roles"],
-    fetchRoles
-  );
+  const { data: roles = [], isLoading: rolesLoading } = useQuery<Role[]>({
+    queryKey: ["roles"],
+    queryFn: fetchRoles,
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -104,7 +103,7 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
     isEditing,
     formateurId,
     () => {
-      queryClient.invalidateQueries({ queryKey: ["formateurs"] });
+      queryClient.invalidateQueries({ queryKey: ["formateurs", "users"] });
       toast.success(
         `Formateur ${isEditing ? "updated" : "created"} successfully`
       );
@@ -197,7 +196,6 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        
         <FormField
           control={form.control}
           name="prenom"
@@ -255,7 +253,7 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
           name="telephone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone</FormLabel>
+              <FormLabel>Telephone</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Telephone"
@@ -281,19 +279,19 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
                 <FormControl>
                   <RadioGroupItem value="heure" />
                 </FormControl>
-                <FormLabel className="font-normal">Hourly</FormLabel>
+                <FormLabel className="font-normal">Heure</FormLabel>
               </FormItem>
               <FormItem className="flex items-center space-x-2 space-y-0">
                 <FormControl>
                   <RadioGroupItem value="jour" />
                 </FormControl>
-                <FormLabel className="font-normal">Daily</FormLabel>
+                <FormLabel className="font-normal">Jour</FormLabel>
               </FormItem>
               <FormItem className="flex items-center space-x-2 space-y-0">
                 <FormControl>
                   <RadioGroupItem value="seance" />
                 </FormControl>
-                <FormLabel className="font-normal">Session</FormLabel>
+                <FormLabel className="font-normal">Séance</FormLabel>
               </FormItem>
             </RadioGroup>
           </FormControl>
@@ -326,11 +324,11 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
             name="tarif_jour"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Daily Rate (€)</FormLabel>
+                <FormLabel>{"Tarif d'une jounée (DT)"}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter daily rate"
+                    placeholder="Entrer le tarif d'une journée"
                     {...field}
                     value={field.value ?? ""}
                   />
@@ -346,11 +344,11 @@ const FormateurForm = ({ formateur }: FormateurFormProps) => {
             name="tarif_seance"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Session Rate (€)</FormLabel>
+                <FormLabel>{"Tarif d'une seance (DT)"}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter session rate"
+                    placeholder="Entrer le tarif d'une séance"
                     {...field}
                     value={field.value ?? ""}
                   />

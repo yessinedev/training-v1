@@ -22,7 +22,7 @@ export type FormUser = Omit<
   user_id?: number;
 };
 
-export type Formateur  = {
+export type Formateur = {
   user_id: string;
   tarif_heure?: number;
   tarif_jour?: number;
@@ -41,9 +41,8 @@ export type Theme = {
   theme_id: number;
   libelle_theme: string;
   domaine_id: number;
-  domaine?: Domain;
+  domaine: Domain;
 };
-
 
 export type Participant = {
   user_id: string;
@@ -99,6 +98,20 @@ export type ActionFormationFormateur = {
   action_id: number;
   formateur_id: string;
   formateur: Formateur;
+  action: Formation;
+};
+export type FormationPayload = {
+  action_id?: number; // Optional for creation
+  type_action: string;
+  theme_id: number;
+  date_debut: string;
+  date_fin: string;
+  duree_jours: number;
+  duree_heures: number;
+  prix_unitaire?: number;
+  lieu: string;
+  nb_participants_prevu: number;
+  user_id?: string;
 };
 
 export type Formation = {
@@ -111,12 +124,16 @@ export type Formation = {
   prix_unitaire?: number;
   lieu: string;
   nb_participants_prevu: number;
+  nb_seances?: number;
   theme_id: number;
-  theme?: Theme;
+  theme: Theme;
+  surveyId?: string;
+  survey?: Survey;
   formateurs: ActionFormationFormateur[];
   participants: ActionFormationParticipant[];
   seances?: Seance[];
   attestations?: Attestation[];
+  files?: File[];
 };
 
 export type FormFormation = Omit<Formation, "action_id" | "formateurs"> & {
@@ -147,7 +164,6 @@ export type Seance = {
 export enum PresenceStatus {
   PRESENT = "PRESENT",
   ABSENT = "ABSENT",
-  RETARD = "RETARD",
 }
 
 export type Presence = {
@@ -159,14 +175,29 @@ export type Presence = {
   formateur_id?: string;
 
   participant?: Participant;
-  seance?: Seance;
+  seance: Seance;
   formateur?: Formateur;
 };
+
+export type CreatePresenceDto = {
+  status?: PresenceStatus;
+  participant_id: string;
+  seance_id: number;
+  formateur_id?: string;
+}
+
+export type UpdatePresenceDto = {
+  status?: PresenceStatus;
+  participant_id?: string;
+  seance_id?: number;
+  formateur_id?: string;
+}
+
 
 export type File = {
   file_id: number;
   file_path: string;
-  type: string;
+  type: FileType;
   title: string;
   formateur_id?: string;
   action_id?: number;
@@ -175,10 +206,16 @@ export type File = {
   action?: Formation;
 };
 
+export enum FileType {
+  FORMATION = "FORMATION",
+  CV = "CV",
+  BADGE = "BADGE",
+}
+
 export type QuestionType =
   | "text"
   | "multiple_choice"
-  | "checkbox"
+  | "single_choice"
   | "rating"
   | "boolean";
 
@@ -186,10 +223,23 @@ export type Survey = {
   id: string;
   title: string;
   description?: string;
-  status: "draft" | "published" | "closed";
+  status: "brouillon" | "publié" | "archivé";
   createdBy: string;
   questions: Question[];
+  formations?: Formation[];
+  createdAt?: Date;
 };
+
+export type UpdateSurvey = {
+  id: string;
+  title: string;
+  description?: string;
+  status: "brouillon" | "publié" | "archivé";
+  createdBy: string;
+  questions: Question[];
+  action_ids?: number[];
+  createdAt?: Date;
+}
 
 export type Question = {
   id: string;
@@ -205,6 +255,19 @@ export type Response = {
   surveyId: string;
   participantId?: string;
   answers: Answer[];
+  participant?: Participant;
+  createdAt: Date;
+};
+
+export type CreateResponse = {
+  surveyId: string;
+  answers: CreateAnswer[];
+  participantId?: string;
+};
+
+export type CreateAnswer = {
+  questionId: string;
+  content: any;
 };
 
 export type Answer = {

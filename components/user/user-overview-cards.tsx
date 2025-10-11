@@ -1,32 +1,28 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { fetchUsers } from "@/services/userService";
 import { User } from "@/types";
+import { useQuery } from "@tanstack/react-query";
 import { UsersIcon, ActivityIcon, PieChartIcon, ClockIcon } from "lucide-react";
 
 export function UserOverviewCards() {
   const {
     data: users,
     isLoading,
-    isError,
-  } = useAuthQuery<User[]>(["users"], fetchUsers);
+  } = useQuery<User[]>({queryKey: ["users"], queryFn: () => fetchUsers()});
 
   if (isLoading) return <div>Loading...</div>;
-  // Calculate statistics
   const totalUsers = users?.length ?? 0;
   const activeUsers =
     users?.filter((user) => !user.user_id.startsWith("inv")).length ?? 0;
   const inactiveUsers = totalUsers - activeUsers;
 
-  // Count users by role
   const roleDistribution = users?.reduce((acc, user: User) => {
     acc[user.role.role_name] = (acc[user.role.role_name] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  // Get most recent user
   const mostRecentUser = users?.[users?.length - 1] ?? null;
 
   return (

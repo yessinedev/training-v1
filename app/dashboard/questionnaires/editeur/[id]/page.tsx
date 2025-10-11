@@ -16,7 +16,7 @@ import {
   arrayMove,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Survey, Question, QuestionType } from "@/types";
+import { Survey, Question, QuestionType, UpdateSurvey } from "@/types";
 import SurveyBuilder from "@/components/evaluations/SurveyBuilder";
 import SurveyPreviewer from "@/components/evaluations/SurveyPreviewer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -25,13 +25,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SaveIcon, EyeIcon } from "lucide-react";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
-import { useAuthMutation } from "@/hooks/useAuthMutation";
 import { fetchSurveyById, updateSurvey } from "@/services/surveyService";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { deleteQuestion } from "@/services/questionService";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export default function SurveyEditorPage() {
   const params = useParams();
@@ -46,15 +45,12 @@ export default function SurveyEditorPage() {
     isLoading: isLoadingSurvey,
     isError: isFetchError,
     error: fetchError,
-  } = useAuthQuery<Survey>(
-    ["survey", surveyId],
-    (token) => fetchSurveyById(token, surveyId),
-    undefined,
-    {
-      enabled: !!surveyId,
-      refetchOnWindowFocus: false,
-    }
-  );
+  } = useQuery<Survey>({
+    queryKey: ["survey", surveyId],
+    queryFn: () => fetchSurveyById(surveyId),
+    enabled: !!surveyId,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     if (fetchedSurvey) {
@@ -62,28 +58,29 @@ export default function SurveyEditorPage() {
     }
   }, [fetchedSurvey]);
 
-  const saveSurveyMutation = useAuthMutation<Survey, Partial<Survey>>(
-    (token, surveyData) => updateSurvey(token, surveyId, surveyData),
-    {
-      onMutate: () => {
-        setIsSaving(true);
-      },
-      onSuccess: (updatedData) => {
-        toast.success("Survey saved successfully!");
-        setSurvey(updatedData);
-      },
-      onError: (error) => {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        toast.error(`Failed to save survey: ${errorMessage}`);
-      },
-      onSettled: () => {
-        setIsSaving(false);
-      },
-    }
-  );
+  const saveSurveyMutation = useMutation<Survey, Error, UpdateSurvey>({
+    mutationFn: (surveyData: UpdateSurvey) =>
+      updateSurvey(surveyId, surveyData),
 
-  const deleteQuestionMutation = useAuthMutation(deleteQuestion, {
+    onMutate: () => {
+      setIsSaving(true);
+    },
+    onSuccess: (updatedData) => {
+      toast.success("Le questionnaire a été enregistré avec succès!");
+      setSurvey(updatedData);
+    },
+    onError: (error) => {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      toast.error(errorMessage);
+    },
+    onSettled: () => {
+      setIsSaving(false);
+    },
+  });
+
+  const deleteQuestionMutation = useMutation({
+    mutationFn: deleteQuestion,
     onSuccess: (_, questionId) => {
       toast.success("Question deleted successfully!");
       setSurvey((s) => {
@@ -96,8 +93,8 @@ export default function SurveyEditorPage() {
     },
     onError: (error) => {
       const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred";
-      toast.error(`Failed to delete question: ${errorMessage}`);
+        error instanceof Error ? error.message : "Un erreur est survenue";
+      toast.error(errorMessage);
     },
   });
 
@@ -131,6 +128,7 @@ export default function SurveyEditorPage() {
       if (!survey) return;
       setSurvey((s) => {
         if (!s) return null;
+        console.log("type: ", type);
         return {
           ...s,
           questions: [
@@ -141,11 +139,12 @@ export default function SurveyEditorPage() {
               text: "",
               type,
               required: false,
-              options: type === "multiple_choice" ? ["Option 1"] : undefined,
+              options: (type === "multiple_choice" || type === "single_choice") ? ["Option 1"] : undefined,
             },
           ],
         };
       });
+      console.log("survey: ", survey.questions);
     },
     [survey]
   );
@@ -174,9 +173,8 @@ export default function SurveyEditorPage() {
           questions: s.questions.filter((q) => q.id !== id),
         };
       });
-      deleteQuestionMutation.mutate(id);
     },
-    [deleteQuestionMutation]
+    []
   );
 
   const handleDragEnd = useCallback(
@@ -235,7 +233,7 @@ export default function SurveyEditorPage() {
               setSurvey((s) => (s ? { ...s, title: e.target.value } : null))
             }
             className="text-4xl font-bold bg-transparent shadow-md border-b-[3px] border-primary hover:shadow-lg px-2 max-w-md focus-visible:ring-0 focus-visible:ring-offset-0"
-            placeholder="Survey Title"
+            placeholder="Titre du questionnaires"
           />
           <Textarea
             value={survey.description}
@@ -245,13 +243,13 @@ export default function SurveyEditorPage() {
               )
             }
             className="max-w-2xl bg-transparent shadow-md border-b-[3px] border-primary hover:shadow-lg px-2 focus-visible:ring-0 focus-visible:ring-offset-0"
-            placeholder="Survey Description"
+            placeholder="Description du questionnaires"
           />
         </div>
 
         <Button onClick={handleSave} disabled={isSaving}>
           <SaveIcon className="h-4 w-4 mr-2" />{" "}
-          {isSaving ? "Saving..." : "Save"}
+          {isSaving ? "Enregistrement..." : "Enregistrer"}
         </Button>
       </div>
 
@@ -271,7 +269,7 @@ export default function SurveyEditorPage() {
             <TabsContent value="editeur">
               <Card>
                 <CardHeader>
-                  <CardTitle>Edit Questions</CardTitle>
+                  <CardTitle>Modifier les questions</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
@@ -319,13 +317,14 @@ export default function SurveyEditorPage() {
         <aside>
           <Card>
             <CardHeader>
-              <CardTitle>Add a Question</CardTitle>
+              <CardTitle>Ajouter un question</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
               {(
                 [
                   "text",
                   "multiple_choice",
+                  "single_choice",
                   "rating",
                   "boolean",
                 ] as QuestionType[]
@@ -340,7 +339,9 @@ export default function SurveyEditorPage() {
                     {type === "text"
                       ? "T"
                       : type === "multiple_choice"
-                      ? "🔘"
+                      ? "☑"
+                      : type === "single_choice"
+                      ? "⚪"
                       : type === "rating"
                       ? "⭐"
                       : "✓"}

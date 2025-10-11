@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -31,16 +31,19 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import axiosInstance from "@/lib/axios";
 import { Formation, Participant } from "@/types";
+import { fetchFormations } from "@/services/formationService";
+import { fetchParticipants } from "@/services/participantService";
+import { fetchFormateurs } from "@/services/formateurService";
+import { fetchThemes } from "@/services/themeService";
 
 // Chart colors from our theme
 const COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
 ];
 
 interface MonthlyFormations {
@@ -50,34 +53,22 @@ interface MonthlyFormations {
 export default function DashboardPage() {
   const { data: formations } = useQuery({
     queryKey: ["formations"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/formations");
-      return response.data;
-    },
+    queryFn: fetchFormations,
   });
 
   const { data: participants } = useQuery({
     queryKey: ["participants"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/participants");
-      return response.data;
-    },
+    queryFn: fetchParticipants,
   });
 
   const { data: formateurs } = useQuery({
     queryKey: ["formateurs"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/formateurs");
-      return response.data;
-    },
+    queryFn: fetchFormateurs
   });
 
   const { data: themes } = useQuery({
     queryKey: ["themes"],
-    queryFn: async () => {
-      const response = await axiosInstance.get("/themes");
-      return response.data;
-    },
+    queryFn: fetchThemes
   });
 
   // Calculate statistics
@@ -86,51 +77,71 @@ export default function DashboardPage() {
   const totalFormateurs = formateurs?.length || 0;
   const totalThemes = themes?.length || 0;
 
-  const upcomingFormations = formations?.filter(
-    (f: Formation) => new Date(f.date_debut) > new Date()
-  ).length || 0;
+  const upcomingFormations =
+    formations?.filter((f: Formation) => new Date(f.date_debut) > new Date())
+      .length || 0;
 
-  const completedFormations = formations?.filter(
-    (f: Formation) => new Date(f.date_fin) < new Date()
-  ).length || 0;
+  const completedFormations =
+    formations?.filter((f: Formation) => new Date(f.date_fin) < new Date())
+      .length || 0;
 
   // Prepare data for charts
   const participantStatusData = [
-    { name: 'Confirmed', value: participants?.filter((p: Participant) => p.actions?.some(a => a.statut === 'Confirmé')).length || 0 },
-    { name: 'Pending', value: participants?.filter((p: Participant) => p.actions?.some(a => a.statut === 'En attente')).length || 0 },
-    { name: 'Waitlist', value: participants?.filter((p: Participant) => p.actions?.some(a => a.statut === "Liste d'attente")).length || 0 },
+    {
+      name: "Confirmed",
+      value:
+        participants?.filter((p: Participant) =>
+          p.actions?.some((a) => a.statut === "Confirmé")
+        ).length || 0,
+    },
+    {
+      name: "Pending",
+      value:
+        participants?.filter((p: Participant) =>
+          p.actions?.some((a) => a.statut === "En attente")
+        ).length || 0,
+    },
+    {
+      name: "Waitlist",
+      value:
+        participants?.filter((p: Participant) =>
+          p.actions?.some((a) => a.statut === "Liste d'attente")
+        ).length || 0,
+    },
   ];
 
-  
-  
-  const monthlyFormations = formations?.reduce((acc: MonthlyFormations, formation: Formation) => {
-    const month = format(new Date(formation.date_debut), 'MMM');
-    acc[month] = (acc[month] || 0) + 1;
-    return acc;
-  }, {} as MonthlyFormations);
-  
+  const monthlyFormations = formations?.reduce(
+    (acc: MonthlyFormations, formation: Formation) => {
+      const month = format(new Date(formation.date_debut), "MMM");
+      acc[month] = (acc[month] || 0) + 1;
+      return acc;
+    },
+    {} as MonthlyFormations
+  );
 
-  const monthlyData = Object.entries(monthlyFormations || {}).map(([month, count]) => ({
-    month,
-    formations: count,
-  }));
+  const monthlyData = Object.entries(monthlyFormations || {}).map(
+    ([month, count]) => ({
+      month,
+      formations: count,
+    })
+  );
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-4">Dashboard Overview</h2>
+        <h2 className="text-2xl font-bold mb-4">Aperçu du tableau de bord</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Formations
+                Formations
               </CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalFormations}</div>
               <p className="text-xs text-muted-foreground">
-                {upcomingFormations} upcoming
+                {upcomingFormations} à venir
               </p>
             </CardContent>
           </Card>
@@ -138,14 +149,14 @@ export default function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Participants
+                Participants
               </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalParticipants}</div>
               <p className="text-xs text-muted-foreground">
-                Active in training sessions
+                Actifs dans les sessions de formation
               </p>
             </CardContent>
           </Card>
@@ -153,14 +164,14 @@ export default function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Formateurs
+                Formateurs 
               </CardTitle>
               <GraduationCap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalFormateurs}</div>
               <p className="text-xs text-muted-foreground">
-                Qualified trainers
+                Formateurs qualifiés
               </p>
             </CardContent>
           </Card>
@@ -168,15 +179,13 @@ export default function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Training Themes
+                Actions de formation
               </CardTitle>
               <UserCog className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalThemes}</div>
-              <p className="text-xs text-muted-foreground">
-                Available courses
-              </p>
+              <p className="text-xs text-muted-foreground">Cours disponibles</p>
             </CardContent>
           </Card>
         </div>
@@ -185,9 +194,9 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Monthly Formations</CardTitle>
+            <CardTitle>Formations mensuelles</CardTitle>
             <CardDescription>
-              Number of training sessions per month
+              Nombre de sessions de formation par mois
             </CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
@@ -207,13 +216,13 @@ export default function DashboardPage() {
 
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Participant Status</CardTitle>
+            <CardTitle>Statut des participants</CardTitle>
             <CardDescription>
-              Distribution of participant statuses
+              Répartition des statuts des participants
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
+            <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -228,7 +237,10 @@ export default function DashboardPage() {
                     label
                   >
                     {participantStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -243,7 +255,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-medium">
-              Training Progress
+              Progression de la formation
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -251,19 +263,23 @@ export default function DashboardPage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">In Progress:</span>
+                <span className="text-sm text-muted-foreground">
+                  En cours :
+                </span>
                 <span className="font-bold">
                   {totalFormations - completedFormations - upcomingFormations}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Upcoming:</span>
+                <span className="text-sm text-muted-foreground">À venir :</span>
                 <span className="font-bold">{upcomingFormations}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Completed:</span>
+                <span className="text-sm text-muted-foreground">
+                  Terminées :
+                </span>
                 <span className="font-bold">{completedFormations}</span>
               </div>
             </div>
@@ -273,24 +289,27 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-medium">
-              Certification Status
+              Statut de certification
             </CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Issued:</span>
+                <span className="text-sm text-muted-foreground">Délivré :</span>
                 <span className="font-bold">
-                  {participants?.filter((p: Participant) => (p.attestations?.length ?? 0) > 0).length || 0}
+                  {participants?.filter(
+                    (p: Participant) => (p.attestations?.length ?? 0) > 0
+                  ).length || 0}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Pending:</span>
+                <span className="text-sm text-muted-foreground">En attente :</span>
                 <span className="font-bold">
-                  {participants?.filter((p: Participant) => 
-                    p.actions?.some(a => a.statut === 'Confirmé') && 
-                    !p.attestations?.length
+                  {participants?.filter(
+                    (p: Participant) =>
+                      p.actions?.some((a) => a.statut === "Confirmé") &&
+                      !p.attestations?.length
                   ).length || 0}
                 </span>
               </div>
@@ -301,20 +320,23 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-medium">
-              Recent Activity
+              Activité récente
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {formations?.slice(0, 3).map((formation: Formation) => (
-                <div key={formation.action_id} className="flex items-center gap-2">
+                <div
+                  key={formation.action_id}
+                  className="flex items-center gap-2"
+                >
                   <div className="flex-1 space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {formation.type_action}
+                      {formation.theme.libelle_theme}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(formation.date_debut), 'dd MMM yyyy')}
+                      {format(new Date(formation.date_debut), "dd MMM yyyy")}
                     </p>
                   </div>
                   <div className="text-sm text-muted-foreground">

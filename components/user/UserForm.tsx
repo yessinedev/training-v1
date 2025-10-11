@@ -4,7 +4,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import {
@@ -26,7 +26,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Role } from "@/types";
 import { fetchRoles } from "@/services/roleService";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { createUser, updateUser } from "@/services/userService";
 
 export const formSchema = z.object({
@@ -46,13 +45,11 @@ interface UserFormProps {
 export default function UserForm({ initialValues }: UserFormProps) {
   const queryClient = useQueryClient();
 
-  // Fetch roles
-  const { data: allRoles = [], isLoading: rolesLoading } = useAuthQuery<Role[]>(
-    ["roles"],
-    fetchRoles
-  );
+  const { data: allRoles = []} = useQuery<Role[]>({
+    queryKey: ["roles"],
+    queryFn: fetchRoles,
+  });
 
-  // Filter as needed
   const filteredRoles = allRoles?.filter(
     (r) => r.role_name === "ADMIN" || r.role_name === "GESTIONNAIRE"
   );
@@ -67,8 +64,14 @@ export default function UserForm({ initialValues }: UserFormProps) {
         role_id: parseInt(values.role_id, 10),
       };
       if (initialValues) {
-        console.log("updating user", {...values, role_id: parseInt(values.role_id)});
-        await updateUser(initialValues.user_id, {...values, role_id: parseInt(values.role_id)});
+        console.log("updating user", {
+          ...values,
+          role_id: parseInt(values.role_id),
+        });
+        await updateUser(initialValues.user_id, {
+          ...values,
+          role_id: parseInt(values.role_id),
+        });
       } else {
         await createUser(payload);
       }
@@ -84,7 +87,6 @@ export default function UserForm({ initialValues }: UserFormProps) {
     },
   });
 
-  // Form setup
   const form = useForm<UserFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialValues ?? {
@@ -102,7 +104,6 @@ export default function UserForm({ initialValues }: UserFormProps) {
         onSubmit={form.handleSubmit((vals) => saveMutation.mutate(vals))}
         className="space-y-4"
       >
-        {/* Email, Nom, Prenom, Telephone */}
         {(["email", "nom", "prenom", "telephone"] as const).map((field) => (
           <FormField
             key={field}
@@ -126,7 +127,6 @@ export default function UserForm({ initialValues }: UserFormProps) {
           />
         ))}
 
-        {/* Role selector */}
         <FormField
           control={form.control}
           name="role_id"
@@ -158,16 +158,16 @@ export default function UserForm({ initialValues }: UserFormProps) {
             type="reset"
             onClick={() => form.reset(initialValues ?? undefined)}
           >
-            Cancel
+            Annuler
           </Button>
           <Button type="submit" disabled={saveMutation.isPending}>
             {saveMutation.isPending
               ? initialValues
-                ? "Updating…"
-                : "Creating…"
+                ? "Modification..."
+                : "Création..."
               : initialValues
-              ? "Save Changes"
-              : "Create User"}
+              ? "Modifier Utilisateur"
+              : "Créer Utilisateur"}
           </Button>
         </div>
       </form>

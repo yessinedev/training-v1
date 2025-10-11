@@ -1,11 +1,16 @@
 import axiosInstance from "@/lib/axios";
-import { Survey } from "@/types";
+import { Survey, UpdateSurvey } from "@/types";
 
-export const fetchSurveys = async (token: string): Promise<Survey[]> => {
-  const response = await axiosInstance.get("/surveys", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
+export const fetchSurveys = async (): Promise<Survey[]> => {
+  try {
+    const response = await axiosInstance.get("/surveys");
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération des enquêtes");
+  }
 };
 
 export type CreateSurveyPayload = {
@@ -15,48 +20,48 @@ export type CreateSurveyPayload = {
 };
 
 export const createSurvey = async (
-  token: string,
   payload: CreateSurveyPayload
 ): Promise<Survey> => {
   console.log("Creating survey with payload:", payload);
   try {
-    const response = await axiosInstance.post("/surveys", payload, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await axiosInstance.post("/surveys", payload);
     return response.data;
   } catch (error) {
-    console.error("Error creating survey:", error);
-    throw error;
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la création de l'enquête");
   }
 };
 
-export const fetchSurveyById = async (
-  token: string,
-  surveyId: string
-): Promise<Survey> => {
-  const response = await axiosInstance.get(`/surveys/${surveyId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
+export const fetchSurveyById = async (surveyId: string): Promise<Survey> => {
+  try {
+    const response = await axiosInstance.get(`/surveys/${surveyId}`);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la récupération de l'enquête");
+  }
 };
 
 export const updateSurvey = async (
-  token: string,
   surveyId: string,
-  surveyData: Partial<Survey>
+  surveyData: UpdateSurvey
 ): Promise<Survey> => {
+  console.log("Updating survey with ID:", surveyId, "and data:", surveyData);
   try {
-    console.log(surveyData.questions)
     const response = await axiosInstance.put(
       `/surveys/${surveyId}`,
-      surveyData,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+      surveyData
     );
     return response.data;
   } catch (error) {
-    console.error("Error updating survey:", error);
-    throw error;
+    console.error("Error during survey update:", error);
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error("Erreur lors de la mise à jour de l'enquête");
   }
 };

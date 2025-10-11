@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -29,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuthQuery } from "@/hooks/useAuthQuery";
 import { formatDate, setHours, setMinutes } from "date-fns";
 
 export function Calendar() {
@@ -40,12 +39,16 @@ export function Calendar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const queryClient = useQueryClient();
-  const queryKey = ["seances", selectedFormation?.action_id];
-  const {
-    data: formations,
-    isLoading: formationsLoading,
-    isError: formationsError,
-  } = useAuthQuery<Formation[]>(["formations"], fetchFormations);
+  const queryKey = useMemo(
+    () => ["seances", selectedFormation?.action_id],
+    [selectedFormation?.action_id]
+  );
+  const { data: formations, isLoading: formationsLoading } = useQuery<
+    Formation[]
+  >({
+    queryKey: ["formations"],
+    queryFn: fetchFormations,
+  });
 
   const {
     data: sessions = [],
@@ -69,7 +72,7 @@ export function Calendar() {
       setIsModalOpen(false);
     },
     onError: (error: Error) => {
-      toast.error(`Erreur lors de la création: ${error.message}`);
+      toast.error(error.message);
     },
   });
 
@@ -143,8 +146,8 @@ export function Calendar() {
       const start = new Date(selectInfo.startStr);
       const end = new Date(selectInfo.endStr);
 
-      const selectedDate = new Date(start.toDateString()); 
-      const heure = start.toTimeString().slice(0, 5); 
+      const selectedDate = new Date(start.toDateString());
+      const heure = start.toTimeString().slice(0, 5);
       const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60); // in hours
 
       const newSeance: Seance = {
@@ -169,7 +172,6 @@ export function Calendar() {
       const seance = selectedFormation?.seances?.find(
         (s) => s.seance_id === Number(clickInfo.event.id)
       );
-      console.log("Clicked event:", seance);
       if (!seance) return;
       setSelectedSeance(seance!);
       setIsModalOpen(true);
@@ -244,6 +246,7 @@ export function Calendar() {
         const { seance_id, ...newSeance } = session;
         createSeanceMutation.mutate(newSeance);
       } else {
+        console.log("updating: session: ", session);
         updateSeanceMutation.mutate(session);
       }
     },
@@ -286,7 +289,7 @@ export function Calendar() {
           </SelectContent>
         </Select>
       </div>
-      <div className="calendar-container h-full">
+      <div className="calendar-container h-full px-4">
         {sessionsLoading ? (
           <p>Loading sessions...</p>
         ) : sessionsError ? (
@@ -314,26 +317,63 @@ export function Calendar() {
             slotMinTime="08:00:00"
             slotMaxTime="19:00:00"
             locale={frLocale}
-            events={sessions?.map((session) => ({
-              id: String(session.seance_id),
-              title: String(session.statut),
-              start: setMinutes(
-                setHours(session.date, parseInt(session.heure)),
-                0
-              ),
-              date: session.date,
-              end: setMinutes(
-                setHours(
-                  session.date,
-                  parseInt(session.heure) + session.duree_heures
-                ),
-                0
-              ),
-              backgroundColor: "#f3f4f6",
-              borderColor: "#d1d5db",
-              textColor: "#1f2937",
-              className: "rounded-lg shadow-sm border-l-4",
-            }))}
+            events={sessions?.map((session) => {
+              const startDate = new Date(session.date);
+              const startHour = parseInt(session.heure.split(":")[0]);
+              const startMinute = parseInt(session.heure.split(":")[1]);
+
+              const startDateTime = setMinutes(
+                setHours(startDate, startHour),
+                startMinute
+              );
+
+              const durationMs = session.duree_heures * 60 * 60 * 1000;
+
+              const endDateTime = new Date(
+                startDateTime.getTime() + durationMs
+              );
+              
+              // Define colors based on session status
+              let backgroundColor, borderColor, textColor;
+              
+              switch (session.statut) {
+                case SeanceStatut.EN_ATTENTE:
+                  backgroundColor = "#f3f4f6"; // Light gray background
+                  borderColor = "#d1d5db";     // Gray border
+                  textColor = "#1f2937";       // Dark text
+                  break;
+                case SeanceStatut.EN_COURS:
+                  backgroundColor = "#dbeafe"; // Light blue background
+                  borderColor = "#3b82f6";     // Blue border
+                  textColor = "#1e40af";       // Dark blue text
+                  break;
+                case SeanceStatut.TERMINEE:
+                  backgroundColor = "#d1fae5"; // Light green background
+                  borderColor = "#10b981";     // Green border
+                  textColor = "#065f46";       // Dark green text
+                  break;
+                case SeanceStatut.ANNULEE:
+                  backgroundColor = "#fee2e2"; // Light red background
+                  borderColor = "#ef4444";     // Red border
+                  textColor = "#b91c1c";       // Dark red text
+                  break;
+                default:
+                  backgroundColor = "#f3f4f6"; // Default light gray
+                  borderColor = "#d1d5db";     // Default gray border
+                  textColor = "#1f2937";       // Default dark text
+              }
+
+              return {
+                id: String(session.seance_id),
+                title: String(session.statut),
+                start: startDateTime,
+                end: endDateTime,
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
+                textColor: textColor,
+                className: "rounded-lg shadow-sm border-l-4",
+              };
+            })}
             select={handleDateSelect}
             eventClick={handleEventClick}
             eventDrop={handleEventDrop}

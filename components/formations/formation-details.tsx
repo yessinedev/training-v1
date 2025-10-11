@@ -18,7 +18,7 @@ export default function FormationDetails({ formation }: FormationDetailsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Session Details</CardTitle>
+        <CardTitle>Détails de la session</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2">
@@ -31,7 +31,7 @@ export default function FormationDetails({ formation }: FormationDetailsProps) {
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
           <span>
-            {formation.duree_jours} days ({formation.duree_heures}h)
+            {formation.duree_jours} jours ({formation.duree_heures}h)
           </span>
         </div>
         <div className="flex items-center gap-2">

@@ -39,13 +39,20 @@ export function SeanceModal({
   onClose,
 }: SessionModalProps) {
   const [formData, setFormData] = useState<Seance>(seance);
-  const [selectedTime, setSelectedTime] = useState(seance.heure || "08:00");
+  const [selectedTime, setSelectedTime] = useState<string>(seance.heure || "08:00");
 
-console.log(formData)
+  const handleTimeChange = (time: string) => {
+    console.log("selected time: ", time);
+    setSelectedTime(time)
+    setFormData(prev => ({
+      ...prev,
+      heure: time
+    }));
+  }
   // Handle form submission.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({...formData, heure: selectedTime});
   };
 
   return (
@@ -78,6 +85,34 @@ console.log(formData)
                 <SelectItem value="EN_COURS">EN_COURS</SelectItem>
                 <SelectItem value="TERMINEE">TERMINEE</SelectItem>
                 <SelectItem value="ANNULEE">ANNULEE</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Trainer Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="formateur">Formateur</Label>
+            <Select
+              value={formData.formateur_id || ""}
+              onValueChange={(value) =>
+                setFormData({
+                  ...formData,
+                  formateur_id: value,
+                })
+              }
+            >
+              <SelectTrigger id="formateur">
+                <SelectValue placeholder="Sélectionnez un formateur" />
+              </SelectTrigger>
+              <SelectContent>
+                {formation?.formateurs.map((formateurAssignment) => (
+                  <SelectItem 
+                    key={formateurAssignment.formateur_id} 
+                    value={formateurAssignment.formateur_id}
+                  >
+                    {formateurAssignment.formateur.user.nom} {formateurAssignment.formateur.user.prenom}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -117,7 +152,7 @@ console.log(formData)
             {/* Time Input */}
             <div className="space-y-2">
               <Label htmlFor="heure">Heure Début</Label>
-              <TimePicker value={selectedTime} onChange={setSelectedTime} />
+              <TimePicker value={selectedTime} onChange={handleTimeChange} />
             </div>
           </div>
 

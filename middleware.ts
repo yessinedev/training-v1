@@ -1,60 +1,38 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
-const isAdminRoute = createRouteMatcher([
-  "/dashboard/utilisateurs",
-  "/dashboard/roles",
-  "/dashboard/participants",
-  "/dashboard/catalogue",
-  "/dashboard/sessions",
-  "/dashboard/calendrier",
-  "/dashboard/devis",
-  "/dashboard/factures",
-]);
-
-const isGestionnaireRoute = createRouteMatcher([
-  // "/dashboard/participants",
-  // "/dashboard/catalogue",
-  // "/dashboard/sessions",
-  // "/dashboard/calendrier",
-]);
 
 export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
   const { sessionClaims } = await auth();
-  const role = sessionClaims?.metadata.role?.role_name;
-  if (isPublicRoute(request)) return NextResponse.next();
-  
-
-  // Redirect root path to dashboard or sign-in
-  if (pathname === "/") {
-    if (!role) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
-    }
-    console.log("true")
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  // Require authentication and role for non-public routes
-  if (!role) {
+  const role = sessionClaims?.metadata?.role?.role_name;
+  // Public route fallback (should be excluded from matcher ideally)
+  if (!role && !pathname.startsWith("/sign-in")) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
-  // Admin route protection
-  if (isAdminRoute(request)) {
-    if (role !== "ADMIN") {
-      console.log("true")
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+  if (pathname === "/") {
+    console.log("role", role);
+    if (role === "ADMIN" || role === "GESTIONNAIRE") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
+    if (role === "PARTICIPANT") {
+      return NextResponse.redirect(new URL("/espace-participant", request.url));
+    }
+    return NextResponse.redirect(new URL("/espace-formateur", request.url));
   }
 
-  // Gestionnaire route protection
-  if (isGestionnaireRoute(request)) {
-    if (role !== "GESTIONNAIRE") {
-      console.log("false")
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
-    }
+  // Role-based route protection
+  if (
+    pathname.startsWith("/dashboard") &&
+    !["ADMIN", "GESTIONNAIRE"].includes(role!)
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+  if (pathname.startsWith("/espace-participant") && role !== "PARTICIPANT") {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+  if (pathname.startsWith("/espace-formateur") && role !== "FORMATEUR") {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
   return NextResponse.next();
@@ -62,7 +40,10 @@ export default clerkMiddleware(async (auth, request) => {
 
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
+    "/", // root redirection
+    "/dashboard/:path*", // ADMIN & GESTIONNAIRE
+    "/espace-participant/:path*", // PARTICIPANT
+    "/espace-formateur/:path*", // FORMATEUR
+    "/((?!_next/static|_next/image|favicon.ico|image1.png|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.svg|.*\\.webp|.*\\.ico|.*\\.ttf|.*\\.woff|.*\\.woff2).*)",
   ],
 };
